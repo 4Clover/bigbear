@@ -6,6 +6,7 @@ CLAUDE.md
 .serena/
 .codesight/
 .claude/
+.vscode/
 # dependencies
 /node_modules
 /.pnp

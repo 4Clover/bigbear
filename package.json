@@ -7,6 +7,10 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "lint:fix": "eslint --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "typecheck": "tsc --noEmit",
     "test": "vitest",
     "test:run": "vitest run",
     "test:coverage": "vitest run --coverage",
@@ -33,6 +37,7 @@
     "stripe": "^20.1.0"
   },
   "devDependencies": {
+    "@eslint/js": "^9.39.2",
     "@tailwindcss/postcss": "^4",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.1",
@@ -45,10 +50,13 @@
     "dotenv": "^17.2.3",
     "eslint": "^9",
     "eslint-config-next": "16.1.1",
+    "eslint-config-prettier": "^10.1.8",
     "happy-dom": "^20.0.11",
+    "prettier": "^3.7.4",
     "tailwindcss": "^4",
     "tsx": "^4.21.0",
     "typescript": "^5",
+    "typescript-eslint": "^8.51.0",
     "vitest": "^4.0.16",
     "vitest-mock-extended": "^3.1.0"
   }

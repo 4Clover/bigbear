@@ -22,7 +22,7 @@ export default function LoginPage() {
         callbackUrl: '/',
       })
 
-      if (result?.error) {
+      if (result.error) {
         setError('Failed to send magic link. Please try again.')
       } else {
         window.location.href = '/verify'
@@ -38,12 +38,12 @@ export default function LoginPage() {
     <div>
       <h3 className="text-lg font-medium text-gray-900 text-center mb-6">Sign in to your account</h3>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={(e) => void handleSubmit(e)} className="space-y-6">
         <Input
           label="Email address"
           type="email"
           value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          onChange={(e) => { setEmail(e.target.value); }}
           placeholder="you@example.com"
           required
           error={error}

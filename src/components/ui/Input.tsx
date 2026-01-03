@@ -9,7 +9,7 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
 }
 
 export const Input = ({ label, error, className = '', id, ref, ...props }: InputProps) => {
-  const inputId = id || label?.toLowerCase().replace(/\s+/g, '-')
+  const inputId = id ?? label?.toLowerCase().replace(/\s+/g, '-')
 
   return (
     <div className="w-full">

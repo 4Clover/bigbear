@@ -69,7 +69,7 @@ export const Calendar = ({
     (date: Date) => {
       if (isDateDisabled(date)) return
 
-      if (!selectingCheckOut || !checkIn) {
+      if (!selectingCheckOut) {
         // Starting fresh or selecting check-in
         onDateSelect(date, null)
       } else {
@@ -92,7 +92,7 @@ export const Calendar = ({
     <div className="flex items-center justify-between mb-4">
       <button
         type="button"
-        onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
+        onClick={() => { setCurrentMonth(subMonths(currentMonth, 1)); }}
         className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
         aria-label="Previous month"
       >
@@ -103,7 +103,7 @@ export const Calendar = ({
       <h3 className="text-lg font-semibold">{format(currentMonth, 'MMMM yyyy')}</h3>
       <button
         type="button"
-        onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
+        onClick={() => { setCurrentMonth(addMonths(currentMonth, 1)); }}
         className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
         aria-label="Next month"
       >
@@ -141,7 +141,8 @@ export const Calendar = ({
       for (let i = 0; i < 7; i++) {
         const currentDay = day
         const disabled = isDateDisabled(currentDay)
-        const isSelected = (checkIn && isSameDay(currentDay, checkIn)) || (checkOut && isSameDay(currentDay, checkOut))
+        const isSelected =
+          Boolean(checkIn && isSameDay(currentDay, checkIn)) || Boolean(checkOut && isSameDay(currentDay, checkOut))
         const inRange = isInRange(currentDay)
         const isCurrentMonth = isSameMonth(currentDay, monthStart)
 
@@ -149,7 +150,7 @@ export const Calendar = ({
           <button
             key={currentDay.toString()}
             type="button"
-            onClick={() => handleDateClick(currentDay)}
+            onClick={() => { handleDateClick(currentDay); }}
             disabled={disabled}
             className={`
               aspect-square p-2 text-sm rounded-lg transition-colors
@@ -181,7 +182,7 @@ export const Calendar = ({
       {renderDays()}
       {renderCells()}
       <div className="mt-4 text-sm text-gray-500 text-center">
-        {selectingCheckOut && checkIn
+        {selectingCheckOut
           ? `Select check-out date (${minNights}-${maxNights} nights)`
           : 'Select check-in date'}
       </div>

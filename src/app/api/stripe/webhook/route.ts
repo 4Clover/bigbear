@@ -1,67 +1,99 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 import { headers } from 'next/headers'
 import { stripe } from '@/lib/stripe'
 import { prisma } from '@/lib/prisma'
 import { sendBookingConfirmation } from '@/lib/notifications'
-import type Stripe from 'stripe'
+import { type Stripe } from 'stripe'
 
 interface AddonMetadata {
   id: string
   quantity: number
 }
 
-export const POST = async (request: NextRequest) => {
+export const POST = async (request: NextRequest): Promise<NextResponse> => {
   const body = await request.text()
   const headersList = await headers()
-  const signature = headersList.get('stripe-signature')!
+  const signature = headersList.get('stripe-signature')
+
+  if (!signature) {
+    return NextResponse.json({ error: 'Missing stripe-signature header' }, { status: 400 })
+  }
+
+  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET
+  if (!webhookSecret) {
+    console.error('STRIPE_WEBHOOK_SECRET is not configured')
+    return NextResponse.json({ error: 'Webhook not configured' }, { status: 500 })
+  }
 
   let event: Stripe.Event
   try {
-    event = stripe.webhooks.constructEvent(body, signature, process.env.STRIPE_WEBHOOK_SECRET!)
+    event = stripe.webhooks.constructEvent(body, signature, webhookSecret)
   } catch {
     return NextResponse.json({ error: 'Webhook signature verification failed' }, { status: 400 })
   }
 
   if (event.type === 'checkout.session.completed') {
-    const session = event.data.object as Stripe.Checkout.Session
-    const metadata = session.metadata!
+    const session = event.data.object
+    const metadata = session.metadata
+
+    if (!metadata) {
+      console.error('Checkout session missing metadata')
+      return NextResponse.json({ error: 'Invalid session data' }, { status: 400 })
+    }
+
+    // Validate required metadata fields
+    const {
+      guestEmail,
+      guestName,
+      guestPhone,
+      checkIn,
+      checkOut,
+      basePrice,
+      addonsTotal,
+      depositAmount,
+      totalAmount,
+      addons: addonsJson,
+    } = metadata
+
+    if (!guestEmail || !guestName || !checkIn || !checkOut || !basePrice || !addonsTotal || !depositAmount || !totalAmount) {
+      console.error('Checkout session missing required metadata fields')
+      return NextResponse.json({ error: 'Invalid session metadata' }, { status: 400 })
+    }
 
     // Create or get guest user
     let user = await prisma.user.findUnique({
-      where: { email: metadata.guestEmail },
+      where: { email: guestEmail },
     })
 
-    if (!user) {
-      user = await prisma.user.create({
-        data: {
-          email: metadata.guestEmail,
-          name: metadata.guestName,
-          phone: metadata.guestPhone || null,
-          role: 'GUEST',
-        },
-      })
-    }
+    user ??= await prisma.user.create({
+      data: {
+        email: guestEmail,
+        name: guestName,
+        phone: guestPhone ?? null,
+        role: 'GUEST',
+      },
+    })
 
     // Create booking
     const booking = await prisma.booking.create({
       data: {
         guestId: user.id,
-        checkIn: new Date(metadata.checkIn),
-        checkOut: new Date(metadata.checkOut),
-        guestName: metadata.guestName,
-        guestEmail: metadata.guestEmail,
-        guestPhone: metadata.guestPhone || null,
-        basePrice: parseFloat(metadata.basePrice),
-        addonsTotal: parseFloat(metadata.addonsTotal),
-        depositAmount: parseFloat(metadata.depositAmount),
-        totalAmount: parseFloat(metadata.totalAmount),
+        checkIn: new Date(checkIn),
+        checkOut: new Date(checkOut),
+        guestName: guestName,
+        guestEmail: guestEmail,
+        guestPhone: guestPhone ?? null,
+        basePrice: parseFloat(basePrice),
+        addonsTotal: parseFloat(addonsTotal),
+        depositAmount: parseFloat(depositAmount),
+        totalAmount: parseFloat(totalAmount),
         paymentIntentId: session.payment_intent as string,
         status: 'CONFIRMED',
       },
     })
 
     // Create booking addons
-    const addons = JSON.parse(metadata.addons || '[]') as AddonMetadata[]
+    const addons = JSON.parse(addonsJson ?? '[]') as AddonMetadata[]
     for (const addon of addons) {
       const addonData = await prisma.addon.findUnique({ where: { id: addon.id } })
       if (addonData) {
@@ -86,7 +118,7 @@ export const POST = async (request: NextRequest) => {
         data: {
           type: 'INCOME',
           categoryId: incomeCategory.id,
-          amount: parseFloat(metadata.totalAmount),
+          amount: parseFloat(totalAmount),
           date: new Date(),
           description: `Booking #${booking.id.slice(-6)}`,
           bookingId: booking.id,

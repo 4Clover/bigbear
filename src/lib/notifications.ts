@@ -5,7 +5,7 @@ import { format } from 'date-fns'
 
 const resend = new Resend(process.env.AUTH_RESEND_KEY)
 
-const fromEmail = process.env.RESEND_FROM_EMAIL || 'noreply@example.com'
+const fromEmail = process.env.RESEND_FROM_EMAIL ?? 'noreply@example.com'
 
 export const sendBookingConfirmation = async (booking: Booking) => {
   const preference = await prisma.notificationPreference.findUnique({

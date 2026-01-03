@@ -8,11 +8,12 @@ import { describe, it, expect } from 'vitest'
  * - Order status, workflow states, etc.
  */
 
-type StateTransition<T extends string> = {
-  from: T
-  to: T
-  valid: boolean
-}
+// Unused but kept for future reference
+// interface StateTransition<T extends string> {
+//   from: T
+//   to: T
+//   valid: boolean
+// }
 
 const createStateMachineValidator = <T extends string>(
   validTransitions: Map<T, T[]>

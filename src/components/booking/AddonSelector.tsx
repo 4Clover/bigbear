@@ -21,7 +21,7 @@ interface AddonSelectorProps {
 export const AddonSelector = ({ addons, selectedAddons, onChange }: AddonSelectorProps) => {
   const getQuantity = (addonId: string) => {
     const selected = selectedAddons.find((a) => a.id === addonId)
-    return selected?.quantity || 0
+    return selected?.quantity ?? 0
   }
 
   const updateQuantity = (addonId: string, quantity: number) => {
@@ -58,7 +58,7 @@ export const AddonSelector = ({ addons, selectedAddons, onChange }: AddonSelecto
               <div className="flex items-center gap-3">
                 <button
                   type="button"
-                  onClick={() => updateQuantity(addon.id, quantity - 1)}
+                  onClick={() => { updateQuantity(addon.id, quantity - 1); }}
                   className="w-8 h-8 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center transition-colors disabled:opacity-50"
                   disabled={quantity === 0}
                   aria-label="Decrease quantity"
@@ -68,7 +68,7 @@ export const AddonSelector = ({ addons, selectedAddons, onChange }: AddonSelecto
                 <span className="w-8 text-center font-medium">{quantity}</span>
                 <button
                   type="button"
-                  onClick={() => updateQuantity(addon.id, quantity + 1)}
+                  onClick={() => { updateQuantity(addon.id, quantity + 1); }}
                   className="w-8 h-8 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white flex items-center justify-center transition-colors"
                   aria-label="Increase quantity"
                 >

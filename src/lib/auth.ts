@@ -19,10 +19,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   },
   callbacks: {
     session({ session, user }) {
-      if (session.user) {
-        session.user.id = user.id
-        session.user.role = (user as { role: UserRole }).role
-      }
+      session.user.id = user.id
+      session.user.role = (user as { role: UserRole }).role
       return session
     },
   },

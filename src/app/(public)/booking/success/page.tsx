@@ -38,7 +38,7 @@ export default async function BookingSuccessPage({ searchParams }: PageProps) {
     )
   }
 
-  const metadata = session.metadata || {}
+  const metadata = session.metadata ?? {}
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-16">
@@ -72,7 +72,7 @@ export default async function BookingSuccessPage({ searchParams }: PageProps) {
           <div className="flex justify-between py-3 border-b border-gray-100">
             <dt className="text-gray-600">Total Paid</dt>
             <dd className="font-medium text-emerald-600">
-              ${((session.amount_total || 0) / 100).toFixed(2)}
+              ${((session.amount_total ?? 0) / 100).toFixed(2)}
             </dd>
           </div>
         </dl>

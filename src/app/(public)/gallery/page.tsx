@@ -58,7 +58,7 @@ export default async function GalleryPage() {
                     <div key={image.id} className="relative aspect-video rounded-xl overflow-hidden shadow-lg">
                       <Image
                         src={image.url}
-                        alt={image.alt || 'Cabin photo'}
+                        alt={image.alt ?? 'Cabin photo'}
                         fill
                         sizes="(max-width: 768px) 100vw, 50vw"
                         className="object-cover"
@@ -86,7 +86,7 @@ export default async function GalleryPage() {
                       <div key={image.id} className="relative aspect-square rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow">
                         <Image
                           src={image.url}
-                          alt={image.alt || 'Cabin photo'}
+                          alt={image.alt ?? 'Cabin photo'}
                           fill
                           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                           className="object-cover"
@@ -102,7 +102,7 @@ export default async function GalleryPage() {
                 <div key={image.id} className="relative aspect-square rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow">
                   <Image
                     src={image.url}
-                    alt={image.alt || 'Cabin photo'}
+                    alt={image.alt ?? 'Cabin photo'}
                     fill
                     sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                     className="object-cover"

@@ -1,4 +1,4 @@
-import { PrismaClient, NotificationEvent } from '@prisma/client'
+import { PrismaClient, type NotificationEvent } from '@prisma/client'
 
 const prisma = new PrismaClient()
 
@@ -87,7 +87,7 @@ const main = async () => {
 }
 
 main()
-  .catch((e) => {
+  .catch((e: unknown) => {
     console.error('Seed failed:', e)
     process.exit(1)
   })

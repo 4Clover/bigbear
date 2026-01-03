@@ -47,7 +47,7 @@ export const Button = ({
         ${sizeStyles[size]}
         ${className}
       `}
-      disabled={disabled || isLoading}
+      disabled={Boolean(disabled) || Boolean(isLoading)}
       {...props}
     >
       {isLoading && (

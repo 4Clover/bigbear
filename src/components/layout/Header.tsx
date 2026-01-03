@@ -59,7 +59,7 @@ export const Header = () => {
           <div className="md:hidden flex items-center">
             <button
               type="button"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              onClick={() => { setMobileMenuOpen(!mobileMenuOpen); }}
               className="p-2 rounded-lg text-gray-600 hover:bg-gray-100"
               aria-label="Toggle menu"
             >
@@ -83,12 +83,12 @@ export const Header = () => {
                   key={link.href}
                   href={link.href}
                   className="text-gray-600 hover:text-emerald-600 font-medium transition-colors"
-                  onClick={() => setMobileMenuOpen(false)}
+                  onClick={() => { setMobileMenuOpen(false); }}
                 >
                   {link.label}
                 </Link>
               ))}
-              <Link href="/login" onClick={() => setMobileMenuOpen(false)}>
+              <Link href="/login" onClick={() => { setMobileMenuOpen(false); }}>
                 <Button variant="outline" size="sm" className="w-full">
                   Sign In
                 </Button>

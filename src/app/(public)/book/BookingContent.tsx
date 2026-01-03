@@ -31,6 +31,11 @@ interface GuestInfo {
   phone: string
 }
 
+interface CheckoutResponse {
+  url?: string
+  error?: string
+}
+
 export const BookingContent = () => {
   const searchParams = useSearchParams()
   const cancelled = searchParams.get('cancelled')
@@ -55,25 +60,25 @@ export const BookingContent = () => {
         ])
 
         if (addonsRes.ok) {
-          const addonsData = await addonsRes.json()
+          const addonsData = (await addonsRes.json()) as Addon[]
           setAddons(addonsData)
         }
 
         if (pricingRes.ok) {
-          const pricingData = await pricingRes.json()
+          const pricingData = (await pricingRes.json()) as PricingConfig
           setPricing(pricingData)
         }
 
         if (blockedRes.ok) {
-          const blockedData = await blockedRes.json()
-          setBlockedDates(blockedData.map((d: string) => new Date(d)))
+          const blockedData = (await blockedRes.json()) as string[]
+          setBlockedDates(blockedData.map((d) => new Date(d)))
         }
       } catch (error) {
         console.error('Failed to fetch booking data:', error)
       }
     }
 
-    fetchData()
+    void fetchData()
   }, [])
 
   const handleDateSelect = (newCheckIn: Date | null, newCheckOut: Date | null) => {
@@ -122,7 +127,7 @@ export const BookingContent = () => {
         }),
       })
 
-      const data = await response.json()
+      const data = (await response.json()) as CheckoutResponse
 
       if (data.url) {
         window.location.href = data.url
@@ -145,7 +150,7 @@ export const BookingContent = () => {
     maxNights: 14,
   }
 
-  const config = pricing || defaultPricing
+  const config = pricing ?? defaultPricing
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -210,7 +215,7 @@ export const BookingContent = () => {
               selectedAddons={selectedAddons}
             />
             <Button
-              onClick={handleSubmit}
+              onClick={() => void handleSubmit()}
               isLoading={isLoading}
               disabled={!checkIn || !checkOut}
               className="w-full"

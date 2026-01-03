@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 import { Resend } from 'resend'
 
 const resend = new Resend(process.env.AUTH_RESEND_KEY)
@@ -10,7 +10,7 @@ interface ContactFormData {
   message: string
 }
 
-export const POST = async (request: NextRequest) => {
+export const POST = async (request: NextRequest): Promise<NextResponse> => {
   try {
     const body = (await request.json()) as ContactFormData
     const { name, email, subject, message } = body
@@ -20,11 +20,11 @@ export const POST = async (request: NextRequest) => {
     }
 
     // Send email to the owner
-    const ownerEmail = process.env.OWNER_EMAIL || process.env.RESEND_FROM_EMAIL
+    const ownerEmail = process.env.OWNER_EMAIL ?? process.env.RESEND_FROM_EMAIL
 
     if (ownerEmail) {
       await resend.emails.send({
-        from: process.env.RESEND_FROM_EMAIL || 'noreply@example.com',
+        from: process.env.RESEND_FROM_EMAIL ?? 'noreply@example.com',
         to: ownerEmail,
         replyTo: email,
         subject: `Contact Form: ${subject}`,
@@ -40,7 +40,7 @@ export const POST = async (request: NextRequest) => {
 
     // Send confirmation to the user
     await resend.emails.send({
-      from: process.env.RESEND_FROM_EMAIL || 'noreply@example.com',
+      from: process.env.RESEND_FROM_EMAIL ?? 'noreply@example.com',
       to: email,
       subject: 'We received your message - Big Bear Cabin',
       html: `

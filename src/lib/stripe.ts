@@ -15,9 +15,7 @@ let _stripe: Stripe | null = null
 
 export const stripe = new Proxy({} as Stripe, {
   get(_, prop) {
-    if (!_stripe) {
-      _stripe = getStripeClient()
-    }
+    _stripe ??= getStripeClient()
     return (_stripe as unknown as Record<string | symbol, unknown>)[prop]
   },
 })

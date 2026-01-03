@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { addDays, eachDayOfInterval, startOfDay } from 'date-fns'
 
-export const GET = async () => {
+export const GET = async (): Promise<NextResponse> => {
   try {
     const today = startOfDay(new Date())
     const futureDate = addDays(today, 365) // Look ahead 1 year

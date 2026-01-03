@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
-export const GET = async () => {
+export const GET = async (): Promise<NextResponse> => {
   try {
     const addons = await prisma.addon.findMany({
       where: { isActive: true },

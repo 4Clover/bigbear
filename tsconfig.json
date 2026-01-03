@@ -4,7 +4,6 @@
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
-    "strict": true,
     "noEmit": true,
     "esModuleInterop": true,
     "module": "esnext",
@@ -20,7 +19,19 @@
     ],
     "paths": {
       "@/*": ["./src/*"]
-    }
+    },
+
+    // Strict mode (already enabled, keeping explicit)
+    "strict": true,
+
+    // Additional strict checks for production quality
+    "noUncheckedIndexedAccess": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "forceConsistentCasingInFileNames": true,
+
+    // Improved error messages
+    "noErrorTruncation": true
   },
   "include": [
     "next-env.d.ts",

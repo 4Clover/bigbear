@@ -63,12 +63,12 @@ export default function ContactPage() {
                   <p className="text-gray-600 mb-4">
                     Thank you for reaching out. We&apos;ll get back to you as soon as possible.
                   </p>
-                  <Button variant="outline" onClick={() => setSubmitted(false)}>
+                  <Button variant="outline" onClick={() => { setSubmitted(false); }}>
                     Send Another Message
                   </Button>
                 </div>
               ) : (
-                <form onSubmit={handleSubmit} className="space-y-6">
+                <form onSubmit={(e) => void handleSubmit(e)} className="space-y-6">
                   <Input
                     label="Your Name"
                     name="name"

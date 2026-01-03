@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect } from 'vitest'
 import { prismaMock } from '../__mocks__/prisma'
 
 // Simple Decimal-like class for tests
