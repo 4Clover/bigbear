@@ -1,5 +1,11 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
+phases/
+plans/
+rental-cabin-development-plan.md
+CLAUDE.md
+.serena/
+.codesight/
+.claude/
 # dependencies
 /node_modules
 /.pnp
