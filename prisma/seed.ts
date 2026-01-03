@@ -1,6 +1,14 @@
+import 'dotenv/config'
 import { PrismaClient, type NotificationEvent } from '@prisma/client'
+import { PrismaNeon } from '@prisma/adapter-neon'
 
-const prisma = new PrismaClient()
+const connectionString = process.env.DATABASE_URL
+if (!connectionString) {
+  throw new Error('DATABASE_URL environment variable is not set')
+}
+
+const adapter = new PrismaNeon({ connectionString })
+const prisma = new PrismaClient({ adapter })
 
 const expenseCategories = [
   { name: 'Rental Income', description: 'Booking revenue', scheduleELine: 'Line 3', isTaxDeductible: false },
