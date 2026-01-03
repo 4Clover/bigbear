@@ -1,0 +1,408 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ============================================================================
+// Auth.js Models
+// ============================================================================
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ============================================================================
+// User Models
+// ============================================================================
+
+enum UserRole {
+  OWNER
+  GUEST
+  WORKER
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  phone         String?
+  role          UserRole  @default(GUEST)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  accounts      Account[]
+  sessions      Session[]
+  bookings      Booking[]
+  workerProfile WorkerProfile?
+  sentMessages  Message[]      @relation("SentMessages")
+}
+
+model WorkerProfile {
+  id           String   @id @default(cuid())
+  userId       String   @unique
+  businessName String?
+  services     String[] @default([])
+  phoneNumber  String?
+  address      String?
+  taxId        String?
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  quotes          Quote[]
+  workCompletions WorkCompletion[]
+}
+
+// ============================================================================
+// Booking & Calendar Models
+// ============================================================================
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+  NO_SHOW
+}
+
+model Booking {
+  id              String        @id @default(cuid())
+  guestId         String
+  checkIn         DateTime
+  checkOut        DateTime
+  guestName       String
+  guestEmail      String
+  guestPhone      String?
+  numberOfGuests  Int           @default(1)
+  specialRequests String?
+  basePrice       Decimal       @db.Decimal(10, 2)
+  addonsTotal     Decimal       @default(0) @db.Decimal(10, 2)
+  depositAmount   Decimal       @db.Decimal(10, 2)
+  totalAmount     Decimal       @db.Decimal(10, 2)
+  paymentIntentId String?
+  status          BookingStatus @default(PENDING)
+  notes           String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  guest        User           @relation(fields: [guestId], references: [id])
+  addons       BookingAddon[]
+  transactions Transaction[]
+  messages     Message[]
+}
+
+model Addon {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  price       Decimal  @db.Decimal(10, 2)
+  isActive    Boolean  @default(true)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  bookingAddons BookingAddon[]
+}
+
+model BookingAddon {
+  id        String  @id @default(cuid())
+  bookingId String
+  addonId   String
+  quantity  Int     @default(1)
+  price     Decimal @db.Decimal(10, 2)
+
+  booking Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  addon   Addon   @relation(fields: [addonId], references: [id])
+
+  @@unique([bookingId, addonId])
+}
+
+model BlockedDate {
+  id        String   @id @default(cuid())
+  startDate DateTime
+  endDate   DateTime
+  reason    String?
+  source    String?  @default("manual")
+  externalId String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([startDate, endDate])
+}
+
+model CalendarSync {
+  id          String    @id @default(cuid())
+  name        String
+  icalUrl     String
+  isActive    Boolean   @default(true)
+  lastSynced  DateTime?
+  lastError   String?
+  syncCount   Int       @default(0)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+// ============================================================================
+// Pricing Configuration
+// ============================================================================
+
+model PricingConfig {
+  id                 String   @id @default("default")
+  baseNightlyRate    Decimal  @db.Decimal(10, 2)
+  weekendRate        Decimal? @db.Decimal(10, 2)
+  weekendDays        Int[]    @default([5, 6])
+  cleaningFee        Decimal  @db.Decimal(10, 2)
+  depositPercentage  Int      @default(20)
+  minNights          Int      @default(2)
+  maxNights          Int      @default(14)
+  maxGuests          Int      @default(8)
+  petFee             Decimal? @db.Decimal(10, 2)
+  extraGuestFee      Decimal? @db.Decimal(10, 2)
+  extraGuestThreshold Int?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+}
+
+// ============================================================================
+// Finance & Ledger Models
+// ============================================================================
+
+enum TransactionType {
+  INCOME
+  EXPENSE
+}
+
+model ExpenseCategory {
+  id              String   @id @default(cuid())
+  name            String   @unique
+  description     String?
+  scheduleELine   String?
+  isTaxDeductible Boolean  @default(true)
+  sortOrder       Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  transactions Transaction[]
+}
+
+model Transaction {
+  id          String          @id @default(cuid())
+  type        TransactionType
+  categoryId  String
+  amount      Decimal         @db.Decimal(10, 2)
+  date        DateTime
+  description String?
+  vendor      String?
+  bookingId   String?
+  notes       String?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  category ExpenseCategory @relation(fields: [categoryId], references: [id])
+  booking  Booking?        @relation(fields: [bookingId], references: [id])
+  receipts Receipt[]
+
+  @@index([date])
+  @@index([type])
+}
+
+model Receipt {
+  id            String   @id @default(cuid())
+  transactionId String
+  fileName      String
+  fileUrl       String
+  fileSize      Int?
+  mimeType      String?
+  createdAt     DateTime @default(now())
+
+  transaction Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+}
+
+// ============================================================================
+// Maintenance Models
+// ============================================================================
+
+enum JobStatus {
+  OPEN
+  QUOTED
+  APPROVED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum JobPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+model MaintenanceJob {
+  id          String      @id @default(cuid())
+  title       String
+  description String?
+  priority    JobPriority @default(MEDIUM)
+  status      JobStatus   @default(OPEN)
+  dueDate     DateTime?
+  images      String[]    @default([])
+  notes       String?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  quotes          Quote[]
+  workCompletions WorkCompletion[]
+}
+
+model Quote {
+  id            String   @id @default(cuid())
+  jobId         String
+  workerId      String
+  amount        Decimal  @db.Decimal(10, 2)
+  description   String?
+  estimatedDays Int?
+  isApproved    Boolean  @default(false)
+  submittedAt   DateTime @default(now())
+  expiresAt     DateTime?
+
+  job    MaintenanceJob @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  worker WorkerProfile  @relation(fields: [workerId], references: [id])
+
+  @@index([jobId])
+}
+
+model WorkCompletion {
+  id           String   @id @default(cuid())
+  jobId        String
+  workerId     String
+  description  String?
+  images       String[] @default([])
+  hoursWorked  Decimal? @db.Decimal(5, 2)
+  materialsUsed String?
+  isApproved   Boolean  @default(false)
+  submittedAt  DateTime @default(now())
+  approvedAt   DateTime?
+
+  job    MaintenanceJob @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  worker WorkerProfile  @relation(fields: [workerId], references: [id])
+
+  @@index([jobId])
+}
+
+// ============================================================================
+// Messaging Models
+// ============================================================================
+
+model Message {
+  id        String   @id @default(cuid())
+  senderId  String
+  bookingId String?
+  content   String   @db.Text
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  sender  User     @relation("SentMessages", fields: [senderId], references: [id])
+  booking Booking? @relation(fields: [bookingId], references: [id])
+
+  @@index([bookingId])
+  @@index([createdAt])
+}
+
+// ============================================================================
+// Notification Models
+// ============================================================================
+
+enum NotificationEvent {
+  BOOKING_REQUEST
+  BOOKING_CONFIRMED
+  BOOKING_CANCELLED
+  PAYMENT_RECEIVED
+  PAYMENT_FAILED
+  GUEST_CHECKIN_REMINDER
+  GUEST_CHECKOUT_REMINDER
+  MAINTENANCE_QUOTE_RECEIVED
+  MAINTENANCE_COMPLETED
+  NEW_MESSAGE
+}
+
+model NotificationPreference {
+  id           String            @id @default(cuid())
+  event        NotificationEvent @unique
+  emailEnabled Boolean           @default(true)
+  smsEnabled   Boolean           @default(false)
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+}
+
+model NotificationLog {
+  id        String            @id @default(cuid())
+  event     NotificationEvent
+  recipient String
+  channel   String
+  subject   String?
+  body      String?           @db.Text
+  status    String            @default("sent")
+  error     String?
+  metadata  Json?
+  createdAt DateTime          @default(now())
+
+  @@index([event])
+  @@index([createdAt])
+}
+
+// ============================================================================
+// Gallery Models
+// ============================================================================
+
+model GalleryImage {
+  id          String   @id @default(cuid())
+  url         String
+  alt         String?
+  caption     String?
+  category    String?
+  sortOrder   Int      @default(0)
+  isFeatured  Boolean  @default(false)
+  isPublished Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([category])
+  @@index([sortOrder])
+}
