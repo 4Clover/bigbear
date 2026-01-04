@@ -30,9 +30,7 @@ const NotificationPreferencesForm = ({
     // Optimistic update
     setOptimisticPrefs((prev) =>
       prev.map((p) =>
-        p.event === event
-          ? { ...p, emailEnabled: newEmailEnabled, smsEnabled: newSmsEnabled }
-          : p
+        p.event === event ? { ...p, emailEnabled: newEmailEnabled, smsEnabled: newSmsEnabled } : p
       )
     )
 
@@ -66,7 +64,9 @@ const NotificationPreferencesForm = ({
             </div>
             <div className="flex items-center justify-center">
               <button
-                onClick={() => { handleToggle(pref.event, 'emailEnabled', pref.emailEnabled) }}
+                onClick={() => {
+                  handleToggle(pref.event, 'emailEnabled', pref.emailEnabled)
+                }}
                 disabled={isPending}
                 className={`relative w-11 h-6 rounded-full transition-colors ${
                   pref.emailEnabled ? 'bg-emerald-500' : 'bg-gray-200'
@@ -81,7 +81,9 @@ const NotificationPreferencesForm = ({
             </div>
             <div className="flex items-center justify-center">
               <button
-                onClick={() => { handleToggle(pref.event, 'smsEnabled', pref.smsEnabled) }}
+                onClick={() => {
+                  handleToggle(pref.event, 'smsEnabled', pref.smsEnabled)
+                }}
                 disabled={isPending}
                 className={`relative w-11 h-6 rounded-full transition-colors ${
                   pref.smsEnabled ? 'bg-emerald-500' : 'bg-gray-200'
@@ -98,9 +100,7 @@ const NotificationPreferencesForm = ({
         )
       })}
 
-      <p className="text-xs text-gray-400 mt-4">
-        Changes are saved automatically.
-      </p>
+      <p className="text-xs text-gray-400 mt-4">Changes are saved automatically.</p>
     </div>
   )
 }

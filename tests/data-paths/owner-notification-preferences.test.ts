@@ -19,9 +19,9 @@ describe('Owner Notification Preferences Data Path', () => {
     'PAYMENT_FAILED',
     'GUEST_CHECKIN_REMINDER',
     'GUEST_CHECKOUT_REMINDER',
-    'MAINTENANCE_DUE',
-    'CALENDAR_SYNC_ERROR',
-    'LOW_AVAILABILITY',
+    'MAINTENANCE_QUOTE_RECEIVED',
+    'MAINTENANCE_COMPLETED',
+    'NEW_MESSAGE',
   ] as const
 
   beforeEach(() => {
@@ -231,9 +231,9 @@ describe('Owner Notification Preferences Data Path', () => {
       expect(allNotificationEvents).toContain('PAYMENT_FAILED')
       expect(allNotificationEvents).toContain('GUEST_CHECKIN_REMINDER')
       expect(allNotificationEvents).toContain('GUEST_CHECKOUT_REMINDER')
-      expect(allNotificationEvents).toContain('MAINTENANCE_DUE')
-      expect(allNotificationEvents).toContain('CALENDAR_SYNC_ERROR')
-      expect(allNotificationEvents).toContain('LOW_AVAILABILITY')
+      expect(allNotificationEvents).toContain('MAINTENANCE_QUOTE_RECEIVED')
+      expect(allNotificationEvents).toContain('MAINTENANCE_COMPLETED')
+      expect(allNotificationEvents).toContain('NEW_MESSAGE')
     })
 
     it('should have exactly 10 notification event types', () => {
@@ -251,9 +251,9 @@ describe('Owner Notification Preferences Data Path', () => {
         PAYMENT_FAILED: 'Payment Failed',
         GUEST_CHECKIN_REMINDER: 'Guest Check-in Reminder',
         GUEST_CHECKOUT_REMINDER: 'Guest Check-out Reminder',
-        MAINTENANCE_DUE: 'Maintenance Due',
-        CALENDAR_SYNC_ERROR: 'Calendar Sync Error',
-        LOW_AVAILABILITY: 'Low Availability Alert',
+        MAINTENANCE_QUOTE_RECEIVED: 'Maintenance Quote Received',
+        MAINTENANCE_COMPLETED: 'Maintenance Completed',
+        NEW_MESSAGE: 'New Message',
       }
 
       allNotificationEvents.forEach((event) => {
@@ -271,9 +271,9 @@ describe('Owner Notification Preferences Data Path', () => {
         PAYMENT_FAILED: 'When a payment attempt fails',
         GUEST_CHECKIN_REMINDER: 'Reminder before guest check-in date',
         GUEST_CHECKOUT_REMINDER: 'Reminder before guest check-out date',
-        MAINTENANCE_DUE: 'When scheduled maintenance is due',
-        CALENDAR_SYNC_ERROR: 'When external calendar sync fails',
-        LOW_AVAILABILITY: 'When availability drops below threshold',
+        MAINTENANCE_QUOTE_RECEIVED: 'When a maintenance worker submits a quote',
+        MAINTENANCE_COMPLETED: 'When maintenance work is completed',
+        NEW_MESSAGE: 'When a new message is received',
       }
 
       allNotificationEvents.forEach((event) => {
@@ -316,9 +316,7 @@ describe('Owner Notification Preferences Data Path', () => {
         }
       }
 
-      const existingPrefs = [
-        { event: 'BOOKING_REQUEST', emailEnabled: false, smsEnabled: true },
-      ]
+      const existingPrefs = [{ event: 'BOOKING_REQUEST', emailEnabled: false, smsEnabled: true }]
 
       const bookingRequest = getPreference(existingPrefs, 'BOOKING_REQUEST')
       const paymentReceived = getPreference(existingPrefs, 'PAYMENT_RECEIVED')
@@ -343,14 +341,16 @@ describe('Owner Notification Preferences Data Path', () => {
         bookings: ['BOOKING_REQUEST', 'BOOKING_CONFIRMED', 'BOOKING_CANCELLED'],
         payments: ['PAYMENT_RECEIVED', 'PAYMENT_FAILED'],
         reminders: ['GUEST_CHECKIN_REMINDER', 'GUEST_CHECKOUT_REMINDER'],
-        system: ['MAINTENANCE_DUE', 'CALENDAR_SYNC_ERROR', 'LOW_AVAILABILITY'],
+        maintenance: ['MAINTENANCE_QUOTE_RECEIVED', 'MAINTENANCE_COMPLETED'],
+        communication: ['NEW_MESSAGE'],
       }
 
       const allCategorized = [
         ...categories.bookings,
         ...categories.payments,
         ...categories.reminders,
-        ...categories.system,
+        ...categories.maintenance,
+        ...categories.communication,
       ]
 
       expect(allCategorized).toHaveLength(10)

@@ -1,43 +1,13 @@
 import type { Booking, BookingStatus, Addon, BookingAddon } from '@prisma/client'
+import { Prisma } from '@prisma/client'
 
-// Simple Decimal-like class for test fixtures
-class TestDecimal {
-  private value: number
-
-  constructor(value: string | number) {
-    this.value = typeof value === 'string' ? parseFloat(value) : value
-  }
-
-  add(other: TestDecimal | number): TestDecimal {
-    const otherValue = other instanceof TestDecimal ? other.value : other
-    return new TestDecimal(this.value + otherValue)
-  }
-
-  mul(other: number): TestDecimal {
-    return new TestDecimal(this.value * other)
-  }
-
-  toString(): string {
-    return String(this.value)
-  }
-
-  toFixed(decimals: number): string {
-    return this.value.toFixed(decimals)
-  }
-
-  toNumber(): number {
-    return this.value
-  }
-}
-
-const Decimal = TestDecimal as any
+// Use Prisma's Decimal for proper type compatibility
+const Decimal = Prisma.Decimal
 
 let bookingCounter = 0
 let addonCounter = 0
 
-export const createBookingFixture = (
-  overrides: Partial<Booking> = {}
-): Booking => {
+export const createBookingFixture = (overrides: Partial<Booking> = {}): Booking => {
   bookingCounter++
   const now = new Date()
   const checkIn = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)
@@ -71,9 +41,7 @@ export const createBookingFixture = (
   }
 }
 
-export const createConfirmedBookingFixture = (
-  overrides: Partial<Booking> = {}
-): Booking => {
+export const createConfirmedBookingFixture = (overrides: Partial<Booking> = {}): Booking => {
   return createBookingFixture({
     status: 'CONFIRMED' as BookingStatus,
     paymentIntentId: `pi_${Date.now()}`,
@@ -81,9 +49,7 @@ export const createConfirmedBookingFixture = (
   })
 }
 
-export const createAddonFixture = (
-  overrides: Partial<Addon> = {}
-): Addon => {
+export const createAddonFixture = (overrides: Partial<Addon> = {}): Addon => {
   addonCounter++
   const now = new Date()
 
@@ -122,3 +88,6 @@ export const resetBookingCounter = (): void => {
 export const resetAddonCounter = (): void => {
   addonCounter = 0
 }
+
+// Export Decimal for test files to use
+export { Decimal }

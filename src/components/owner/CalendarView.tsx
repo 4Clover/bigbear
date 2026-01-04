@@ -72,7 +72,7 @@ const CalendarView = ({
   onSelectSlot,
   onSelectEvent,
 }: CalendarViewProps) => {
-  const [view, setView] = useState<typeof Views[keyof typeof Views]>(Views.MONTH)
+  const [view, setView] = useState<(typeof Views)[keyof typeof Views]>(Views.MONTH)
   const [date, setDate] = useState(new Date())
 
   const events = useMemo<CalendarEvent[]>(() => {

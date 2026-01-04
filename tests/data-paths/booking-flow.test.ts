@@ -1,35 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import { prismaMock } from '../__mocks__/prisma'
-
-// Simple Decimal-like class for tests
-class Decimal {
-  private value: number
-
-  constructor(value: string | number) {
-    this.value = typeof value === 'string' ? parseFloat(value) : value
-  }
-
-  add(other: Decimal | number): Decimal {
-    const otherValue = other instanceof Decimal ? other.value : other
-    return new Decimal(this.value + otherValue)
-  }
-
-  mul(other: number): Decimal {
-    return new Decimal(this.value * other)
-  }
-
-  div(other: number): Decimal {
-    return new Decimal(this.value / other)
-  }
-
-  toString(): string {
-    return String(this.value)
-  }
-
-  toFixed(decimals: number): string {
-    return this.value.toFixed(decimals)
-  }
-}
 import {
   createBookingFixture,
   createConfirmedBookingFixture,
@@ -37,6 +7,7 @@ import {
   createBookingAddonFixture,
   resetBookingCounter,
   resetAddonCounter,
+  Decimal,
 } from '../fixtures/booking.factory'
 
 /**
@@ -272,10 +243,7 @@ describe('Booking Flow Data Path', () => {
   describe('Booking queries', () => {
     it('should find bookings by guest ID', async () => {
       const guestId = 'guest-123'
-      const bookings = [
-        createBookingFixture({ guestId }),
-        createBookingFixture({ guestId }),
-      ]
+      const bookings = [createBookingFixture({ guestId }), createBookingFixture({ guestId })]
 
       prismaMock.booking.findMany.mockResolvedValue(bookings)
 
@@ -290,10 +258,7 @@ describe('Booking Flow Data Path', () => {
     })
 
     it('should find bookings by status', async () => {
-      const confirmedBookings = [
-        createConfirmedBookingFixture(),
-        createConfirmedBookingFixture(),
-      ]
+      const confirmedBookings = [createConfirmedBookingFixture(), createConfirmedBookingFixture()]
 
       prismaMock.booking.findMany.mockResolvedValue(confirmedBookings)
 
@@ -309,9 +274,7 @@ describe('Booking Flow Data Path', () => {
     it('should find bookings by date range', async () => {
       const checkInStart = new Date('2024-06-01')
       const checkInEnd = new Date('2024-06-30')
-      const juneBookings = [
-        createBookingFixture({ checkIn: new Date('2024-06-15') }),
-      ]
+      const juneBookings = [createBookingFixture({ checkIn: new Date('2024-06-15') })]
 
       prismaMock.booking.findMany.mockResolvedValue(juneBookings)
 

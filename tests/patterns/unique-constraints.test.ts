@@ -33,9 +33,7 @@ describe('Unique Constraint Pattern', () => {
         const existingUser = createUserFixture({ email: 'existing@example.com' })
 
         // Simulate unique violation
-        prismaMock.user.create.mockRejectedValue(
-          createUniqueViolationError('email')
-        )
+        prismaMock.user.create.mockRejectedValue(createUniqueViolationError('email'))
 
         await expect(
           prismaMock.user.create({
@@ -72,9 +70,7 @@ describe('Unique Constraint Pattern', () => {
 
     describe('Addon.name', () => {
       it('should reject duplicate addon names', async () => {
-        prismaMock.addon.create.mockRejectedValue(
-          createUniqueViolationError('name')
-        )
+        prismaMock.addon.create.mockRejectedValue(createUniqueViolationError('name'))
 
         await expect(
           prismaMock.addon.create({
@@ -89,9 +85,7 @@ describe('Unique Constraint Pattern', () => {
 
     describe('ExpenseCategory.name', () => {
       it('should reject duplicate category names', async () => {
-        prismaMock.expenseCategory.create.mockRejectedValue(
-          createUniqueViolationError('name')
-        )
+        prismaMock.expenseCategory.create.mockRejectedValue(createUniqueViolationError('name'))
 
         await expect(
           prismaMock.expenseCategory.create({
@@ -232,27 +226,21 @@ describe('Unique Constraint Pattern', () => {
     })
 
     it('should include field name in error metadata', () => {
-      const error = new Prisma.PrismaClientKnownRequestError(
-        'Unique constraint failed',
-        {
-          code: 'P2002',
-          clientVersion: '7.0.0',
-          meta: { target: ['email'] },
-        }
-      )
+      const error = new Prisma.PrismaClientKnownRequestError('Unique constraint failed', {
+        code: 'P2002',
+        clientVersion: '7.0.0',
+        meta: { target: ['email'] },
+      })
 
       expect(error.meta?.target).toContain('email')
     })
 
     it('should include multiple fields for composite constraints', () => {
-      const error = new Prisma.PrismaClientKnownRequestError(
-        'Unique constraint failed',
-        {
-          code: 'P2002',
-          clientVersion: '7.0.0',
-          meta: { target: ['provider', 'providerAccountId'] },
-        }
-      )
+      const error = new Prisma.PrismaClientKnownRequestError('Unique constraint failed', {
+        code: 'P2002',
+        clientVersion: '7.0.0',
+        meta: { target: ['provider', 'providerAccountId'] },
+      })
 
       expect(error.meta?.target).toContain('provider')
       expect(error.meta?.target).toContain('providerAccountId')

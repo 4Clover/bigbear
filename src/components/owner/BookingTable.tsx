@@ -3,11 +3,7 @@
 import { format } from 'date-fns'
 import type { Booking } from '@prisma/client'
 import { useState, useTransition } from 'react'
-import {
-  approveBookingRequest,
-  rejectBookingRequest,
-  cancelBooking,
-} from '@/actions/bookings'
+import { approveBookingRequest, rejectBookingRequest, cancelBooking } from '@/actions/bookings'
 
 interface BookingTableProps {
   bookings: Booking[]
@@ -85,9 +81,7 @@ const BookingTable = ({ bookings }: BookingTableProps) => {
           />
         </svg>
         <h3 className="mt-4 text-lg font-medium text-gray-900">No bookings found</h3>
-        <p className="mt-2 text-gray-500">
-          No bookings match your current filters.
-        </p>
+        <p className="mt-2 text-gray-500">No bookings match your current filters.</p>
       </div>
     )
   }
@@ -125,9 +119,7 @@ const BookingTable = ({ bookings }: BookingTableProps) => {
                 <tr key={booking.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div>
-                      <div className="text-sm font-medium text-gray-900">
-                        {booking.guestName}
-                      </div>
+                      <div className="text-sm font-medium text-gray-900">{booking.guestName}</div>
                       <div className="text-sm text-gray-500">{booking.guestEmail}</div>
                     </div>
                   </td>
@@ -135,9 +127,7 @@ const BookingTable = ({ bookings }: BookingTableProps) => {
                     <div className="text-sm text-gray-900">
                       {format(booking.checkIn, 'MMM d')} - {format(booking.checkOut, 'MMM d')}
                     </div>
-                    <div className="text-sm text-gray-500">
-                      {format(booking.checkIn, 'yyyy')}
-                    </div>
+                    <div className="text-sm text-gray-500">{format(booking.checkIn, 'yyyy')}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     {booking.numberOfGuests}
@@ -157,14 +147,18 @@ const BookingTable = ({ bookings }: BookingTableProps) => {
                       {booking.status === 'PENDING' && (
                         <>
                           <button
-                            onClick={() => { handleApprove(booking.id) }}
+                            onClick={() => {
+                              handleApprove(booking.id)
+                            }}
                             disabled={isActionPending}
                             className="text-emerald-600 hover:text-emerald-900 font-medium disabled:opacity-50"
                           >
                             {isActionPending ? '...' : 'Approve'}
                           </button>
                           <button
-                            onClick={() => { handleReject(booking.id) }}
+                            onClick={() => {
+                              handleReject(booking.id)
+                            }}
                             disabled={isActionPending}
                             className="text-gray-600 hover:text-gray-900 font-medium disabled:opacity-50"
                           >
@@ -174,7 +168,9 @@ const BookingTable = ({ bookings }: BookingTableProps) => {
                       )}
                       {booking.status === 'CONFIRMED' && (
                         <button
-                          onClick={() => { handleCancel(booking.id) }}
+                          onClick={() => {
+                            handleCancel(booking.id)
+                          }}
                           disabled={isActionPending}
                           className="text-red-600 hover:text-red-900 font-medium disabled:opacity-50"
                         >

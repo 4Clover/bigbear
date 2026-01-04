@@ -8,8 +8,6 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
  * The real prisma.ts is mocked to avoid actual database connections.
  */
 describe('Prisma Client (lib/prisma.ts)', () => {
-  const originalEnv = process.env.NODE_ENV
-
   beforeEach(() => {
     vi.resetModules()
     // Clean up globalThis
@@ -18,7 +16,7 @@ describe('Prisma Client (lib/prisma.ts)', () => {
   })
 
   afterEach(() => {
-    process.env.NODE_ENV = originalEnv
+    vi.unstubAllEnvs()
   })
 
   describe('Singleton pattern', () => {
@@ -28,7 +26,7 @@ describe('Prisma Client (lib/prisma.ts)', () => {
       // export const prisma = globalForPrisma.prisma || new PrismaClient({ adapter })
       // if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
 
-      const globalStore = globalThis as { prisma?: object }
+      const globalStore = globalThis as { prisma?: { _type: string } }
       const mockClient = { _type: 'PrismaClient' }
 
       // Simulate first access
@@ -43,9 +41,9 @@ describe('Prisma Client (lib/prisma.ts)', () => {
     })
 
     it('should cache client on globalThis in development', () => {
-      process.env.NODE_ENV = 'development'
+      vi.stubEnv('NODE_ENV', 'development')
 
-      const globalStore = globalThis as { devPrisma?: object }
+      const globalStore = globalThis as { devPrisma?: { id: string } }
       const mockClient = { id: 'dev-client' }
 
       // Only cache in non-production
@@ -57,9 +55,9 @@ describe('Prisma Client (lib/prisma.ts)', () => {
     })
 
     it('should not cache client on globalThis in production', () => {
-      process.env.NODE_ENV = 'production'
+      vi.stubEnv('NODE_ENV', 'production')
 
-      const globalStore = globalThis as { prodPrisma?: object }
+      const globalStore = globalThis as { prodPrisma?: { id: string } }
       const mockClient = { id: 'prod-client' }
 
       // Only cache in non-production
@@ -73,6 +71,9 @@ describe('Prisma Client (lib/prisma.ts)', () => {
 
   describe('Adapter configuration', () => {
     it('should use connection string from environment', () => {
+      // Stub DATABASE_URL for this test
+      vi.stubEnv('DATABASE_URL', 'postgresql://test:test@localhost:5432/testdb')
+
       const connectionString = process.env.DATABASE_URL
 
       // The pattern: const connectionString = process.env.DATABASE_URL!
@@ -81,8 +82,11 @@ describe('Prisma Client (lib/prisma.ts)', () => {
     })
 
     it('should require DATABASE_URL environment variable', () => {
+      // Stub DATABASE_URL for this test
+      vi.stubEnv('DATABASE_URL', 'postgresql://test:test@localhost:5432/testdb')
+
       // The module uses DATABASE_URL with non-null assertion
-      // This validates that the env var is set (in vitest.setup.ts)
+      // This validates that the env var is set
       expect(process.env.DATABASE_URL).toBeDefined()
     })
   })

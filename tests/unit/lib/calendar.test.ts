@@ -17,78 +17,41 @@ describe('Calendar Utilities', () => {
   describe('isDateRangeAvailable', () => {
     describe('with no existing bookings or blocked dates', () => {
       it('should return true for any date range', () => {
-        const result = isDateRangeAvailable(
-          addDays(today, 1),
-          addDays(today, 5),
-          [],
-          []
-        )
+        const result = isDateRangeAvailable(addDays(today, 1), addDays(today, 5), [], [])
         expect(result).toBe(true)
       })
     })
 
     describe('with existing bookings', () => {
-      const bookings = [
-        { checkIn: addDays(today, 10), checkOut: addDays(today, 15) },
-      ]
+      const bookings = [{ checkIn: addDays(today, 10), checkOut: addDays(today, 15) }]
 
       it('should return true for dates before existing booking', () => {
-        const result = isDateRangeAvailable(
-          addDays(today, 1),
-          addDays(today, 5),
-          bookings,
-          []
-        )
+        const result = isDateRangeAvailable(addDays(today, 1), addDays(today, 5), bookings, [])
         expect(result).toBe(true)
       })
 
       it('should return true for dates after existing booking', () => {
-        const result = isDateRangeAvailable(
-          addDays(today, 20),
-          addDays(today, 25),
-          bookings,
-          []
-        )
+        const result = isDateRangeAvailable(addDays(today, 20), addDays(today, 25), bookings, [])
         expect(result).toBe(true)
       })
 
       it('should return false when check-in falls within existing booking', () => {
-        const result = isDateRangeAvailable(
-          addDays(today, 12),
-          addDays(today, 18),
-          bookings,
-          []
-        )
+        const result = isDateRangeAvailable(addDays(today, 12), addDays(today, 18), bookings, [])
         expect(result).toBe(false)
       })
 
       it('should return false when check-out falls within existing booking', () => {
-        const result = isDateRangeAvailable(
-          addDays(today, 8),
-          addDays(today, 12),
-          bookings,
-          []
-        )
+        const result = isDateRangeAvailable(addDays(today, 8), addDays(today, 12), bookings, [])
         expect(result).toBe(false)
       })
 
       it('should return false when requested range surrounds existing booking', () => {
-        const result = isDateRangeAvailable(
-          addDays(today, 8),
-          addDays(today, 18),
-          bookings,
-          []
-        )
+        const result = isDateRangeAvailable(addDays(today, 8), addDays(today, 18), bookings, [])
         expect(result).toBe(false)
       })
 
       it('should return false when existing booking surrounds requested range', () => {
-        const result = isDateRangeAvailable(
-          addDays(today, 11),
-          addDays(today, 14),
-          bookings,
-          []
-        )
+        const result = isDateRangeAvailable(addDays(today, 11), addDays(today, 14), bookings, [])
         expect(result).toBe(false)
       })
 
@@ -115,9 +78,7 @@ describe('Calendar Utilities', () => {
     })
 
     describe('with blocked dates', () => {
-      const blockedDates = [
-        { startDate: addDays(today, 20), endDate: addDays(today, 25) },
-      ]
+      const blockedDates = [{ startDate: addDays(today, 20), endDate: addDays(today, 25) }]
 
       it('should return false when dates overlap with blocked range', () => {
         const result = isDateRangeAvailable(
@@ -130,23 +91,14 @@ describe('Calendar Utilities', () => {
       })
 
       it('should return true when dates are outside blocked range', () => {
-        const result = isDateRangeAvailable(
-          addDays(today, 1),
-          addDays(today, 5),
-          [],
-          blockedDates
-        )
+        const result = isDateRangeAvailable(addDays(today, 1), addDays(today, 5), [], blockedDates)
         expect(result).toBe(true)
       })
     })
 
     describe('with both bookings and blocked dates', () => {
-      const bookings = [
-        { checkIn: addDays(today, 10), checkOut: addDays(today, 15) },
-      ]
-      const blockedDates = [
-        { startDate: addDays(today, 20), endDate: addDays(today, 25) },
-      ]
+      const bookings = [{ checkIn: addDays(today, 10), checkOut: addDays(today, 15) }]
+      const blockedDates = [{ startDate: addDays(today, 20), endDate: addDays(today, 25) }]
 
       it('should return false when overlapping booking', () => {
         const result = isDateRangeAvailable(
@@ -188,30 +140,24 @@ describe('Calendar Utilities', () => {
         ]
 
         // Gap between first and second booking
-        expect(
-          isDateRangeAvailable(addDays(today, 9), addDays(today, 14), bookings, [])
-        ).toBe(true)
+        expect(isDateRangeAvailable(addDays(today, 9), addDays(today, 14), bookings, [])).toBe(true)
 
         // Overlapping with second booking
-        expect(
-          isDateRangeAvailable(addDays(today, 16), addDays(today, 22), bookings, [])
-        ).toBe(false)
+        expect(isDateRangeAvailable(addDays(today, 16), addDays(today, 22), bookings, [])).toBe(
+          false
+        )
       })
 
       it('should handle single-day ranges', () => {
-        const bookings = [
-          { checkIn: addDays(today, 10), checkOut: addDays(today, 15) },
-        ]
+        const bookings = [{ checkIn: addDays(today, 10), checkOut: addDays(today, 15) }]
 
         // Single day before booking
-        expect(
-          isDateRangeAvailable(addDays(today, 5), addDays(today, 6), bookings, [])
-        ).toBe(true)
+        expect(isDateRangeAvailable(addDays(today, 5), addDays(today, 6), bookings, [])).toBe(true)
 
         // Single day during booking
-        expect(
-          isDateRangeAvailable(addDays(today, 12), addDays(today, 13), bookings, [])
-        ).toBe(false)
+        expect(isDateRangeAvailable(addDays(today, 12), addDays(today, 13), bookings, [])).toBe(
+          false
+        )
       })
     })
   })
@@ -223,9 +169,7 @@ describe('Calendar Utilities', () => {
     })
 
     it('should return booking dates as unavailable ranges', () => {
-      const bookings = [
-        { checkIn: addDays(today, 10), checkOut: addDays(today, 15) },
-      ]
+      const bookings = [{ checkIn: addDays(today, 10), checkOut: addDays(today, 15) }]
 
       const result = getUnavailableDates(bookings, [])
 
@@ -235,9 +179,7 @@ describe('Calendar Utilities', () => {
     })
 
     it('should return blocked dates as unavailable ranges', () => {
-      const blockedDates = [
-        { startDate: addDays(today, 20), endDate: addDays(today, 25) },
-      ]
+      const blockedDates = [{ startDate: addDays(today, 20), endDate: addDays(today, 25) }]
 
       const result = getUnavailableDates([], blockedDates)
 
@@ -247,12 +189,8 @@ describe('Calendar Utilities', () => {
     })
 
     it('should combine and sort bookings and blocked dates', () => {
-      const bookings = [
-        { checkIn: addDays(today, 20), checkOut: addDays(today, 25) },
-      ]
-      const blockedDates = [
-        { startDate: addDays(today, 5), endDate: addDays(today, 10) },
-      ]
+      const bookings = [{ checkIn: addDays(today, 20), checkOut: addDays(today, 25) }]
+      const blockedDates = [{ startDate: addDays(today, 5), endDate: addDays(today, 10) }]
 
       const result = getUnavailableDates(bookings, blockedDates)
 

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { validateExternalUrl } from '@/lib/security'
 import ical from 'node-ical'
 
 export const dynamic = 'force-dynamic'
@@ -20,6 +21,9 @@ export const GET = async (request: Request): Promise<NextResponse> => {
 
   for (const sync of syncs) {
     try {
+      // Validate URL to prevent SSRF attacks
+      validateExternalUrl(sync.icalUrl)
+
       const events = await ical.async.fromURL(sync.icalUrl)
 
       let eventsProcessed = 0
@@ -70,8 +74,7 @@ export const GET = async (request: Request): Promise<NextResponse> => {
         status: `success - ${eventsProcessed} events`,
       })
     } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : String(error)
+      const errorMessage = error instanceof Error ? error.message : String(error)
 
       await prisma.calendarSync.update({
         where: { id: sync.id },

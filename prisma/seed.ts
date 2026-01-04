@@ -11,25 +11,55 @@ const adapter = new PrismaNeon({ connectionString })
 const prisma = new PrismaClient({ adapter })
 
 const expenseCategories = [
-  { name: 'Rental Income', description: 'Booking revenue', scheduleELine: 'Line 3', isTaxDeductible: false },
-  { name: 'Advertising', description: 'Listing fees, photography, marketing', scheduleELine: 'Line 5' },
+  {
+    name: 'Rental Income',
+    description: 'Booking revenue',
+    scheduleELine: 'Line 3',
+    isTaxDeductible: false,
+  },
+  {
+    name: 'Advertising',
+    description: 'Listing fees, photography, marketing',
+    scheduleELine: 'Line 5',
+  },
   { name: 'Auto & Travel', description: 'Mileage, trips to property', scheduleELine: 'Line 6' },
-  { name: 'Cleaning & Maintenance', description: 'Cleaning service, minor repairs', scheduleELine: 'Line 7' },
+  {
+    name: 'Cleaning & Maintenance',
+    description: 'Cleaning service, minor repairs',
+    scheduleELine: 'Line 7',
+  },
   { name: 'Commissions', description: 'Platform fees (Airbnb, VRBO)', scheduleELine: 'Line 8' },
   { name: 'Insurance', description: 'Property, liability insurance', scheduleELine: 'Line 9' },
-  { name: 'Legal & Professional', description: 'Accountant, attorney fees', scheduleELine: 'Line 10' },
+  {
+    name: 'Legal & Professional',
+    description: 'Accountant, attorney fees',
+    scheduleELine: 'Line 10',
+  },
   { name: 'Management Fees', description: 'Property manager fees', scheduleELine: 'Line 11' },
   { name: 'Mortgage Interest', description: 'Loan interest portion', scheduleELine: 'Line 12' },
   { name: 'Other Interest', description: 'Other loan interest', scheduleELine: 'Line 13' },
   { name: 'Repairs', description: 'Plumbing, HVAC, appliances', scheduleELine: 'Line 14' },
   { name: 'Supplies', description: 'Linens, toiletries, kitchen items', scheduleELine: 'Line 15' },
   { name: 'Property Taxes', description: 'Annual property taxes', scheduleELine: 'Line 16' },
-  { name: 'Utilities', description: 'Electric, gas, water, internet, trash', scheduleELine: 'Line 17' },
-  { name: 'Depreciation', description: 'Property depreciation', scheduleELine: 'Line 18', isTaxDeductible: true },
+  {
+    name: 'Utilities',
+    description: 'Electric, gas, water, internet, trash',
+    scheduleELine: 'Line 17',
+  },
+  {
+    name: 'Depreciation',
+    description: 'Property depreciation',
+    scheduleELine: 'Line 18',
+    isTaxDeductible: true,
+  },
   { name: 'HOA Fees', description: 'Homeowners association fees', scheduleELine: 'Line 19' },
   { name: 'Pest Control', description: 'Extermination services', scheduleELine: 'Line 19' },
   { name: 'Landscaping', description: 'Lawn care, snow removal', scheduleELine: 'Line 19' },
-  { name: 'Licenses & Permits', description: 'Business license, STR permit', scheduleELine: 'Line 19' },
+  {
+    name: 'Licenses & Permits',
+    description: 'Business license, STR permit',
+    scheduleELine: 'Line 19',
+  },
 ]
 
 const notificationEvents: NotificationEvent[] = [

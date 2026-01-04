@@ -269,9 +269,7 @@ describe('Owner Booking Management Data Path', () => {
       const fromDate = new Date('2024-07-01')
       const toDate = new Date('2024-07-31')
 
-      const julyBookings = [
-        createBookingFixture({ checkIn: new Date('2024-07-15') }),
-      ]
+      const julyBookings = [createBookingFixture({ checkIn: new Date('2024-07-15') })]
 
       prismaMock.booking.findMany.mockResolvedValue(julyBookings)
 
@@ -294,8 +292,7 @@ describe('Owner Booking Management Data Path', () => {
       const guestSession = { user: { role: 'GUEST' } }
       const workerSession = { user: { role: 'WORKER' } }
 
-      const isOwner = (session: { user: { role: string } }) =>
-        session.user.role === 'OWNER'
+      const isOwner = (session: { user: { role: string } }) => session.user.role === 'OWNER'
 
       expect(isOwner(ownerSession)).toBe(true)
       expect(isOwner(guestSession)).toBe(false)

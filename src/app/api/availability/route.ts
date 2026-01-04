@@ -1,8 +1,28 @@
-import { NextResponse } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { addDays, eachDayOfInterval, startOfDay } from 'date-fns'
+import { checkRateLimit, getClientIdentifier, RATE_LIMITS } from '@/lib/rate-limit'
 
-export const GET = async (): Promise<NextResponse> => {
+export const GET = async (request: NextRequest): Promise<NextResponse> => {
+  // Check rate limit
+  const clientId = getClientIdentifier(request)
+  const rateLimitResult = await checkRateLimit(`availability:${clientId}`, RATE_LIMITS.availability)
+
+  if (!rateLimitResult.success) {
+    return NextResponse.json(
+      { error: 'Too many requests. Please try again later.' },
+      {
+        status: 429,
+        headers: {
+          'Retry-After': String(Math.ceil((rateLimitResult.resetTime - Date.now()) / 1000)),
+          'X-RateLimit-Limit': String(RATE_LIMITS.availability.limit),
+          'X-RateLimit-Remaining': '0',
+          'X-RateLimit-Reset': String(rateLimitResult.resetTime),
+        },
+      }
+    )
+  }
+
   try {
     const today = startOfDay(new Date())
     const futureDate = addDays(today, 365) // Look ahead 1 year
@@ -52,11 +72,12 @@ export const GET = async (): Promise<NextResponse> => {
     }
 
     // Remove duplicates and filter to within our range
-    const uniqueDates = [...new Set(allBlockedDates.map((d) => d.toISOString()))]
-      .filter((dateStr) => {
+    const uniqueDates = [...new Set(allBlockedDates.map((d) => d.toISOString()))].filter(
+      (dateStr) => {
         const date = new Date(dateStr)
         return date >= today && date <= futureDate
-      })
+      }
+    )
 
     return NextResponse.json(uniqueDates)
   } catch (error) {

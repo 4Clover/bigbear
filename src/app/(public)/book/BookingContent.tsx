@@ -157,7 +157,8 @@ export const BookingContent = () => {
       <div className="text-center mb-12">
         <h1 className="text-4xl font-bold mb-4">Book Your Stay</h1>
         <p className="text-gray-600 max-w-2xl mx-auto">
-          Select your dates, provide your information, and complete your booking. We can&apos;t wait to host you!
+          Select your dates, provide your information, and complete your booking. We can&apos;t wait
+          to host you!
         </p>
       </div>
 
@@ -182,7 +183,8 @@ export const BookingContent = () => {
               />
               {checkIn && checkOut && (
                 <div className="mt-4 p-3 bg-emerald-50 rounded-lg text-emerald-700 text-sm">
-                  {Math.ceil((checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24))} nights selected
+                  {Math.ceil((checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24))}{' '}
+                  nights selected
                 </div>
               )}
             </CardContent>
@@ -197,7 +199,11 @@ export const BookingContent = () => {
           {addons.length > 0 && (
             <Card>
               <CardContent className="py-6">
-                <AddonSelector addons={addons} selectedAddons={selectedAddons} onChange={setSelectedAddons} />
+                <AddonSelector
+                  addons={addons}
+                  selectedAddons={selectedAddons}
+                  onChange={setSelectedAddons}
+                />
               </CardContent>
             </Card>
           )}

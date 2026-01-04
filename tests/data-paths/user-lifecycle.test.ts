@@ -160,11 +160,7 @@ describe('User Lifecycle Data Path', () => {
     })
 
     it('should find users by role', async () => {
-      const workers = [
-        createWorkerFixture(),
-        createWorkerFixture(),
-        createWorkerFixture(),
-      ]
+      const workers = [createWorkerFixture(), createWorkerFixture(), createWorkerFixture()]
 
       prismaMock.user.findMany.mockResolvedValue(workers)
 

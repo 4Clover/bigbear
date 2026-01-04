@@ -12,12 +12,7 @@ interface BlockDateModalProps {
   existingBlock?: BlockedDate | null
 }
 
-const BlockDateModal = ({
-  isOpen,
-  onClose,
-  selectedRange,
-  existingBlock,
-}: BlockDateModalProps) => {
+const BlockDateModal = ({ isOpen, onClose, selectedRange, existingBlock }: BlockDateModalProps) => {
   const [isPending, startTransition] = useTransition()
   const [reason, setReason] = useState(existingBlock?.reason ?? '')
   const [startDate, setStartDate] = useState(
@@ -60,19 +55,13 @@ const BlockDateModal = ({
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto">
       <div className="flex min-h-screen items-center justify-center p-4">
-        <div
-          className="fixed inset-0 bg-black/50 transition-opacity"
-          onClick={onClose}
-        />
+        <div className="fixed inset-0 bg-black/50 transition-opacity" onClick={onClose} />
         <div className="relative bg-white rounded-xl shadow-xl max-w-md w-full p-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold text-gray-900">
               {existingBlock ? 'Manage Blocked Dates' : 'Block Dates'}
             </h2>
-            <button
-              onClick={onClose}
-              className="text-gray-400 hover:text-gray-600"
-            >
+            <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
                   strokeLinecap="round"
@@ -93,9 +82,7 @@ const BlockDateModal = ({
                   {format(existingBlock.endDate, 'MMM d, yyyy')}
                 </p>
                 {existingBlock.reason && (
-                  <p className="text-sm text-gray-600 mt-1">
-                    Reason: {existingBlock.reason}
-                  </p>
+                  <p className="text-sm text-gray-600 mt-1">Reason: {existingBlock.reason}</p>
                 )}
               </div>
               <button
@@ -110,25 +97,25 @@ const BlockDateModal = ({
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Start Date
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
                   <input
                     type="date"
                     value={startDate}
-                    onChange={(e) => { setStartDate(e.target.value) }}
+                    onChange={(e) => {
+                      setStartDate(e.target.value)
+                    }}
                     required
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    End Date
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">End Date</label>
                   <input
                     type="date"
                     value={endDate}
-                    onChange={(e) => { setEndDate(e.target.value) }}
+                    onChange={(e) => {
+                      setEndDate(e.target.value)
+                    }}
                     required
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                   />
@@ -142,7 +129,9 @@ const BlockDateModal = ({
                 <input
                   type="text"
                   value={reason}
-                  onChange={(e) => { setReason(e.target.value) }}
+                  onChange={(e) => {
+                    setReason(e.target.value)
+                  }}
                   placeholder="e.g., Maintenance, Personal use, Holiday"
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                 />

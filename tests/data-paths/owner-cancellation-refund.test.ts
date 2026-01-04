@@ -165,7 +165,7 @@ describe('Owner Cancellation Refund Data Path', () => {
 
   describe('Stripe refund amount conversion', () => {
     it('should convert dollars to cents for Stripe API', () => {
-      const refundAmountDollars = 400.00
+      const refundAmountDollars = 400.0
       const refundAmountCents = Math.round(refundAmountDollars * 100)
 
       expect(refundAmountCents).toBe(40000)
@@ -197,9 +197,11 @@ describe('Owner Cancellation Refund Data Path', () => {
       const bookingWithoutPayment = { paymentIntentId: null }
 
       const canRefundWithPayment =
-        bookingWithPayment.paymentIntentId !== null && bookingWithPayment.paymentIntentId !== undefined
+        bookingWithPayment.paymentIntentId !== null &&
+        bookingWithPayment.paymentIntentId !== undefined
       const canRefundWithoutPayment =
-        bookingWithoutPayment.paymentIntentId !== null && bookingWithoutPayment.paymentIntentId !== undefined
+        bookingWithoutPayment.paymentIntentId !== null &&
+        bookingWithoutPayment.paymentIntentId !== undefined
 
       expect(canRefundWithPayment).toBe(true)
       expect(canRefundWithoutPayment).toBe(false)
@@ -274,11 +276,7 @@ describe('Owner Cancellation Refund Data Path', () => {
 
     it('should include refund type in notes', async () => {
       const refundTypes = ['full', 'partial', 'none']
-      const expectedPatterns = [
-        'Refund: full',
-        'Refund: partial',
-        'Refund: none',
-      ]
+      const expectedPatterns = ['Refund: full', 'Refund: partial', 'Refund: none']
 
       refundTypes.forEach((type, index) => {
         const note = `Cancelled by owner. Refund: ${type} ($0.00)`

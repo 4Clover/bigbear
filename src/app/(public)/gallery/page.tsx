@@ -21,8 +21,8 @@ export default async function GalleryPage() {
       <div className="text-center mb-12">
         <h1 className="text-4xl font-bold mb-4">Photo Gallery</h1>
         <p className="text-gray-600 max-w-2xl mx-auto">
-          Take a virtual tour of our cozy mountain cabin. From stunning views to comfortable interiors, see what awaits
-          you at Big Bear.
+          Take a virtual tour of our cozy mountain cabin. From stunning views to comfortable
+          interiors, see what awaits you at Big Bear.
         </p>
       </div>
 
@@ -55,7 +55,10 @@ export default async function GalleryPage() {
                   .filter((img) => img.isFeatured)
                   .slice(0, 2)
                   .map((image) => (
-                    <div key={image.id} className="relative aspect-video rounded-xl overflow-hidden shadow-lg">
+                    <div
+                      key={image.id}
+                      className="relative aspect-video rounded-xl overflow-hidden shadow-lg"
+                    >
                       <Image
                         src={image.url}
                         alt={image.alt ?? 'Cabin photo'}
@@ -83,7 +86,10 @@ export default async function GalleryPage() {
                   {images
                     .filter((img) => img.category === category)
                     .map((image) => (
-                      <div key={image.id} className="relative aspect-square rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow">
+                      <div
+                        key={image.id}
+                        className="relative aspect-square rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow"
+                      >
                         <Image
                           src={image.url}
                           alt={image.alt ?? 'Cabin photo'}
@@ -99,7 +105,10 @@ export default async function GalleryPage() {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {images.map((image) => (
-                <div key={image.id} className="relative aspect-square rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow">
+                <div
+                  key={image.id}
+                  className="relative aspect-square rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow"
+                >
                   <Image
                     src={image.url}
                     alt={image.alt ?? 'Cabin photo'}

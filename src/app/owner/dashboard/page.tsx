@@ -8,44 +8,39 @@ const getStats = async () => {
   const monthEnd = endOfMonth(now)
   const yearStart = startOfYear(now)
 
-  const [
-    upcomingBookings,
-    pendingCount,
-    monthlyRevenue,
-    yearlyRevenue,
-    recentBookings,
-  ] = await Promise.all([
-    prisma.booking.findMany({
-      where: {
-        status: 'CONFIRMED',
-        checkIn: { gte: now },
-      },
-      orderBy: { checkIn: 'asc' },
-      take: 5,
-    }),
-    prisma.booking.count({
-      where: { status: 'PENDING' },
-    }),
-    prisma.booking.aggregate({
-      where: {
-        status: { in: ['CONFIRMED', 'COMPLETED'] },
-        createdAt: { gte: monthStart, lte: monthEnd },
-      },
-      _sum: { totalAmount: true },
-    }),
-    prisma.booking.aggregate({
-      where: {
-        status: { in: ['CONFIRMED', 'COMPLETED'] },
-        createdAt: { gte: yearStart },
-      },
-      _sum: { totalAmount: true },
-    }),
-    prisma.booking.findMany({
-      orderBy: { createdAt: 'desc' },
-      take: 10,
-      include: { guest: { select: { name: true, email: true } } },
-    }),
-  ])
+  const [upcomingBookings, pendingCount, monthlyRevenue, yearlyRevenue, recentBookings] =
+    await Promise.all([
+      prisma.booking.findMany({
+        where: {
+          status: 'CONFIRMED',
+          checkIn: { gte: now },
+        },
+        orderBy: { checkIn: 'asc' },
+        take: 5,
+      }),
+      prisma.booking.count({
+        where: { status: 'PENDING' },
+      }),
+      prisma.booking.aggregate({
+        where: {
+          status: { in: ['CONFIRMED', 'COMPLETED'] },
+          createdAt: { gte: monthStart, lte: monthEnd },
+        },
+        _sum: { totalAmount: true },
+      }),
+      prisma.booking.aggregate({
+        where: {
+          status: { in: ['CONFIRMED', 'COMPLETED'] },
+          createdAt: { gte: yearStart },
+        },
+        _sum: { totalAmount: true },
+      }),
+      prisma.booking.findMany({
+        orderBy: { createdAt: 'desc' },
+        take: 10,
+        include: { guest: { select: { name: true, email: true } } },
+      }),
+    ])
 
   return {
     upcomingBookings,
@@ -77,7 +72,10 @@ const StatCard = ({
 
   if (href) {
     return (
-      <Link href={href} className="block hover:ring-2 hover:ring-emerald-500 rounded-xl transition-shadow">
+      <Link
+        href={href}
+        className="block hover:ring-2 hover:ring-emerald-500 rounded-xl transition-shadow"
+      >
         {content}
       </Link>
     )

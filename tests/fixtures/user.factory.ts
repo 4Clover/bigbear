@@ -2,9 +2,7 @@ import type { User, UserRole, WorkerProfile } from '@prisma/client'
 
 let userCounter = 0
 
-export const createUserFixture = (
-  overrides: Partial<User> = {}
-): User => {
+export const createUserFixture = (overrides: Partial<User> = {}): User => {
   userCounter++
   const now = new Date()
 

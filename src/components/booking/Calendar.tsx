@@ -92,7 +92,9 @@ export const Calendar = ({
     <div className="flex items-center justify-between mb-4">
       <button
         type="button"
-        onClick={() => { setCurrentMonth(subMonths(currentMonth, 1)); }}
+        onClick={() => {
+          setCurrentMonth(subMonths(currentMonth, 1))
+        }}
         className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
         aria-label="Previous month"
       >
@@ -103,7 +105,9 @@ export const Calendar = ({
       <h3 className="text-lg font-semibold">{format(currentMonth, 'MMMM yyyy')}</h3>
       <button
         type="button"
-        onClick={() => { setCurrentMonth(addMonths(currentMonth, 1)); }}
+        onClick={() => {
+          setCurrentMonth(addMonths(currentMonth, 1))
+        }}
         className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
         aria-label="Next month"
       >
@@ -142,7 +146,8 @@ export const Calendar = ({
         const currentDay = day
         const disabled = isDateDisabled(currentDay)
         const isSelected =
-          Boolean(checkIn && isSameDay(currentDay, checkIn)) || Boolean(checkOut && isSameDay(currentDay, checkOut))
+          Boolean(checkIn && isSameDay(currentDay, checkIn)) ||
+          Boolean(checkOut && isSameDay(currentDay, checkOut))
         const inRange = isInRange(currentDay)
         const isCurrentMonth = isSameMonth(currentDay, monthStart)
 
@@ -150,7 +155,9 @@ export const Calendar = ({
           <button
             key={currentDay.toString()}
             type="button"
-            onClick={() => { handleDateClick(currentDay); }}
+            onClick={() => {
+              handleDateClick(currentDay)
+            }}
             disabled={disabled}
             className={`
               aspect-square p-2 text-sm rounded-lg transition-colors

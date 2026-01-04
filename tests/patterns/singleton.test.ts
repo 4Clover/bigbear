@@ -8,8 +8,6 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
  * - Service instances
  */
 describe('Singleton Pattern', () => {
-  const originalNodeEnv = process.env.NODE_ENV
-
   beforeEach(() => {
     vi.resetModules()
     // Clean up any global singleton storage
@@ -18,14 +16,14 @@ describe('Singleton Pattern', () => {
   })
 
   afterEach(() => {
-    process.env.NODE_ENV = originalNodeEnv
+    vi.unstubAllEnvs()
   })
 
   describe('globalThis caching behavior', () => {
     it('should store singleton on globalThis in development', () => {
       // Pattern: In development, singletons are cached on globalThis
       // to survive hot module replacement
-      process.env.NODE_ENV = 'development'
+      vi.stubEnv('NODE_ENV', 'development')
 
       const globalStore = globalThis as { singleton?: object }
       const instance = { id: 'test-instance' }
@@ -37,7 +35,7 @@ describe('Singleton Pattern', () => {
     })
 
     it('should return same instance on repeated access', () => {
-      const globalStore = globalThis as { singleton?: object }
+      const globalStore = globalThis as { singleton?: { id: string } }
       const instance = { id: 'original' }
 
       globalStore.singleton = instance
@@ -49,7 +47,7 @@ describe('Singleton Pattern', () => {
 
     it('should not pollute global scope in production', () => {
       // Pattern: In production, don't store on globalThis
-      process.env.NODE_ENV = 'production'
+      vi.stubEnv('NODE_ENV', 'production')
 
       const globalStore = globalThis as { prodSingleton?: object }
       const shouldNotCache = process.env.NODE_ENV === 'production'
@@ -108,19 +106,19 @@ describe('Singleton Pattern', () => {
 
   describe('environment-based behavior', () => {
     it('should detect development environment correctly', () => {
-      process.env.NODE_ENV = 'development'
+      vi.stubEnv('NODE_ENV', 'development')
       expect(process.env.NODE_ENV).toBe('development')
       expect(process.env.NODE_ENV !== 'production').toBe(true)
     })
 
     it('should detect production environment correctly', () => {
-      process.env.NODE_ENV = 'production'
+      vi.stubEnv('NODE_ENV', 'production')
       expect(process.env.NODE_ENV).toBe('production')
       expect(process.env.NODE_ENV !== 'production').toBe(false)
     })
 
     it('should handle test environment', () => {
-      process.env.NODE_ENV = 'test'
+      vi.stubEnv('NODE_ENV', 'test')
       // Test environment typically behaves like development
       expect(process.env.NODE_ENV !== 'production').toBe(true)
     })

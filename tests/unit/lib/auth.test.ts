@@ -69,7 +69,7 @@ describe('Auth Configuration (lib/auth.ts)', () => {
     })
 
     it('should handle session without user gracefully', () => {
-      const mockSession = {} as { user?: unknown }
+      const mockSession: { user?: { id?: string; role?: string; email?: string } } = {}
       const mockUser = { id: 'user-123', role: 'GUEST' }
 
       const result = sessionCallback({ session: mockSession, user: mockUser })

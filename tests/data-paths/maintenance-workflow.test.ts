@@ -1,18 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { prismaMock } from '../__mocks__/prisma'
-
-// Simple Decimal-like class for tests
-class Decimal {
-  private value: number
-
-  constructor(value: string | number) {
-    this.value = typeof value === 'string' ? parseFloat(value) : value
-  }
-
-  toString(): string {
-    return String(this.value)
-  }
-}
+import { Decimal } from '../fixtures/booking.factory'
 
 /**
  * Maintenance workflow data path tests.
@@ -86,10 +74,7 @@ describe('Maintenance Workflow Data Path', () => {
         priority: 'HIGH' as const,
         status: 'OPEN' as const,
         dueDate: null,
-        images: [
-          'https://example.com/before1.jpg',
-          'https://example.com/before2.jpg',
-        ],
+        images: ['https://example.com/before1.jpg', 'https://example.com/before2.jpg'],
         notes: null,
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -101,10 +86,7 @@ describe('Maintenance Workflow Data Path', () => {
         data: {
           title: 'Broken window',
           priority: 'HIGH',
-          images: [
-            'https://example.com/before1.jpg',
-            'https://example.com/before2.jpg',
-          ],
+          images: ['https://example.com/before1.jpg', 'https://example.com/before2.jpg'],
         },
       })
 
@@ -443,7 +425,7 @@ describe('Maintenance Workflow Data Path', () => {
       })
 
       expect(result.length).toBe(1)
-      expect(result[0].priority).toBe('URGENT')
+      expect(result[0]?.priority).toBe('URGENT')
     })
 
     it('should find jobs by worker through quotes', async () => {

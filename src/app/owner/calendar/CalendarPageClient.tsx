@@ -12,15 +12,9 @@ interface CalendarPageClientProps {
   calendarSyncs: CalendarSync[]
 }
 
-const CalendarPageClient = ({
-  bookings,
-  blockedDates,
-  calendarSyncs,
-}: CalendarPageClientProps) => {
+const CalendarPageClient = ({ bookings, blockedDates, calendarSyncs }: CalendarPageClientProps) => {
   const [modalOpen, setModalOpen] = useState(false)
-  const [selectedRange, setSelectedRange] = useState<{ start: Date; end: Date } | null>(
-    null
-  )
+  const [selectedRange, setSelectedRange] = useState<{ start: Date; end: Date } | null>(null)
   const [selectedBlock, setSelectedBlock] = useState<BlockedDate | null>(null)
 
   const handleSelectSlot = (slotInfo: { start: Date; end: Date }) => {

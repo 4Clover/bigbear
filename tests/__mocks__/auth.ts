@@ -1,7 +1,6 @@
 import { vi } from 'vitest'
 import type { Session } from 'next-auth'
-
-type UserRole = 'OWNER' | 'GUEST' | 'WORKER'
+import type { UserRole } from '@prisma/client'
 
 interface MockUser {
   id: string
@@ -14,9 +13,7 @@ interface MockSession extends Session {
   user: MockUser
 }
 
-export const createMockSession = (
-  overrides: Partial<MockSession> = {}
-): MockSession => ({
+export const createMockSession = (overrides: Partial<MockSession> = {}): MockSession => ({
   user: {
     id: 'test-user-id',
     email: 'test@example.com',
@@ -28,9 +25,7 @@ export const createMockSession = (
   ...overrides,
 })
 
-export const createMockUser = (
-  overrides: Partial<MockUser> = {}
-): MockUser => ({
+export const createMockUser = (overrides: Partial<MockUser> = {}): MockUser => ({
   id: 'test-user-id',
   email: 'test@example.com',
   name: 'Test User',

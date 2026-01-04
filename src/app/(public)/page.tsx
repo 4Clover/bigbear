@@ -11,7 +11,8 @@ export default function HomePage() {
           <div className="max-w-3xl">
             <h1 className="text-4xl md:text-6xl font-bold mb-6">Your Mountain Escape Awaits</h1>
             <p className="text-xl md:text-2xl text-emerald-100 mb-8">
-              Discover the perfect getaway in our cozy Big Bear cabin. Surrounded by nature, equipped for comfort.
+              Discover the perfect getaway in our cozy Big Bear cabin. Surrounded by nature,
+              equipped for comfort.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
               <Link href="/book">
@@ -20,7 +21,11 @@ export default function HomePage() {
                 </Button>
               </Link>
               <Link href="/gallery">
-                <Button variant="outline" size="lg" className="w-full sm:w-auto border-white text-white hover:bg-white/10">
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className="w-full sm:w-auto border-white text-white hover:bg-white/10"
+                >
                   View Gallery
                 </Button>
               </Link>
@@ -85,7 +90,8 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl font-bold mb-4">Ready for Your Mountain Adventure?</h2>
           <p className="text-gray-600 mb-8 max-w-2xl mx-auto">
-            Check availability and book your stay today. We look forward to hosting you at our Big Bear cabin.
+            Check availability and book your stay today. We look forward to hosting you at our Big
+            Bear cabin.
           </p>
           <Link href="/book">
             <Button size="lg">Check Availability</Button>

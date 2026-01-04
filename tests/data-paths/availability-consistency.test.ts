@@ -1,10 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { prismaMock } from '../__mocks__/prisma'
 import { addDays, eachDayOfInterval } from 'date-fns'
-import {
-  createConfirmedBookingFixture,
-  resetBookingCounter,
-} from '../fixtures/booking.factory'
+import { createConfirmedBookingFixture, resetBookingCounter } from '../fixtures/booking.factory'
 
 /**
  * Availability consistency tests.
@@ -77,10 +74,7 @@ describe('Availability Consistency', () => {
         updatedAt: new Date(),
       }
 
-      prismaMock.blockedDate.findMany.mockResolvedValue([
-        manualBlocked,
-        importedBlocked,
-      ])
+      prismaMock.blockedDate.findMany.mockResolvedValue([manualBlocked, importedBlocked])
 
       const blockedDates = await prismaMock.blockedDate.findMany({
         where: { endDate: { gte: new Date() } },

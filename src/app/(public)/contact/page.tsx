@@ -56,14 +56,24 @@ export default function ContactPage() {
                 <div className="text-center py-8">
                   <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 mb-4">
                     <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M5 13l4 4L19 7"
+                      />
                     </svg>
                   </div>
                   <h3 className="text-xl font-semibold mb-2">Message Sent!</h3>
                   <p className="text-gray-600 mb-4">
                     Thank you for reaching out. We&apos;ll get back to you as soon as possible.
                   </p>
-                  <Button variant="outline" onClick={() => { setSubmitted(false); }}>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setSubmitted(false)
+                    }}
+                  >
                     Send Another Message
                   </Button>
                 </div>
@@ -95,7 +105,10 @@ export default function ContactPage() {
                     placeholder="Question about my booking"
                   />
                   <div>
-                    <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1">
+                    <label
+                      htmlFor="message"
+                      className="block text-sm font-medium text-gray-700 mb-1"
+                    >
                       Message
                     </label>
                     <textarea
@@ -122,15 +135,20 @@ export default function ContactPage() {
           <div>
             <h2 className="text-2xl font-bold mb-4">Get in Touch</h2>
             <p className="text-gray-600 mb-6">
-              Whether you have questions about amenities, directions, or special requests, we&apos;re here to help make
-              your stay perfect.
+              Whether you have questions about amenities, directions, or special requests,
+              we&apos;re here to help make your stay perfect.
             </p>
           </div>
 
           <div className="space-y-6">
             <div className="flex items-start gap-4">
               <div className="flex-shrink-0 w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center">
-                <svg className="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg
+                  className="w-6 h-6 text-emerald-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -153,7 +171,12 @@ export default function ContactPage() {
 
             <div className="flex items-start gap-4">
               <div className="flex-shrink-0 w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center">
-                <svg className="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg
+                  className="w-6 h-6 text-emerald-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -164,7 +187,10 @@ export default function ContactPage() {
               </div>
               <div>
                 <h3 className="font-semibold mb-1">Email</h3>
-                <a href="mailto:hello@bigbearcabin.com" className="text-emerald-600 hover:underline">
+                <a
+                  href="mailto:hello@bigbearcabin.com"
+                  className="text-emerald-600 hover:underline"
+                >
                   hello@bigbearcabin.com
                 </a>
               </div>
@@ -172,7 +198,12 @@ export default function ContactPage() {
 
             <div className="flex items-start gap-4">
               <div className="flex-shrink-0 w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center">
-                <svg className="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg
+                  className="w-6 h-6 text-emerald-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"

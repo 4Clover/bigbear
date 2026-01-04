@@ -1,30 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { prismaMock } from '../__mocks__/prisma'
-
-// Simple Decimal-like class for tests
-class Decimal {
-  private value: number
-
-  constructor(value: string | number) {
-    this.value = typeof value === 'string' ? parseFloat(value) : value
-  }
-
-  add(other: Decimal): Decimal {
-    return new Decimal(this.value + other.value)
-  }
-
-  sub(other: Decimal): Decimal {
-    return new Decimal(this.value - other.value)
-  }
-
-  toString(): string {
-    return String(this.value)
-  }
-
-  toFixed(decimals: number): string {
-    return this.value.toFixed(decimals)
-  }
-}
+import { Decimal } from '../fixtures/booking.factory'
 
 /**
  * Transaction ledger data path tests.
@@ -238,9 +214,9 @@ describe('Transaction Ledger Data Path', () => {
       prismaMock.transaction.aggregate.mockResolvedValue({
         _sum: { amount: new Decimal('2500.00') },
         _count: { id: 5 },
-        _avg: null,
-        _min: null,
-        _max: null,
+        _avg: undefined,
+        _min: undefined,
+        _max: undefined,
       })
 
       const result = await prismaMock.transaction.aggregate({
@@ -255,9 +231,9 @@ describe('Transaction Ledger Data Path', () => {
       prismaMock.transaction.aggregate.mockResolvedValue({
         _sum: { amount: new Decimal('850.00') },
         _count: { id: 8 },
-        _avg: null,
-        _min: null,
-        _max: null,
+        _avg: undefined,
+        _min: undefined,
+        _max: undefined,
       })
 
       const result = await prismaMock.transaction.aggregate({
@@ -277,11 +253,12 @@ describe('Transaction Ledger Data Path', () => {
     })
 
     it('should group expenses by category', async () => {
-      prismaMock.transaction.groupBy.mockResolvedValue([
+      // Cast to any to work around vitest-mock-extended limitations with Prisma's complex groupBy generics
+      ;(prismaMock.transaction.groupBy as any).mockResolvedValue([
         { categoryId: 'utilities', _sum: { amount: new Decimal('300.00') } },
         { categoryId: 'repairs', _sum: { amount: new Decimal('450.00') } },
         { categoryId: 'supplies', _sum: { amount: new Decimal('100.00') } },
-      ] as any)
+      ])
 
       const result = await prismaMock.transaction.groupBy({
         by: ['categoryId'],

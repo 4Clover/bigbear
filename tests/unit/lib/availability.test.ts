@@ -90,20 +90,24 @@ const canBookDateRange = (
   for (const booking of existingBookings) {
     if (booking.status === 'CANCELLED') continue
 
-    if (doDateRangesOverlap(
-      { start: checkIn, end: checkOut },
-      { start: booking.checkIn, end: booking.checkOut }
-    )) {
+    if (
+      doDateRangesOverlap(
+        { start: checkIn, end: checkOut },
+        { start: booking.checkIn, end: booking.checkOut }
+      )
+    ) {
       conflicts.push(`Conflicts with booking ${booking.id}`)
     }
   }
 
   // Check against blocked dates
   for (const blocked of blockedDates) {
-    if (doDateRangesOverlap(
-      { start: checkIn, end: checkOut },
-      { start: blocked.startDate, end: blocked.endDate }
-    )) {
+    if (
+      doDateRangesOverlap(
+        { start: checkIn, end: checkOut },
+        { start: blocked.startDate, end: blocked.endDate }
+      )
+    ) {
       conflicts.push(`Overlaps blocked period from ${blocked.source}`)
     }
   }
@@ -161,11 +165,7 @@ describe('Availability Calculation', () => {
   })
 
   describe('Blocked date checking', () => {
-    const blockedDates = [
-      new Date('2024-06-15'),
-      new Date('2024-06-16'),
-      new Date('2024-06-17'),
-    ]
+    const blockedDates = [new Date('2024-06-15'), new Date('2024-06-16'), new Date('2024-06-17')]
 
     it('should identify blocked date', () => {
       expect(isDateBlocked(new Date('2024-06-15'), blockedDates)).toBe(true)
@@ -184,12 +184,14 @@ describe('Availability Calculation', () => {
 
   describe('Blocked dates from bookings', () => {
     it('should generate blocked dates from confirmed booking', () => {
-      const bookings: Booking[] = [{
-        id: 'booking-1',
-        checkIn: new Date('2024-06-10'),
-        checkOut: new Date('2024-06-13'),
-        status: 'CONFIRMED',
-      }]
+      const bookings: Booking[] = [
+        {
+          id: 'booking-1',
+          checkIn: new Date('2024-06-10'),
+          checkOut: new Date('2024-06-13'),
+          status: 'CONFIRMED',
+        },
+      ]
 
       const result = getBlockedDatesInRange(
         new Date('2024-06-01'),
@@ -203,12 +205,14 @@ describe('Availability Calculation', () => {
     })
 
     it('should generate blocked dates from pending booking', () => {
-      const bookings: Booking[] = [{
-        id: 'booking-1',
-        checkIn: new Date('2024-06-10'),
-        checkOut: new Date('2024-06-12'),
-        status: 'PENDING',
-      }]
+      const bookings: Booking[] = [
+        {
+          id: 'booking-1',
+          checkIn: new Date('2024-06-10'),
+          checkOut: new Date('2024-06-12'),
+          status: 'PENDING',
+        },
+      ]
 
       const result = getBlockedDatesInRange(
         new Date('2024-06-01'),
@@ -221,12 +225,14 @@ describe('Availability Calculation', () => {
     })
 
     it('should NOT generate blocked dates from cancelled booking', () => {
-      const bookings: Booking[] = [{
-        id: 'booking-1',
-        checkIn: new Date('2024-06-10'),
-        checkOut: new Date('2024-06-15'),
-        status: 'CANCELLED',
-      }]
+      const bookings: Booking[] = [
+        {
+          id: 'booking-1',
+          checkIn: new Date('2024-06-10'),
+          checkOut: new Date('2024-06-15'),
+          status: 'CANCELLED',
+        },
+      ]
 
       const result = getBlockedDatesInRange(
         new Date('2024-06-01'),
@@ -267,11 +273,13 @@ describe('Availability Calculation', () => {
 
   describe('Blocked dates from manual blocks', () => {
     it('should include manually blocked dates', () => {
-      const blockedDates: BlockedDate[] = [{
-        startDate: new Date('2024-06-20'),
-        endDate: new Date('2024-06-25'),
-        source: 'manual',
-      }]
+      const blockedDates: BlockedDate[] = [
+        {
+          startDate: new Date('2024-06-20'),
+          endDate: new Date('2024-06-25'),
+          source: 'manual',
+        },
+      ]
 
       const result = getBlockedDatesInRange(
         new Date('2024-06-01'),
@@ -284,18 +292,22 @@ describe('Availability Calculation', () => {
     })
 
     it('should merge booking and manual blocks', () => {
-      const bookings: Booking[] = [{
-        id: 'booking-1',
-        checkIn: new Date('2024-06-10'),
-        checkOut: new Date('2024-06-12'),
-        status: 'CONFIRMED',
-      }]
+      const bookings: Booking[] = [
+        {
+          id: 'booking-1',
+          checkIn: new Date('2024-06-10'),
+          checkOut: new Date('2024-06-12'),
+          status: 'CONFIRMED',
+        },
+      ]
 
-      const blockedDates: BlockedDate[] = [{
-        startDate: new Date('2024-06-20'),
-        endDate: new Date('2024-06-22'),
-        source: 'ical',
-      }]
+      const blockedDates: BlockedDate[] = [
+        {
+          startDate: new Date('2024-06-20'),
+          endDate: new Date('2024-06-22'),
+          source: 'ical',
+        },
+      ]
 
       const result = getBlockedDatesInRange(
         new Date('2024-06-01'),
@@ -429,11 +441,13 @@ describe('Availability Calculation', () => {
     })
 
     it('should reject booking that overlaps manual block', () => {
-      const blockedDates: BlockedDate[] = [{
-        startDate: new Date('2024-07-01'),
-        endDate: new Date('2024-07-05'),
-        source: 'maintenance',
-      }]
+      const blockedDates: BlockedDate[] = [
+        {
+          startDate: new Date('2024-07-01'),
+          endDate: new Date('2024-07-05'),
+          source: 'maintenance',
+        },
+      ]
 
       const result = canBookDateRange(
         new Date('2024-07-03'),
@@ -449,23 +463,20 @@ describe('Availability Calculation', () => {
 
   describe('Edge cases', () => {
     it('should handle empty booking list', () => {
-      const result = canBookDateRange(
-        new Date('2024-06-01'),
-        new Date('2024-06-10'),
-        [],
-        []
-      )
+      const result = canBookDateRange(new Date('2024-06-01'), new Date('2024-06-10'), [], [])
 
       expect(result.available).toBe(true)
     })
 
     it('should handle date range filtering at boundaries', () => {
-      const bookings: Booking[] = [{
-        id: 'booking-1',
-        checkIn: new Date('2024-06-28'),
-        checkOut: new Date('2024-07-05'),
-        status: 'CONFIRMED',
-      }]
+      const bookings: Booking[] = [
+        {
+          id: 'booking-1',
+          checkIn: new Date('2024-06-28'),
+          checkOut: new Date('2024-07-05'),
+          status: 'CONFIRMED',
+        },
+      ]
 
       // Query only June
       const result = getBlockedDatesInRange(

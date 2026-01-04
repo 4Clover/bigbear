@@ -23,8 +23,8 @@ export const Footer = () => {
               <span className="text-xl font-bold text-white">Big Bear Cabin</span>
             </div>
             <p className="text-sm max-w-md">
-              Escape to our cozy mountain cabin nestled in the heart of Big Bear. Perfect for families, couples, and
-              groups seeking a peaceful retreat.
+              Escape to our cozy mountain cabin nestled in the heart of Big Bear. Perfect for
+              families, couples, and groups seeking a peaceful retreat.
             </p>
           </div>
 
@@ -54,7 +54,10 @@ export const Footer = () => {
             <ul className="space-y-2 text-sm">
               <li>Big Bear Lake, CA</li>
               <li>
-                <a href="mailto:hello@bigbearcabin.com" className="hover:text-emerald-400 transition-colors">
+                <a
+                  href="mailto:hello@bigbearcabin.com"
+                  className="hover:text-emerald-400 transition-colors"
+                >
                   hello@bigbearcabin.com
                 </a>
               </li>

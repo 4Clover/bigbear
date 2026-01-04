@@ -4,20 +4,9 @@ import { prisma } from '@/lib/prisma'
 import { stripe } from '@/lib/stripe'
 import { calculateRefund } from '@/lib/utils/refund'
 import { revalidatePath } from 'next/cache'
-import { auth } from '@/lib/auth'
+import { assertOwner } from '@/lib/auth/guards'
 
-const assertOwner = async () => {
-  const session = await auth()
-  if (!session?.user || session.user.role !== 'OWNER') {
-    throw new Error('Unauthorized')
-  }
-  return session
-}
-
-export const cancelBooking = async (
-  bookingId: string,
-  initiatedBy: 'guest' | 'owner'
-) => {
+export const cancelBooking = async (bookingId: string, initiatedBy: 'guest' | 'owner') => {
   await assertOwner()
 
   const booking = await prisma.booking.findUnique({

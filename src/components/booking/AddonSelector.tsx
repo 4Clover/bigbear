@@ -52,13 +52,19 @@ export const AddonSelector = ({ addons, selectedAddons, onChange }: AddonSelecto
             >
               <div className="flex-1">
                 <div className="font-medium">{addon.name}</div>
-                {addon.description && <div className="text-sm text-gray-500">{addon.description}</div>}
-                <div className="text-sm font-semibold text-emerald-600">${addon.price.toFixed(2)}</div>
+                {addon.description && (
+                  <div className="text-sm text-gray-500">{addon.description}</div>
+                )}
+                <div className="text-sm font-semibold text-emerald-600">
+                  ${addon.price.toFixed(2)}
+                </div>
               </div>
               <div className="flex items-center gap-3">
                 <button
                   type="button"
-                  onClick={() => { updateQuantity(addon.id, quantity - 1); }}
+                  onClick={() => {
+                    updateQuantity(addon.id, quantity - 1)
+                  }}
                   className="w-8 h-8 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center transition-colors disabled:opacity-50"
                   disabled={quantity === 0}
                   aria-label="Decrease quantity"
@@ -68,7 +74,9 @@ export const AddonSelector = ({ addons, selectedAddons, onChange }: AddonSelecto
                 <span className="w-8 text-center font-medium">{quantity}</span>
                 <button
                   type="button"
-                  onClick={() => { updateQuantity(addon.id, quantity + 1); }}
+                  onClick={() => {
+                    updateQuantity(addon.id, quantity + 1)
+                  }}
                   className="w-8 h-8 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white flex items-center justify-center transition-colors"
                   aria-label="Increase quantity"
                 >

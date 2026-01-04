@@ -59,15 +59,27 @@ export const Header = () => {
           <div className="md:hidden flex items-center">
             <button
               type="button"
-              onClick={() => { setMobileMenuOpen(!mobileMenuOpen); }}
+              onClick={() => {
+                setMobileMenuOpen(!mobileMenuOpen)
+              }}
               className="p-2 rounded-lg text-gray-600 hover:bg-gray-100"
               aria-label="Toggle menu"
             >
               <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 {mobileMenuOpen ? (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
                 ) : (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 6h16M4 12h16M4 18h16"
+                  />
                 )}
               </svg>
             </button>
@@ -83,12 +95,19 @@ export const Header = () => {
                   key={link.href}
                   href={link.href}
                   className="text-gray-600 hover:text-emerald-600 font-medium transition-colors"
-                  onClick={() => { setMobileMenuOpen(false); }}
+                  onClick={() => {
+                    setMobileMenuOpen(false)
+                  }}
                 >
                   {link.label}
                 </Link>
               ))}
-              <Link href="/login" onClick={() => { setMobileMenuOpen(false); }}>
+              <Link
+                href="/login"
+                onClick={() => {
+                  setMobileMenuOpen(false)
+                }}
+              >
                 <Button variant="outline" size="sm" className="w-full">
                   Sign In
                 </Button>

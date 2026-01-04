@@ -54,9 +54,7 @@ const validateBookingDates = (
   }
 
   // Calculate nights
-  const nights = Math.ceil(
-    (checkOutNorm.getTime() - checkInNorm.getTime()) / (1000 * 60 * 60 * 24)
-  )
+  const nights = Math.ceil((checkOutNorm.getTime() - checkInNorm.getTime()) / (1000 * 60 * 60 * 24))
 
   // Minimum nights
   if (nights < config.minNights) {
@@ -71,10 +69,7 @@ const validateBookingDates = (
   return { valid: errors.length === 0, errors }
 }
 
-const validateGuestCount = (
-  numberOfGuests: number,
-  maxGuests: number
-): ValidationResult => {
+const validateGuestCount = (numberOfGuests: number, maxGuests: number): ValidationResult => {
   const errors: string[] = []
 
   if (numberOfGuests < 1) {

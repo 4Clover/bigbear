@@ -58,12 +58,12 @@ const CalendarSyncList = ({ syncs }: CalendarSyncListProps) => {
       <div className="flex items-center justify-between mb-4">
         <div>
           <h2 className="text-lg font-semibold text-gray-900">External Calendars</h2>
-          <p className="text-sm text-gray-500">
-            Sync with Airbnb, VRBO, or other iCal calendars
-          </p>
+          <p className="text-sm text-gray-500">Sync with Airbnb, VRBO, or other iCal calendars</p>
         </div>
         <button
-          onClick={() => { setShowAddForm(!showAddForm) }}
+          onClick={() => {
+            setShowAddForm(!showAddForm)
+          }}
           className="px-4 py-2 bg-emerald-600 text-white text-sm font-medium rounded-lg hover:bg-emerald-700"
         >
           {showAddForm ? 'Cancel' : 'Add Calendar'}
@@ -74,26 +74,26 @@ const CalendarSyncList = ({ syncs }: CalendarSyncListProps) => {
         <form onSubmit={handleAdd} className="mb-6 p-4 bg-gray-50 rounded-lg">
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Calendar Name
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Calendar Name</label>
               <input
                 type="text"
                 value={name}
-                onChange={(e) => { setName(e.target.value) }}
+                onChange={(e) => {
+                  setName(e.target.value)
+                }}
                 placeholder="e.g., Airbnb, VRBO"
                 required
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                iCal URL
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">iCal URL</label>
               <input
                 type="url"
                 value={icalUrl}
-                onChange={(e) => { setIcalUrl(e.target.value) }}
+                onChange={(e) => {
+                  setIcalUrl(e.target.value)
+                }}
                 placeholder="https://..."
                 required
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
@@ -126,9 +126,7 @@ const CalendarSyncList = ({ syncs }: CalendarSyncListProps) => {
                   <span className="font-medium text-gray-900">{sync.name}</span>
                   <span
                     className={`text-xs px-2 py-0.5 rounded-full ${
-                      sync.isActive
-                        ? 'bg-green-100 text-green-700'
-                        : 'bg-gray-100 text-gray-600'
+                      sync.isActive ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'
                     }`}
                   >
                     {sync.isActive ? 'Active' : 'Paused'}
@@ -146,14 +144,18 @@ const CalendarSyncList = ({ syncs }: CalendarSyncListProps) => {
               </div>
               <div className="flex items-center gap-2 ml-4">
                 <button
-                  onClick={() => { handleToggle(sync.id, sync.isActive) }}
+                  onClick={() => {
+                    handleToggle(sync.id, sync.isActive)
+                  }}
                   disabled={isPending}
                   className="text-sm text-gray-600 hover:text-gray-900 disabled:opacity-50"
                 >
                   {sync.isActive ? 'Pause' : 'Resume'}
                 </button>
                 <button
-                  onClick={() => { handleRemove(sync.id) }}
+                  onClick={() => {
+                    handleRemove(sync.id)
+                  }}
                   disabled={isPending}
                   className="text-sm text-red-600 hover:text-red-900 disabled:opacity-50"
                 >

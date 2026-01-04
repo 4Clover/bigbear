@@ -78,7 +78,8 @@ const calculateBookingPrice = (
   const weekendSurcharge = weekendNights * ((config.weekendRate || 0) - config.baseNightlyRate)
 
   // Base price = regular nights * base rate + weekend nights * weekend rate
-  const basePrice = regularNights * config.baseNightlyRate +
+  const basePrice =
+    regularNights * config.baseNightlyRate +
     weekendNights * (config.weekendRate || config.baseNightlyRate)
 
   // Calculate addons

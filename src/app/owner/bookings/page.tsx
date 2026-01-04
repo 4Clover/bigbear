@@ -15,7 +15,10 @@ const getBookings = async (searchParams: SearchParams) => {
 
   const where: {
     status?: { in: BookingStatus[] }
-    OR?: ({ guestName: { contains: string; mode: 'insensitive' } } | { guestEmail: { contains: string; mode: 'insensitive' } })[]
+    OR?: (
+      | { guestName: { contains: string; mode: 'insensitive' } }
+      | { guestEmail: { contains: string; mode: 'insensitive' } }
+    )[]
     checkIn?: { gte?: Date; lte?: Date }
   } = {}
 
@@ -45,11 +48,7 @@ const getBookings = async (searchParams: SearchParams) => {
   return bookings
 }
 
-const BookingsPage = async ({
-  searchParams,
-}: {
-  searchParams: Promise<SearchParams>
-}) => {
+const BookingsPage = async ({ searchParams }: { searchParams: Promise<SearchParams> }) => {
   const params = await searchParams
   const bookings = await getBookings(params)
 
@@ -58,13 +57,10 @@ const BookingsPage = async ({
     _count: { status: true },
   })
 
-  const counts = statusCounts.reduce<Record<string, number>>(
-    (acc, item) => {
-      acc[item.status] = item._count.status
-      return acc
-    },
-    {}
-  )
+  const counts = statusCounts.reduce<Record<string, number>>((acc, item) => {
+    acc[item.status] = item._count.status
+    return acc
+  }, {})
 
   return (
     <div className="space-y-6">
@@ -74,17 +70,15 @@ const BookingsPage = async ({
       </div>
 
       <div className="flex flex-wrap gap-3">
-        {(['PENDING', 'CONFIRMED', 'COMPLETED', 'CANCELLED', 'NO_SHOW'] as const).map(
-          (status) => (
-            <div
-              key={status}
-              className="bg-white px-4 py-2 rounded-lg border border-gray-200 text-sm"
-            >
-              <span className="text-gray-500">{status}:</span>{' '}
-              <span className="font-medium">{counts[status] ?? 0}</span>
-            </div>
-          )
-        )}
+        {(['PENDING', 'CONFIRMED', 'COMPLETED', 'CANCELLED', 'NO_SHOW'] as const).map((status) => (
+          <div
+            key={status}
+            className="bg-white px-4 py-2 rounded-lg border border-gray-200 text-sm"
+          >
+            <span className="text-gray-500">{status}:</span>{' '}
+            <span className="font-medium">{counts[status] ?? 0}</span>
+          </div>
+        ))}
       </div>
 
       <BookingFilters

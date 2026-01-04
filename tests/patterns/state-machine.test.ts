@@ -15,9 +15,7 @@ import { describe, it, expect } from 'vitest'
 //   valid: boolean
 // }
 
-const createStateMachineValidator = <T extends string>(
-  validTransitions: Map<T, T[]>
-) => ({
+const createStateMachineValidator = <T extends string>(validTransitions: Map<T, T[]>) => ({
   isValidTransition: (from: T, to: T): boolean => {
     const allowed = validTransitions.get(from)
     return allowed?.includes(to) ?? false
@@ -137,14 +135,28 @@ describe('State Machine Pattern', () => {
 
     describe('no recovery from terminal states', () => {
       it('should not allow COMPLETED → any state', () => {
-        const allStates: JobStatus[] = ['OPEN', 'QUOTED', 'APPROVED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED']
+        const allStates: JobStatus[] = [
+          'OPEN',
+          'QUOTED',
+          'APPROVED',
+          'IN_PROGRESS',
+          'COMPLETED',
+          'CANCELLED',
+        ]
         allStates.forEach((state) => {
           expect(validator.isValidTransition('COMPLETED', state)).toBe(false)
         })
       })
 
       it('should not allow CANCELLED → any state', () => {
-        const allStates: JobStatus[] = ['OPEN', 'QUOTED', 'APPROVED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED']
+        const allStates: JobStatus[] = [
+          'OPEN',
+          'QUOTED',
+          'APPROVED',
+          'IN_PROGRESS',
+          'COMPLETED',
+          'CANCELLED',
+        ]
         allStates.forEach((state) => {
           expect(validator.isValidTransition('CANCELLED', state)).toBe(false)
         })

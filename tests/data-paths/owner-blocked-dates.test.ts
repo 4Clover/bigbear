@@ -227,10 +227,7 @@ describe('Owner Blocked Dates Data Path', () => {
             },
             {
               // Block spans the entire range
-              AND: [
-                { startDate: { lte: monthStart } },
-                { endDate: { gte: monthEnd } },
-              ],
+              AND: [{ startDate: { lte: monthStart } }, { endDate: { gte: monthEnd } }],
             },
           ],
         },

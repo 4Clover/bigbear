@@ -36,14 +36,18 @@ export default function LoginPage() {
 
   return (
     <div>
-      <h3 className="text-lg font-medium text-gray-900 text-center mb-6">Sign in to your account</h3>
+      <h3 className="text-lg font-medium text-gray-900 text-center mb-6">
+        Sign in to your account
+      </h3>
 
       <form onSubmit={(e) => void handleSubmit(e)} className="space-y-6">
         <Input
           label="Email address"
           type="email"
           value={email}
-          onChange={(e) => { setEmail(e.target.value); }}
+          onChange={(e) => {
+            setEmail(e.target.value)
+          }}
           placeholder="you@example.com"
           required
           error={error}
@@ -66,7 +70,8 @@ export default function LoginPage() {
       </div>
 
       <p className="mt-6 text-center text-sm text-gray-600">
-        We&apos;ll send a magic link to your email. Click the link to sign in - no password required!
+        We&apos;ll send a magic link to your email. Click the link to sign in - no password
+        required!
       </p>
 
       <div className="mt-6 text-center">

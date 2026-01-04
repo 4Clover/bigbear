@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { calculateRefund } from '@/lib/utils/refund'
-import { addDays, subDays } from 'date-fns'
+import { addDays, subDays, startOfDay } from 'date-fns'
 
 /**
  * Refund calculation tests.
@@ -15,10 +15,14 @@ describe('Refund Calculation', () => {
   const totalAmount = 500
   const depositAmount = 100 // 20% deposit
 
+  // Use startOfDay to normalize dates and avoid time-component edge cases
+  // with differenceInDays which measures "full day periods"
+  const today = startOfDay(new Date())
+
   describe('Full refund (14+ days before check-in)', () => {
     it('should return full refund when cancelled exactly 14 days before', () => {
-      const checkInDate = addDays(new Date(), 14)
-      const cancellationDate = new Date()
+      const checkInDate = addDays(today, 14)
+      const cancellationDate = today
 
       const result = calculateRefund(checkInDate, cancellationDate, totalAmount, depositAmount)
 
@@ -28,8 +32,8 @@ describe('Refund Calculation', () => {
     })
 
     it('should return full refund when cancelled 30 days before', () => {
-      const checkInDate = addDays(new Date(), 30)
-      const cancellationDate = new Date()
+      const checkInDate = addDays(today, 30)
+      const cancellationDate = today
 
       const result = calculateRefund(checkInDate, cancellationDate, totalAmount, depositAmount)
 
@@ -38,8 +42,8 @@ describe('Refund Calculation', () => {
     })
 
     it('should return full refund when cancelled 365 days before', () => {
-      const checkInDate = addDays(new Date(), 365)
-      const cancellationDate = new Date()
+      const checkInDate = addDays(today, 365)
+      const cancellationDate = today
 
       const result = calculateRefund(checkInDate, cancellationDate, totalAmount, depositAmount)
 
@@ -48,8 +52,8 @@ describe('Refund Calculation', () => {
     })
 
     it('should calculate correct refund for high-value booking', () => {
-      const checkInDate = addDays(new Date(), 20)
-      const cancellationDate = new Date()
+      const checkInDate = addDays(today, 20)
+      const cancellationDate = today
       const highTotal = 2500
       const highDeposit = 500
 
@@ -62,8 +66,8 @@ describe('Refund Calculation', () => {
 
   describe('Partial refund (7-13 days before check-in)', () => {
     it('should return 50% refund when cancelled exactly 7 days before', () => {
-      const checkInDate = addDays(new Date(), 7)
-      const cancellationDate = new Date()
+      const checkInDate = addDays(today, 7)
+      const cancellationDate = today
 
       const result = calculateRefund(checkInDate, cancellationDate, totalAmount, depositAmount)
 
@@ -73,8 +77,8 @@ describe('Refund Calculation', () => {
     })
 
     it('should return 50% refund when cancelled 10 days before', () => {
-      const checkInDate = addDays(new Date(), 10)
-      const cancellationDate = new Date()
+      const checkInDate = addDays(today, 10)
+      const cancellationDate = today
 
       const result = calculateRefund(checkInDate, cancellationDate, totalAmount, depositAmount)
 
@@ -84,8 +88,8 @@ describe('Refund Calculation', () => {
     })
 
     it('should return 50% refund when cancelled exactly 13 days before', () => {
-      const checkInDate = addDays(new Date(), 13)
-      const cancellationDate = new Date()
+      const checkInDate = addDays(today, 13)
+      const cancellationDate = today
 
       const result = calculateRefund(checkInDate, cancellationDate, totalAmount, depositAmount)
 
@@ -94,8 +98,8 @@ describe('Refund Calculation', () => {
     })
 
     it('should handle odd amounts correctly for partial refunds', () => {
-      const checkInDate = addDays(new Date(), 7)
-      const cancellationDate = new Date()
+      const checkInDate = addDays(today, 7)
+      const cancellationDate = today
       const oddTotal = 333
       const oddDeposit = 67
 
@@ -108,8 +112,8 @@ describe('Refund Calculation', () => {
 
   describe('No refund (less than 7 days before check-in)', () => {
     it('should return no refund when cancelled 6 days before', () => {
-      const checkInDate = addDays(new Date(), 6)
-      const cancellationDate = new Date()
+      const checkInDate = addDays(today, 6)
+      const cancellationDate = today
 
       const result = calculateRefund(checkInDate, cancellationDate, totalAmount, depositAmount)
 
@@ -119,8 +123,8 @@ describe('Refund Calculation', () => {
     })
 
     it('should return no refund when cancelled 1 day before', () => {
-      const checkInDate = addDays(new Date(), 1)
-      const cancellationDate = new Date()
+      const checkInDate = addDays(today, 1)
+      const cancellationDate = today
 
       const result = calculateRefund(checkInDate, cancellationDate, totalAmount, depositAmount)
 
@@ -129,8 +133,8 @@ describe('Refund Calculation', () => {
     })
 
     it('should return no refund when cancelled on check-in day', () => {
-      const checkInDate = new Date()
-      const cancellationDate = new Date()
+      const checkInDate = today
+      const cancellationDate = today
 
       const result = calculateRefund(checkInDate, cancellationDate, totalAmount, depositAmount)
 
@@ -139,8 +143,8 @@ describe('Refund Calculation', () => {
     })
 
     it('should return no refund when cancelled after check-in', () => {
-      const checkInDate = subDays(new Date(), 1)
-      const cancellationDate = new Date()
+      const checkInDate = subDays(today, 1)
+      const cancellationDate = today
 
       const result = calculateRefund(checkInDate, cancellationDate, totalAmount, depositAmount)
 

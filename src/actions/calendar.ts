@@ -2,15 +2,8 @@
 
 import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
-import { auth } from '@/lib/auth'
-
-const assertOwner = async () => {
-  const session = await auth()
-  if (!session?.user || session.user.role !== 'OWNER') {
-    throw new Error('Unauthorized')
-  }
-  return session
-}
+import { assertOwner } from '@/lib/auth/guards'
+import { validateExternalUrl } from '@/lib/security'
 
 export const blockDates = async (
   startDate: Date,
@@ -46,6 +39,9 @@ export const unblockDates = async (blockedDateId: string) => {
 
 export const addCalendarSync = async (name: string, icalUrl: string) => {
   await assertOwner()
+
+  // Validate URL to prevent SSRF attacks
+  validateExternalUrl(icalUrl)
 
   await prisma.calendarSync.create({
     data: {

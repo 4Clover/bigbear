@@ -55,7 +55,16 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
       addons: addonsJson,
     } = metadata
 
-    if (!guestEmail || !guestName || !checkIn || !checkOut || !basePrice || !addonsTotal || !depositAmount || !totalAmount) {
+    if (
+      !guestEmail ||
+      !guestName ||
+      !checkIn ||
+      !checkOut ||
+      !basePrice ||
+      !addonsTotal ||
+      !depositAmount ||
+      !totalAmount
+    ) {
       console.error('Checkout session missing required metadata fields')
       return NextResponse.json({ error: 'Invalid session metadata' }, { status: 400 })
     }

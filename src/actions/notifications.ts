@@ -3,15 +3,7 @@
 import { prisma } from '@/lib/prisma'
 import type { NotificationEvent } from '@prisma/client'
 import { revalidatePath } from 'next/cache'
-import { auth } from '@/lib/auth'
-
-const assertOwner = async () => {
-  const session = await auth()
-  if (!session?.user || session.user.role !== 'OWNER') {
-    throw new Error('Unauthorized')
-  }
-  return session
-}
+import { assertOwner } from '@/lib/auth/guards'
 
 export const updateNotificationPreference = async (
   event: NotificationEvent,

@@ -9,7 +9,24 @@ const formatICalTimestamp = (date: Date): string => {
   return (isoString.split('.')[0] ?? '') + 'Z'
 }
 
-export const GET = async (): Promise<NextResponse> => {
+export const GET = async (request: Request): Promise<NextResponse> => {
+  // Authenticate via bearer token or query param (for calendar app compatibility)
+  const url = new URL(request.url)
+  const tokenParam = url.searchParams.get('token')
+  const authHeader = request.headers.get('authorization')
+  const bearerToken = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null
+
+  const icalSecret = process.env.ICAL_SECRET
+  if (!icalSecret) {
+    console.error('ICAL_SECRET is not configured')
+    return NextResponse.json({ error: 'Calendar export not configured' }, { status: 500 })
+  }
+
+  const providedToken = bearerToken ?? tokenParam
+  if (!providedToken || providedToken !== icalSecret) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
   try {
     const bookings = await prisma.booking.findMany({
       where: {
@@ -75,9 +92,6 @@ END:VEVENT
     })
   } catch (error) {
     console.error('Error generating iCal:', error)
-    return NextResponse.json(
-      { error: 'Failed to generate calendar' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to generate calendar' }, { status: 500 })
   }
 }

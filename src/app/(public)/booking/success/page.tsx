@@ -30,7 +30,10 @@ export default async function BookingSuccessPage({ searchParams }: PageProps) {
     return (
       <div className="max-w-2xl mx-auto px-4 py-16 text-center">
         <h1 className="text-2xl font-bold mb-4">Session Not Found</h1>
-        <p className="text-gray-600 mb-8">We couldn&apos;t find this booking session. Please contact us if you believe this is an error.</p>
+        <p className="text-gray-600 mb-8">
+          We couldn&apos;t find this booking session. Please contact us if you believe this is an
+          error.
+        </p>
         <Link href="/contact">
           <Button>Contact Us</Button>
         </Link>
@@ -50,7 +53,8 @@ export default async function BookingSuccessPage({ searchParams }: PageProps) {
         </div>
         <h1 className="text-4xl font-bold mb-4">Booking Confirmed!</h1>
         <p className="text-gray-600">
-          Thank you for your reservation. A confirmation email has been sent to {metadata.guestEmail}.
+          Thank you for your reservation. A confirmation email has been sent to{' '}
+          {metadata.guestEmail}.
         </p>
       </div>
 
@@ -82,20 +86,50 @@ export default async function BookingSuccessPage({ searchParams }: PageProps) {
         <h3 className="font-semibold mb-2">What&apos;s Next?</h3>
         <ul className="text-sm text-gray-700 space-y-2">
           <li className="flex items-start gap-2">
-            <svg className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            <svg
+              className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M5 13l4 4L19 7"
+              />
             </svg>
             <span>Check your email for a confirmation with all booking details</span>
           </li>
           <li className="flex items-start gap-2">
-            <svg className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            <svg
+              className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M5 13l4 4L19 7"
+              />
             </svg>
             <span>We&apos;ll send check-in instructions 2 days before your arrival</span>
           </li>
           <li className="flex items-start gap-2">
-            <svg className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            <svg
+              className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M5 13l4 4L19 7"
+              />
             </svg>
             <span>Contact us anytime if you have questions about your stay</span>
           </li>

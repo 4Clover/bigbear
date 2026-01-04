@@ -22,7 +22,8 @@ export default function VerifyPage() {
 
       <div className="bg-gray-50 rounded-lg p-4 mb-6">
         <p className="text-sm text-gray-500">
-          The link will expire in 10 minutes. If you don&apos;t see the email, check your spam folder.
+          The link will expire in 10 minutes. If you don&apos;t see the email, check your spam
+          folder.
         </p>
       </div>
 
