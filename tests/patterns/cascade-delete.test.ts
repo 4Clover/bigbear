@@ -64,6 +64,8 @@ describe('Cascade Delete Pattern', () => {
         address: null,
         taxId: null,
         isActive: true,
+        trustworthiness: null,
+        notes: null,
         createdAt: new Date(),
         updatedAt: new Date(),
       })
@@ -118,6 +120,10 @@ describe('Cascade Delete Pattern', () => {
         dueDate: null,
         images: [],
         notes: null,
+        assignedWorkerId: null,
+        scheduledDate: null,
+        scheduledTime: null,
+        completedAt: null,
         createdAt: new Date(),
         updatedAt: new Date(),
       })
@@ -141,6 +147,10 @@ describe('Cascade Delete Pattern', () => {
         dueDate: null,
         images: [],
         notes: null,
+        assignedWorkerId: null,
+        scheduledDate: null,
+        scheduledTime: null,
+        completedAt: null,
         createdAt: new Date(),
         updatedAt: new Date(),
       })

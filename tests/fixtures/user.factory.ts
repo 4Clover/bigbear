@@ -43,6 +43,8 @@ export const createWorkerProfileFixture = (
     address: null,
     taxId: null,
     isActive: true,
+    trustworthiness: null,
+    notes: null,
     createdAt: now,
     updatedAt: now,
     ...overrides,

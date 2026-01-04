@@ -2,6 +2,7 @@
 
 import { useTransition } from 'react'
 import { deleteTransaction } from '@/actions/finance'
+import { formatCurrency, formatDate } from '@/lib/format'
 import type { Transaction, ExpenseCategory, Receipt } from '@prisma/client'
 
 type TransactionWithRelations = Transaction & {
@@ -12,21 +13,6 @@ type TransactionWithRelations = Transaction & {
 interface TransactionTableProps {
   transactions: TransactionWithRelations[]
   onViewReceipts?: (transaction: TransactionWithRelations) => void
-}
-
-const formatCurrency = (amount: number) => {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-  }).format(amount)
-}
-
-const formatDate = (date: Date) => {
-  return new Intl.DateTimeFormat('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  }).format(new Date(date))
 }
 
 export const TransactionTable = ({ transactions, onViewReceipts }: TransactionTableProps) => {

@@ -15,3 +15,19 @@ export const assertOwnerOrAccountant = async () => {
   }
   return session
 }
+
+export const assertWorker = async () => {
+  const session = await auth()
+  if (!session?.user || session.user.role !== 'WORKER') {
+    throw new Error('Unauthorized')
+  }
+  return session
+}
+
+export const assertOwnerOrWorker = async () => {
+  const session = await auth()
+  if (!session?.user || !['OWNER', 'WORKER'].includes(session.user.role)) {
+    throw new Error('Unauthorized')
+  }
+  return session
+}

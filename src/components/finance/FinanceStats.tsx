@@ -1,15 +1,10 @@
+import { formatCurrency } from '@/lib/format'
+
 interface FinanceStatsProps {
   income: number
   expenses: number
   netIncome: number
   transactionCount: number
-}
-
-const formatCurrency = (amount: number) => {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-  }).format(amount)
 }
 
 export const FinanceStats = ({

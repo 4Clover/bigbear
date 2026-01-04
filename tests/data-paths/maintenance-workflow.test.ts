@@ -22,6 +22,10 @@ describe('Maintenance Workflow Data Path', () => {
         dueDate: null,
         images: [],
         notes: null,
+        assignedWorkerId: null,
+        scheduledDate: null,
+        scheduledTime: null,
+        completedAt: null,
         createdAt: new Date(),
         updatedAt: new Date(),
       }
@@ -49,6 +53,10 @@ describe('Maintenance Workflow Data Path', () => {
         dueDate: new Date(),
         images: [],
         notes: null,
+        assignedWorkerId: null,
+        scheduledDate: null,
+        scheduledTime: null,
+        completedAt: null,
         createdAt: new Date(),
         updatedAt: new Date(),
       }
@@ -76,6 +84,10 @@ describe('Maintenance Workflow Data Path', () => {
         dueDate: null,
         images: ['https://example.com/before1.jpg', 'https://example.com/before2.jpg'],
         notes: null,
+        assignedWorkerId: null,
+        scheduledDate: null,
+        scheduledTime: null,
+        completedAt: null,
         createdAt: new Date(),
         updatedAt: new Date(),
       }
@@ -169,6 +181,10 @@ describe('Maintenance Workflow Data Path', () => {
         dueDate: null,
         images: [],
         notes: null,
+        assignedWorkerId: null,
+        scheduledDate: null,
+        scheduledTime: null,
+        completedAt: null,
         createdAt: new Date(),
         updatedAt: new Date(),
       }
@@ -218,6 +234,10 @@ describe('Maintenance Workflow Data Path', () => {
         dueDate: null,
         images: [],
         notes: null,
+        assignedWorkerId: null,
+        scheduledDate: null,
+        scheduledTime: null,
+        completedAt: null,
         createdAt: new Date(),
         updatedAt: new Date(),
       }
@@ -244,6 +264,10 @@ describe('Maintenance Workflow Data Path', () => {
         dueDate: null,
         images: [],
         notes: null,
+        assignedWorkerId: null,
+        scheduledDate: null,
+        scheduledTime: null,
+        completedAt: null,
         createdAt: new Date(),
         updatedAt: new Date(),
       }
@@ -269,9 +293,13 @@ describe('Maintenance Workflow Data Path', () => {
         images: ['https://example.com/after.jpg'],
         hoursWorked: new Decimal('2.5'),
         materialsUsed: 'Moen cartridge, plumber tape',
+        unexpectedIssues: null,
+        finalAmount: null,
         isApproved: false,
+        isPaid: false,
         submittedAt: new Date(),
         approvedAt: null,
+        paidAt: null,
       }
 
       prismaMock.workCompletion.create.mockResolvedValue(completion)
@@ -301,9 +329,13 @@ describe('Maintenance Workflow Data Path', () => {
         images: [],
         hoursWorked: new Decimal('2.0'),
         materialsUsed: null,
+        unexpectedIssues: null,
+        finalAmount: null,
         isApproved: true,
+        isPaid: false,
         submittedAt: new Date(),
         approvedAt,
+        paidAt: null,
       }
 
       prismaMock.workCompletion.update.mockResolvedValue(completion)
@@ -330,6 +362,10 @@ describe('Maintenance Workflow Data Path', () => {
         dueDate: null,
         images: [],
         notes: null,
+        assignedWorkerId: null,
+        scheduledDate: null,
+        scheduledTime: null,
+        completedAt: null,
         createdAt: new Date(),
         updatedAt: new Date(),
       }
@@ -356,6 +392,10 @@ describe('Maintenance Workflow Data Path', () => {
         dueDate: null,
         images: [],
         notes: 'No longer needed',
+        assignedWorkerId: null,
+        scheduledDate: null,
+        scheduledTime: null,
+        completedAt: null,
         createdAt: new Date(),
         updatedAt: new Date(),
       }
@@ -383,6 +423,10 @@ describe('Maintenance Workflow Data Path', () => {
         dueDate: null,
         images: [],
         notes: 'Property sold',
+        assignedWorkerId: null,
+        scheduledDate: null,
+        scheduledTime: null,
+        completedAt: null,
         createdAt: new Date(),
         updatedAt: new Date(),
       }
@@ -410,6 +454,10 @@ describe('Maintenance Workflow Data Path', () => {
           dueDate: null,
           images: [],
           notes: null,
+          assignedWorkerId: null,
+          scheduledDate: null,
+          scheduledTime: null,
+          completedAt: null,
           createdAt: new Date(),
           updatedAt: new Date(),
         },
