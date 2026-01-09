@@ -42,7 +42,7 @@ export const createExpense = async (data: {
   }
 
   revalidatePath('/owner/finance')
-  return { success: true, transaction }
+  return { success: true, transaction: { ...transaction, amount: Number(transaction.amount) } }
 }
 
 export const updateTransaction = async (
@@ -63,7 +63,7 @@ export const updateTransaction = async (
   })
 
   revalidatePath('/owner/finance')
-  return { success: true, transaction }
+  return { success: true, transaction: { ...transaction, amount: Number(transaction.amount) } }
 }
 
 export const deleteTransaction = async (transactionId: string) => {
@@ -183,7 +183,7 @@ export const getTransactions = async (
   ])
 
   return {
-    data: transactions,
+    data: transactions.map((t) => ({ ...t, amount: Number(t.amount) })),
     total,
     page,
     pageSize,

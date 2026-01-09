@@ -6,7 +6,8 @@ import { formatCurrency, formatDate } from '@/lib/format'
 import { Pagination } from '@/components/ui/Pagination'
 import type { Transaction, ExpenseCategory, Receipt } from '@prisma/client'
 
-type TransactionWithRelations = Transaction & {
+type TransactionWithRelations = Omit<Transaction, 'amount'> & {
+  amount: number
   category: ExpenseCategory
   receipts: Receipt[]
 }
@@ -114,7 +115,7 @@ export const TransactionTable = ({
                 }`}
               >
                 {transaction.type === 'EXPENSE' ? '-' : '+'}
-                {formatCurrency(Number(transaction.amount))}
+                {formatCurrency(transaction.amount)}
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-center">
                 {transaction.receipts.length > 0 ? (

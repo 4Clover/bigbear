@@ -13,12 +13,8 @@ import {
   exportReportToCsv,
 } from '@/actions/reports'
 
-const mockDecimal = (value: number) =>
-  ({
-    toNumber: () => value,
-    toString: () => value.toString(),
-    valueOf: () => value,
-  }) as never
+// Prisma client extension now converts Decimals to plain numbers
+const mockDecimal = (value: number) => value
 
 const createMockTransaction = (overrides: Partial<{
   id: string
