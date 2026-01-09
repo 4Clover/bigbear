@@ -11,20 +11,25 @@ interface SearchParams {
   search?: string
   from?: string
   to?: string
+  page?: string
 }
 
 const FinancePage = async ({ searchParams }: { searchParams: Promise<SearchParams> }) => {
   const params = await searchParams
   const currentYear = new Date().getFullYear()
+  const page = params.page ? parseInt(params.page, 10) : 1
 
-  const [transactions, summary, categories] = await Promise.all([
-    getTransactions({
-      type: params.type as TransactionType | undefined,
-      categoryId: params.categoryId,
-      search: params.search,
-      startDate: params.from ? new Date(params.from) : undefined,
-      endDate: params.to ? new Date(params.to) : undefined,
-    }),
+  const [paginatedTransactions, summary, categories] = await Promise.all([
+    getTransactions(
+      {
+        type: params.type as TransactionType | undefined,
+        categoryId: params.categoryId,
+        search: params.search,
+        startDate: params.from ? new Date(params.from) : undefined,
+        endDate: params.to ? new Date(params.to) : undefined,
+      },
+      { page }
+    ),
     getFinanceSummary(currentYear),
     getExpenseCategories(),
   ])
@@ -60,7 +65,13 @@ const FinancePage = async ({ searchParams }: { searchParams: Promise<SearchParam
         currentTo={params.to}
       />
 
-      <TransactionTable transactions={transactions} />
+      <TransactionTable
+        transactions={paginatedTransactions.data}
+        page={paginatedTransactions.page}
+        totalPages={paginatedTransactions.totalPages}
+        total={paginatedTransactions.total}
+        pageSize={paginatedTransactions.pageSize}
+      />
     </div>
   )
 }

@@ -53,7 +53,7 @@ export const TransactionFilters = ({
     setSearch('')
   }
 
-  const hasFilters = currentType || currentCategoryId || currentSearch || currentFrom || currentTo
+  const hasFilters = currentType ?? currentCategoryId ?? currentSearch ?? currentFrom ?? currentTo
 
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">

@@ -415,7 +415,7 @@ export const sendBookingRequest = async (booking: Booking, ownerEmail: string) =
           <li><strong>Guests:</strong> ${booking.numberOfGuests}</li>
           <li><strong>Amount:</strong> $${Number(booking.totalAmount).toFixed(2)}</li>
         </ul>
-        <p><a href="${process.env.AUTH_URL || 'http://localhost:3000'}/owner/bookings/${booking.id}">Review Booking</a></p>
+        <p><a href="${process.env.AUTH_URL ?? 'http://localhost:3000'}/owner/bookings/${booking.id}">Review Booking</a></p>
       `,
     })
 
@@ -538,10 +538,10 @@ export const sendQuoteReceived = async (job: JobInfo, quote: QuoteInfo, ownerEma
         <h2>${safeTitle}</h2>
         <ul>
           <li><strong>Quote Amount:</strong> $${quote.amount.toFixed(2)}</li>
-          <li><strong>Estimated Time:</strong> ${quote.estimatedDays || 'Not specified'} days</li>
+          <li><strong>Estimated Time:</strong> ${quote.estimatedDays ?? 'Not specified'} days</li>
           <li><strong>Description:</strong> ${safeDescription}</li>
         </ul>
-        <p><a href="${process.env.AUTH_URL || 'http://localhost:3000'}/owner/maintenance/${job.id}">Review Quote</a></p>
+        <p><a href="${process.env.AUTH_URL ?? 'http://localhost:3000'}/owner/maintenance/${job.id}">Review Quote</a></p>
       `,
     })
 
@@ -593,7 +593,7 @@ export const sendMaintenanceCompleted = async (
           <li><strong>Final Amount:</strong> $${completion.finalAmount ? completion.finalAmount.toFixed(2) : 'Not specified'}</li>
           <li><strong>Completion Notes:</strong> ${safeDescription}</li>
         </ul>
-        <p><a href="${process.env.AUTH_URL || 'http://localhost:3000'}/owner/maintenance/${job.id}">View Details</a></p>
+        <p><a href="${process.env.AUTH_URL ?? 'http://localhost:3000'}/owner/maintenance/${job.id}">View Details</a></p>
       `,
     })
 
@@ -622,7 +622,8 @@ const logNotification = async (
   channel: string,
   subject: string,
   status: string,
-  error?: string
+  error?: string,
+  body?: string
 ) => {
   await prisma.notificationLog.create({
     data: {
@@ -632,6 +633,7 @@ const logNotification = async (
       subject,
       status,
       error,
+      body,
     },
   })
 }

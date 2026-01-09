@@ -23,6 +23,14 @@ vi.mock('next/cache', () => ({
   revalidatePath: mockRevalidatePath,
 }))
 
+vi.mock('@/lib/env', () => ({
+  env: () => ({
+    OWNER_EMAIL: 'owner@test.com',
+    RESEND_FROM_EMAIL: 'noreply@test.com',
+    AUTH_RESEND_KEY: 're_test_key',
+  }),
+}))
+
 import {
   getAvailableJobs,
   getAssignedJobs as _getAssignedJobs,

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { getMaintenanceJobs, getWorkers, cancelJob } from '@/actions/maintenance'
+import { DEFAULT_PAGE_SIZE } from '@/types/pagination'
 import JobList from '@/components/maintenance/JobList'
 import JobForm from '@/components/maintenance/JobForm'
 import QuoteReview from '@/components/maintenance/QuoteReview'
@@ -33,17 +34,32 @@ type ActiveModal =
   | { type: 'inviteWorker' }
   | null
 
+interface PaginatedJobs {
+  data: Job[]
+  total: number
+  page: number
+  pageSize: number
+  totalPages: number
+}
+
 const OwnerMaintenancePage = () => {
   const [activeTab, setActiveTab] = useState<'jobs' | 'workers'>('jobs')
-  const [jobs, setJobs] = useState<Job[]>([])
+  const [paginatedJobs, setPaginatedJobs] = useState<PaginatedJobs>({
+    data: [],
+    total: 0,
+    page: 1,
+    pageSize: DEFAULT_PAGE_SIZE,
+    totalPages: 0,
+  })
   const [workers, setWorkers] = useState<WorkerProfile[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [activeModal, setActiveModal] = useState<ActiveModal>(null)
+  const [currentPage, setCurrentPage] = useState(1)
 
-  const loadJobs = useCallback(async () => {
+  const loadJobs = useCallback(async (page = 1) => {
     try {
-      const data = await getMaintenanceJobs()
-      setJobs(data)
+      const data = await getMaintenanceJobs(undefined, { page })
+      setPaginatedJobs(data)
     } catch (error) {
       console.error('Failed to load jobs:', error)
     }
@@ -61,17 +77,21 @@ const OwnerMaintenancePage = () => {
   useEffect(() => {
     const loadData = async () => {
       setIsLoading(true)
-      await Promise.all([loadJobs(), loadWorkers()])
+      await Promise.all([loadJobs(currentPage), loadWorkers()])
       setIsLoading(false)
     }
     void loadData()
-  }, [loadJobs, loadWorkers])
+  }, [loadJobs, loadWorkers, currentPage])
+
+  const handlePageChange = (newPage: number) => {
+    setCurrentPage(newPage)
+  }
 
   const handleCancelJob = async (jobId: string) => {
     if (!confirm('Are you sure you want to cancel this job?')) return
     try {
       await cancelJob(jobId)
-      await loadJobs()
+      await loadJobs(currentPage)
     } catch (error) {
       console.error('Failed to cancel job:', error)
       alert('Failed to cancel job')
@@ -80,7 +100,7 @@ const OwnerMaintenancePage = () => {
 
   const handleModalSuccess = async () => {
     setActiveModal(null)
-    await Promise.all([loadJobs(), loadWorkers()])
+    await Promise.all([loadJobs(currentPage), loadWorkers()])
   }
 
   if (isLoading) {
@@ -141,7 +161,7 @@ const OwnerMaintenancePage = () => {
               : 'border-transparent text-gray-500 hover:text-gray-700'
           }`}
         >
-          Jobs ({jobs.length})
+          Jobs ({paginatedJobs.total})
         </button>
         <button
           onClick={() => { setActiveTab('workers'); }}
@@ -158,7 +178,12 @@ const OwnerMaintenancePage = () => {
       {/* Tab Content */}
       {activeTab === 'jobs' && (
         <JobList
-          jobs={jobs}
+          jobs={paginatedJobs.data}
+          page={paginatedJobs.page}
+          totalPages={paginatedJobs.totalPages}
+          total={paginatedJobs.total}
+          pageSize={paginatedJobs.pageSize}
+          onPageChange={handlePageChange}
           onViewQuotes={(job) => { setActiveModal({ type: 'quotes', job }); }}
           onViewCompletion={(job) => { setActiveModal({ type: 'completion', job }); }}
           onCancel={(jobId) => { void handleCancelJob(jobId); }}

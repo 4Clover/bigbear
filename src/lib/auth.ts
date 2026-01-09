@@ -20,7 +20,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   callbacks: {
     // Authorized callback for proxy support (Next.js 16+)
     // Actual route protection logic is in proxy.ts
-    authorized: async ({ auth }) => {
+    authorized: ({ auth }) => {
       // Always return true - proxy.ts handles the actual logic
       // This callback just enables the proxy integration
       return !!auth

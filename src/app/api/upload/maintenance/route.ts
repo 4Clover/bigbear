@@ -23,6 +23,7 @@ export const POST = async (request: Request): Promise<NextResponse> => {
       },
       onUploadCompleted: async ({ blob }) => {
         console.log('Maintenance photo uploaded:', blob.url)
+        await Promise.resolve()
       },
     })
 

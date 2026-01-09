@@ -3,8 +3,9 @@ import { Resend } from 'resend'
 import { z } from 'zod'
 import { escapeHtml } from '@/lib/security'
 import { checkRateLimit, getClientIdentifier, RATE_LIMITS } from '@/lib/rate-limit'
+import { env } from '@/lib/env'
 
-const resend = new Resend(process.env.AUTH_RESEND_KEY)
+const resend = new Resend(env().AUTH_RESEND_KEY)
 
 const contactSchema = z.object({
   name: z.string().min(1, 'Name is required').max(100, 'Name is too long'),
@@ -54,27 +55,23 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
     const safeMessage = escapeHtml(message).replace(/\n/g, '<br>')
 
     // Send email to the owner
-    const ownerEmail = process.env.OWNER_EMAIL ?? process.env.RESEND_FROM_EMAIL
-
-    if (ownerEmail) {
-      await resend.emails.send({
-        from: process.env.RESEND_FROM_EMAIL ?? 'noreply@example.com',
-        to: ownerEmail,
-        replyTo: email,
-        subject: `Contact Form: ${subject}`,
-        html: `
-          <h2>New Contact Form Submission</h2>
-          <p><strong>From:</strong> ${safeName} (${safeEmail})</p>
-          <p><strong>Subject:</strong> ${safeSubject}</p>
-          <hr>
-          <p>${safeMessage}</p>
-        `,
-      })
-    }
+    await resend.emails.send({
+      from: env().RESEND_FROM_EMAIL,
+      to: env().OWNER_EMAIL,
+      replyTo: email,
+      subject: `Contact Form: ${subject}`,
+      html: `
+        <h2>New Contact Form Submission</h2>
+        <p><strong>From:</strong> ${safeName} (${safeEmail})</p>
+        <p><strong>Subject:</strong> ${safeSubject}</p>
+        <hr>
+        <p>${safeMessage}</p>
+      `,
+    })
 
     // Send confirmation to the user
     await resend.emails.send({
-      from: process.env.RESEND_FROM_EMAIL ?? 'noreply@example.com',
+      from: env().RESEND_FROM_EMAIL,
       to: email,
       subject: 'We received your message - Big Bear Cabin',
       html: `

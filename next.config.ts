@@ -72,11 +72,8 @@ const nextConfig: NextConfig = {
         hostname: '*.public.blob.vercel-storage.com',
       },
     ],
-    // Using unoptimized for dynamic gallery images from database
-    // Remove this and configure remotePatterns for production optimization
-    unoptimized: true,
   },
-  async headers() {
+  headers() {
     return [
       {
         // Apply security headers to all routes

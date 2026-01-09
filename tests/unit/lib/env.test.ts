@@ -9,6 +9,7 @@ const validEnv = {
   AUTH_SECRET: 'test-auth-secret-32-chars-minimum',
   AUTH_RESEND_KEY: 're_test_key',
   RESEND_FROM_EMAIL: 'test@example.com',
+  OWNER_EMAIL: 'owner@example.com',
   STRIPE_SECRET_KEY: 'sk_test_1234567890',
   STRIPE_WEBHOOK_SECRET: 'whsec_test_1234567890',
   ICAL_SECRET: 'ical-secret-16chars',
@@ -90,13 +91,12 @@ describe('Environment Variable Validation', () => {
       delete process.env.UPSTASH_REDIS_REST_TOKEN
       delete process.env.BLOB_READ_WRITE_TOKEN
       delete process.env.NEXT_PUBLIC_APP_URL
-      delete process.env.OWNER_EMAIL
 
       const { validateEnv } = await import('@/lib/env')
       expect(() => validateEnv()).not.toThrow()
     })
 
-    it('should validate optional OWNER_EMAIL as email format when present', async () => {
+    it('should validate OWNER_EMAIL as email format', async () => {
       process.env.OWNER_EMAIL = 'not-an-email'
 
       const { validateEnv } = await import('@/lib/env')

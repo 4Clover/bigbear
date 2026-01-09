@@ -89,7 +89,7 @@ const WorkerList = ({ workers, onRefresh }: WorkerListProps) => {
             <div className="flex-1">
               <div className="flex items-center gap-2">
                 <h3 className="font-semibold text-gray-900">
-                  {worker.businessName || worker.user.name || 'Unknown'}
+                  {worker.businessName ?? worker.user.name ?? 'Unknown'}
                 </h3>
                 {!worker.isActive && (
                   <span className="px-2 py-0.5 text-xs font-medium bg-red-100 text-red-700 rounded">
@@ -184,7 +184,7 @@ const WorkerList = ({ workers, onRefresh }: WorkerListProps) => {
             ) : (
               <div className="flex items-start justify-between gap-2">
                 <p className="text-sm text-gray-600 flex-1">
-                  {worker.notes || <span className="italic text-gray-400">No notes</span>}
+                  {worker.notes ?? <span className="italic text-gray-400">No notes</span>}
                 </p>
                 <button
                   onClick={() => { setEditingId(worker.id); }}

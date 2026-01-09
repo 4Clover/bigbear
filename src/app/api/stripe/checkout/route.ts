@@ -168,6 +168,7 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
         depositAmount: depositAmount.toString(),
         totalAmount: totalAmount.toString(),
         addons: JSON.stringify(addons),
+        pricingTimestamp: Date.now().toString(),
       },
       customer_email: guestEmail,
       success_url: `${process.env.NEXT_PUBLIC_APP_URL ?? ''}/booking/success?session_id={CHECKOUT_SESSION_ID}`,

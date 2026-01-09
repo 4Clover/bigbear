@@ -37,7 +37,7 @@ const envSchema = z
     // Optional
     BLOB_READ_WRITE_TOKEN: z.string().optional(),
     NEXT_PUBLIC_APP_URL: z.url().optional(),
-    OWNER_EMAIL: z.email().optional(),
+    OWNER_EMAIL: z.email({ message: 'OWNER_EMAIL must be a valid email' }),
   })
   .refine((data) => data.ICAL_SECRET !== data.CRON_SECRET, {
     message: 'ICAL_SECRET and CRON_SECRET must be different values for security',

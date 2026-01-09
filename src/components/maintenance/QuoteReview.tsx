@@ -69,7 +69,7 @@ const QuoteReview = ({ jobTitle, quotes, onSuccess, onCancel }: QuoteReviewProps
               <div className="flex-1">
                 <div className="flex items-center gap-2">
                   <p className="font-medium text-gray-900">
-                    {quote.worker.businessName || quote.worker.user.name || quote.worker.user.email}
+                    {quote.worker.businessName ?? quote.worker.user.name ?? quote.worker.user.email}
                   </p>
                   {quote.worker.trustworthiness && (
                     <div className="flex items-center gap-1">

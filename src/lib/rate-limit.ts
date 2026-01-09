@@ -29,9 +29,7 @@ const isUpstashConfigured = (): boolean =>
 // Lazy-initialized Redis client
 let redis: Redis | null = null
 const getRedis = (): Redis => {
-  if (!redis) {
-    redis = Redis.fromEnv()
-  }
+  redis ??= Redis.fromEnv()
   return redis
 }
 

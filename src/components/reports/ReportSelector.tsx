@@ -99,7 +99,7 @@ export const ReportSelector = ({ currentType, currentYear, currentMonth }: Repor
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Month</label>
             <select
-              value={currentMonth || new Date().getMonth() + 1}
+              value={currentMonth ?? new Date().getMonth() + 1}
               onChange={(e) => { updateParams('month', e.target.value); }}
               className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
             >

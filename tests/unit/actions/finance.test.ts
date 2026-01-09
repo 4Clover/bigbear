@@ -30,6 +30,9 @@ vi.mock('next/cache', () => ({
   revalidatePath: mockRevalidatePath,
 }))
 
+// Silence console.error for expected blob deletion failures in tests
+vi.spyOn(console, 'error').mockImplementation(() => undefined)
+
 import {
   createExpense,
   updateTransaction,
@@ -834,6 +837,7 @@ describe('Finance Actions', () => {
   describe('getTransactions', () => {
     it('should return all transactions without filters', async () => {
       prismaMock.transaction.findMany.mockResolvedValueOnce([])
+      prismaMock.transaction.count.mockResolvedValueOnce(0)
 
       await getTransactions()
 
@@ -841,11 +845,14 @@ describe('Finance Actions', () => {
         where: {},
         include: { category: true, receipts: true },
         orderBy: { date: 'desc' },
+        take: 25,
+        skip: 0,
       })
     })
 
     it('should filter by type', async () => {
       prismaMock.transaction.findMany.mockResolvedValueOnce([])
+      prismaMock.transaction.count.mockResolvedValueOnce(0)
 
       await getTransactions({ type: 'EXPENSE' })
 
@@ -858,6 +865,7 @@ describe('Finance Actions', () => {
 
     it('should filter by category', async () => {
       prismaMock.transaction.findMany.mockResolvedValueOnce([])
+      prismaMock.transaction.count.mockResolvedValueOnce(0)
 
       await getTransactions({ categoryId: 'cat-1' })
 
@@ -873,6 +881,7 @@ describe('Finance Actions', () => {
       const endDate = new Date('2024-12-31')
 
       prismaMock.transaction.findMany.mockResolvedValueOnce([])
+      prismaMock.transaction.count.mockResolvedValueOnce(0)
 
       await getTransactions({ startDate, endDate })
 
@@ -889,6 +898,7 @@ describe('Finance Actions', () => {
       const startDate = new Date('2024-01-01')
 
       prismaMock.transaction.findMany.mockResolvedValueOnce([])
+      prismaMock.transaction.count.mockResolvedValueOnce(0)
 
       await getTransactions({ startDate })
 
@@ -905,6 +915,7 @@ describe('Finance Actions', () => {
       const endDate = new Date('2024-12-31')
 
       prismaMock.transaction.findMany.mockResolvedValueOnce([])
+      prismaMock.transaction.count.mockResolvedValueOnce(0)
 
       await getTransactions({ endDate })
 
@@ -919,6 +930,7 @@ describe('Finance Actions', () => {
 
     it('should search by description or vendor', async () => {
       prismaMock.transaction.findMany.mockResolvedValueOnce([])
+      prismaMock.transaction.count.mockResolvedValueOnce(0)
 
       await getTransactions({ search: 'office' })
 
@@ -939,6 +951,7 @@ describe('Finance Actions', () => {
       const endDate = new Date('2024-12-31')
 
       prismaMock.transaction.findMany.mockResolvedValueOnce([])
+      prismaMock.transaction.count.mockResolvedValueOnce(0)
 
       await getTransactions({
         type: 'EXPENSE',
@@ -960,6 +973,8 @@ describe('Finance Actions', () => {
         },
         include: { category: true, receipts: true },
         orderBy: { date: 'desc' },
+        take: 25,
+        skip: 0,
       })
     })
   })

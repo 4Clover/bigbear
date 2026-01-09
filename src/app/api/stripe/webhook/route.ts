@@ -2,6 +2,7 @@ import { type NextRequest, NextResponse } from 'next/server'
 import { headers } from 'next/headers'
 import { stripe } from '@/lib/stripe'
 import { prisma } from '@/lib/prisma'
+import { env } from '@/lib/env'
 import {
   sendBookingConfirmation,
   sendPaymentReceived,
@@ -11,7 +12,7 @@ import {
 import { isDateRangeAvailable } from '@/lib/utils/calendar'
 import { type Stripe } from 'stripe'
 
-const OWNER_EMAIL = process.env.OWNER_EMAIL ?? 'owner@example.com'
+const OWNER_EMAIL = env().OWNER_EMAIL
 
 interface AddonMetadata {
   id: string
@@ -75,6 +76,23 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
     ) {
       console.error('Checkout session missing required metadata fields')
       return NextResponse.json({ error: 'Invalid session metadata' }, { status: 400 })
+    }
+
+    // Verify price consistency between checkout and payment
+    // This prevents issues if pricing changed between checkout creation and payment completion
+    const storedTotal = parseFloat(totalAmount) + parseFloat(depositAmount)
+    const paidAmount = (session.amount_total ?? 0) / 100
+    const priceDifference = Math.abs(storedTotal - paidAmount)
+
+    if (priceDifference > 0.01) {
+      console.error('Price mismatch detected', {
+        storedTotal,
+        paidAmount,
+        difference: priceDifference,
+        sessionId: session.id,
+      })
+      // Log but don't reject - the payment already succeeded, so we honor the paid amount
+      // This provides visibility into any pricing race conditions
     }
 
     const checkInDate = new Date(checkIn)

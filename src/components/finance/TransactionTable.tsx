@@ -3,6 +3,7 @@
 import { useTransition } from 'react'
 import { deleteTransaction } from '@/actions/finance'
 import { formatCurrency, formatDate } from '@/lib/format'
+import { Pagination } from '@/components/ui/Pagination'
 import type { Transaction, ExpenseCategory, Receipt } from '@prisma/client'
 
 type TransactionWithRelations = Transaction & {
@@ -12,10 +13,21 @@ type TransactionWithRelations = Transaction & {
 
 interface TransactionTableProps {
   transactions: TransactionWithRelations[]
+  page: number
+  totalPages: number
+  total: number
+  pageSize: number
   onViewReceipts?: (transaction: TransactionWithRelations) => void
 }
 
-export const TransactionTable = ({ transactions, onViewReceipts }: TransactionTableProps) => {
+export const TransactionTable = ({
+  transactions,
+  page,
+  totalPages,
+  total,
+  pageSize,
+  onViewReceipts,
+}: TransactionTableProps) => {
   const [isPending, startTransition] = useTransition()
 
   const handleDelete = (id: string) => {
@@ -91,10 +103,10 @@ export const TransactionTable = ({ transactions, onViewReceipts }: TransactionTa
                 {transaction.category.name}
               </td>
               <td className="px-6 py-4 text-sm text-gray-900 max-w-xs truncate">
-                {transaction.description || '-'}
+                {transaction.description ?? '-'}
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                {transaction.vendor || '-'}
+                {transaction.vendor ?? '-'}
               </td>
               <td
                 className={`px-6 py-4 whitespace-nowrap text-sm font-medium text-right ${
@@ -131,7 +143,9 @@ export const TransactionTable = ({ transactions, onViewReceipts }: TransactionTa
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
                 <button
-                  onClick={() => { handleDelete(transaction.id); }}
+                  onClick={() => {
+                    handleDelete(transaction.id)
+                  }}
                   disabled={isPending}
                   className="text-red-600 hover:text-red-700 disabled:opacity-50"
                 >
@@ -142,6 +156,7 @@ export const TransactionTable = ({ transactions, onViewReceipts }: TransactionTa
           ))}
         </tbody>
       </table>
+      <Pagination page={page} totalPages={totalPages} total={total} pageSize={pageSize} />
     </div>
   )
 }

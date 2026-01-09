@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 import { approveWorkCompletion, markWorkerPaid } from '@/actions/maintenance'
 import type { Prisma } from '@prisma/client'
 
@@ -80,7 +81,7 @@ const CompletionReview = ({ jobTitle, completions, jobStatus, onSuccess, onCance
             <div className="flex items-start justify-between gap-4 mb-4">
               <div>
                 <p className="font-medium text-gray-900">
-                  {completion.worker.businessName || completion.worker.user.name || completion.worker.user.email}
+                  {completion.worker.businessName ?? completion.worker.user.name ?? completion.worker.user.email}
                 </p>
                 <p className="text-sm text-gray-500">Submitted: {formatDate(completion.submittedAt)}</p>
               </div>
@@ -118,9 +119,11 @@ const CompletionReview = ({ jobTitle, completions, jobStatus, onSuccess, onCance
                       rel="noopener noreferrer"
                       className="block"
                     >
-                      <img
+                      <Image
                         src={url}
                         alt={`Proof ${index + 1}`}
+                        width={200}
+                        height={96}
                         className="w-full h-24 object-cover rounded-lg hover:opacity-90 transition-opacity"
                       />
                     </a>

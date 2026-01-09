@@ -30,6 +30,9 @@ vi.mock('next/cache', () => ({
   revalidatePath: mockRevalidatePath,
 }))
 
+// Silence console.error for expected blob deletion failures in tests
+vi.spyOn(console, 'error').mockImplementation(() => undefined)
+
 import {
   createExpense,
   updateTransaction,
@@ -284,10 +287,11 @@ describe('Finance Workflow Data Paths', () => {
           receipts: [createdReceipt],
         },
       ] as never)
+      prismaMock.transaction.count.mockResolvedValueOnce(1)
 
-      const transactions = await getTransactions()
-      expect(transactions[0]?.receipts).toHaveLength(1)
-      expect(transactions[0]?.receipts?.[0]?.id).toBe(receiptId)
+      const result = await getTransactions()
+      expect(result.data[0]?.receipts).toHaveLength(1)
+      expect(result.data[0]?.receipts?.[0]?.id).toBe(receiptId)
 
       // Step 3: Delete the receipt
       prismaMock.receipt.findUnique.mockResolvedValueOnce(createdReceipt)
@@ -658,6 +662,7 @@ describe('Finance Workflow Data Paths', () => {
       const endDate = new Date('2024-06-30')
 
       prismaMock.transaction.findMany.mockResolvedValueOnce([])
+      prismaMock.transaction.count.mockResolvedValueOnce(0)
 
       await getTransactions({
         type: 'EXPENSE',
@@ -679,11 +684,14 @@ describe('Finance Workflow Data Paths', () => {
         },
         include: { category: true, receipts: true },
         orderBy: { date: 'desc' },
+        take: 25,
+        skip: 0,
       })
     })
 
     it('should handle search across both description and vendor', async () => {
       prismaMock.transaction.findMany.mockResolvedValueOnce([])
+      prismaMock.transaction.count.mockResolvedValueOnce(0)
 
       await getTransactions({ search: 'power' })
 

@@ -5,6 +5,8 @@ import { deleteBlob } from '@/lib/blob'
 import { revalidatePath } from 'next/cache'
 import { assertOwnerOrAccountant } from '@/lib/auth/guards'
 import type { TransactionType } from '@prisma/client'
+import type { PaginationParams } from '@/types/pagination'
+import { DEFAULT_PAGE_SIZE } from '@/types/pagination'
 
 export const createExpense = async (data: {
   categoryId: string
@@ -33,7 +35,7 @@ export const createExpense = async (data: {
         data: {
           transactionId: transaction.id,
           fileUrl: url,
-          fileName: url.split('/').pop() || 'receipt',
+          fileName: url.split('/').pop() ?? 'receipt',
         },
       })
     }
@@ -137,15 +139,19 @@ export const deleteReceipt = async (receiptId: string) => {
   return { success: true }
 }
 
-export const getTransactions = async (filters?: {
-  type?: TransactionType
-  categoryId?: string
-  startDate?: Date
-  endDate?: Date
-  search?: string
-}) => {
+export const getTransactions = async (
+  filters?: {
+    type?: TransactionType
+    categoryId?: string
+    startDate?: Date
+    endDate?: Date
+    search?: string
+  },
+  pagination: PaginationParams = {}
+) => {
   await assertOwnerOrAccountant()
 
+  const { page = 1, pageSize = DEFAULT_PAGE_SIZE } = pagination
   const where: Record<string, unknown> = {}
 
   if (filters?.type) where.type = filters.type
@@ -162,14 +168,27 @@ export const getTransactions = async (filters?: {
     ]
   }
 
-  return prisma.transaction.findMany({
-    where,
-    include: {
-      category: true,
-      receipts: true,
-    },
-    orderBy: { date: 'desc' },
-  })
+  const [transactions, total] = await Promise.all([
+    prisma.transaction.findMany({
+      where,
+      include: {
+        category: true,
+        receipts: true,
+      },
+      orderBy: { date: 'desc' },
+      take: pageSize,
+      skip: (page - 1) * pageSize,
+    }),
+    prisma.transaction.count({ where }),
+  ])
+
+  return {
+    data: transactions,
+    total,
+    page,
+    pageSize,
+    totalPages: Math.ceil(total / pageSize),
+  }
 }
 
 export const getFinanceSummary = async (year: number, month?: number) => {
@@ -196,7 +215,7 @@ export const getFinanceSummary = async (year: number, month?: number) => {
   const byCategory = transactions.reduce<Record<string, number>>(
     (acc, t) => {
       const key = t.category.name
-      if (!acc[key]) acc[key] = 0
+      acc[key] ??= 0
       acc[key] += Number(t.amount) * (t.type === 'EXPENSE' ? -1 : 1)
       return acc
     },

@@ -66,7 +66,7 @@ export const ScheduleEReportPdf = ({ data }: ScheduleEReportPdfProps) => {
               <View key={item.line} style={styles.tableRow}>
                 <Text style={[styles.tableCell, styles.textBold, { width: 60 }]}>{item.line}</Text>
                 <Text style={[styles.tableCell, { flex: 1 }]}>
-                  {SCHEDULE_E_LINE_DESCRIPTIONS[item.line] || 'Other expenses'}
+                  {SCHEDULE_E_LINE_DESCRIPTIONS[item.line] ?? 'Other expenses'}
                 </Text>
                 <Text style={[styles.tableCell, styles.textRight, { width: 100 }]}>
                   {formatCurrencyPdf(item.total)}

@@ -6,8 +6,11 @@ import { assertOwner, assertWorker, assertOwnerOrWorker } from '@/lib/auth/guard
 import { auth } from '@/lib/auth'
 import { sendQuoteReceived, sendMaintenanceCompleted } from '@/lib/notifications'
 import type { JobPriority, JobStatus } from '@prisma/client'
+import type { PaginationParams } from '@/types/pagination'
+import { DEFAULT_PAGE_SIZE } from '@/types/pagination'
+import { env } from '@/lib/env'
 
-const OWNER_EMAIL = process.env.OWNER_EMAIL ?? 'owner@example.com'
+const OWNER_EMAIL = env().OWNER_EMAIL
 
 // ============================================================================
 // Worker Actions
@@ -289,13 +292,17 @@ export const createMaintenanceJob = async (data: {
   return { success: true, job }
 }
 
-export const getMaintenanceJobs = async (filters?: {
-  status?: JobStatus
-  priority?: JobPriority
-  search?: string
-}) => {
+export const getMaintenanceJobs = async (
+  filters?: {
+    status?: JobStatus
+    priority?: JobPriority
+    search?: string
+  },
+  pagination: PaginationParams = {}
+) => {
   await assertOwnerOrWorker()
 
+  const { page = 1, pageSize = DEFAULT_PAGE_SIZE } = pagination
   const where: Record<string, unknown> = {}
 
   if (filters?.status) where.status = filters.status
@@ -307,21 +314,34 @@ export const getMaintenanceJobs = async (filters?: {
     ]
   }
 
-  return prisma.maintenanceJob.findMany({
-    where,
-    include: {
-      quotes: {
-        include: { worker: { include: { user: true } } },
+  const [jobs, total] = await Promise.all([
+    prisma.maintenanceJob.findMany({
+      where,
+      include: {
+        quotes: {
+          include: { worker: { include: { user: true } } },
+        },
+        workCompletions: {
+          include: { worker: { include: { user: true } } },
+        },
+        assignedWorker: {
+          include: { user: true },
+        },
       },
-      workCompletions: {
-        include: { worker: { include: { user: true } } },
-      },
-      assignedWorker: {
-        include: { user: true },
-      },
-    },
-    orderBy: [{ priority: 'desc' }, { createdAt: 'desc' }],
-  })
+      orderBy: [{ priority: 'desc' }, { createdAt: 'desc' }],
+      take: pageSize,
+      skip: (page - 1) * pageSize,
+    }),
+    prisma.maintenanceJob.count({ where }),
+  ])
+
+  return {
+    data: jobs,
+    total,
+    page,
+    pageSize,
+    totalPages: Math.ceil(total / pageSize),
+  }
 }
 
 export const getMaintenanceJob = async (jobId: string) => {

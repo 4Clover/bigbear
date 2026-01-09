@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef, useCallback } from 'react'
+import Image from 'next/image'
 import { upload } from '@vercel/blob/client'
 import type { PutBlobResult } from '@vercel/blob'
 
@@ -141,9 +142,11 @@ const ProofPhotoUploader = ({ onUpload, existingPhotos = [] }: ProofPhotoUploade
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
             {uploadedPhotos.map((url, index) => (
               <div key={index} className="relative group">
-                <img
+                <Image
                   src={url}
                   alt={`Proof photo ${index + 1}`}
+                  width={200}
+                  height={96}
                   className="w-full h-24 object-cover rounded-lg"
                 />
                 <button
