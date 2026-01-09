@@ -2,6 +2,7 @@ import { type NextRequest, NextResponse } from 'next/server'
 import { stripe } from '@/lib/stripe'
 import { prisma } from '@/lib/prisma'
 import { checkRateLimit, getClientIdentifier, RATE_LIMITS } from '@/lib/rate-limit'
+import { isDateRangeAvailable } from '@/lib/utils/calendar'
 import { z } from 'zod'
 
 // Zod schema for checkout request validation
@@ -101,6 +102,24 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
       return NextResponse.json(
         { error: `Maximum stay is ${pricing.maxNights} nights` },
         { status: 400 }
+      )
+    }
+
+    // Check date availability before creating checkout session
+    const [existingBookings, blockedDates] = await Promise.all([
+      prisma.booking.findMany({
+        where: { status: { in: ['CONFIRMED', 'PENDING'] } },
+        select: { checkIn: true, checkOut: true },
+      }),
+      prisma.blockedDate.findMany({
+        select: { startDate: true, endDate: true },
+      }),
+    ])
+
+    if (!isDateRangeAvailable(checkInDate, checkOutDate, existingBookings, blockedDates)) {
+      return NextResponse.json(
+        { error: 'Selected dates are no longer available' },
+        { status: 409 }
       )
     }
 

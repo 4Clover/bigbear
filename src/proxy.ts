@@ -10,10 +10,12 @@ export const proxy = auth((req) => {
   const { pathname } = req.nextUrl
   const session = req.auth
 
-  // Check if route requires owner access
+  // Check if route requires owner or worker access
   const isOwnerRoute = pathname.startsWith('/owner')
+  const isWorkerRoute = pathname.startsWith('/worker')
+  const isProtectedRoute = isOwnerRoute || isWorkerRoute
 
-  if (isOwnerRoute) {
+  if (isProtectedRoute) {
     // Not authenticated at all
     if (!session?.user) {
       const loginUrl = new URL('/login', req.nextUrl.origin)
@@ -21,9 +23,12 @@ export const proxy = auth((req) => {
       return NextResponse.redirect(loginUrl)
     }
 
-    // Authenticated but not OWNER role
-    if (session.user.role !== 'OWNER') {
-      // Redirect to home - user doesn't have access
+    // Check role-specific access
+    if (isOwnerRoute && session.user.role !== 'OWNER') {
+      return NextResponse.redirect(new URL('/', req.nextUrl.origin))
+    }
+
+    if (isWorkerRoute && session.user.role !== 'WORKER') {
       return NextResponse.redirect(new URL('/', req.nextUrl.origin))
     }
   }

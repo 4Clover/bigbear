@@ -135,14 +135,16 @@ export const checkRateLimit = async (
     }
   }
 
-  // Fallback to in-memory (with warning in production)
+  // In production, require Upstash Redis for distributed rate limiting
   if (process.env.NODE_ENV === 'production') {
-    console.warn(
-      '⚠️ Using in-memory rate limiting in production. ' +
-        'Configure UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN for distributed rate limiting.'
+    throw new Error(
+      'UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN are required in production for rate limiting. ' +
+        'In-memory rate limiting is not reliable across serverless instances.'
     )
   }
 
+  // Fallback to in-memory for development only
+  console.warn('[Rate Limit] Using in-memory fallback (development only)')
   return checkRateLimitInMemory(identifier, options)
 }
 

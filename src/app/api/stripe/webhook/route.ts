@@ -2,7 +2,13 @@ import { type NextRequest, NextResponse } from 'next/server'
 import { headers } from 'next/headers'
 import { stripe } from '@/lib/stripe'
 import { prisma } from '@/lib/prisma'
-import { sendBookingConfirmation, sendPaymentReceived, sendPaymentFailed } from '@/lib/notifications'
+import {
+  sendBookingConfirmation,
+  sendPaymentReceived,
+  sendPaymentFailed,
+  sendBookingFailedRefund,
+} from '@/lib/notifications'
+import { isDateRangeAvailable } from '@/lib/utils/calendar'
 import { type Stripe } from 'stripe'
 
 const OWNER_EMAIL = process.env.OWNER_EMAIL ?? 'owner@example.com'
@@ -71,77 +77,124 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
       return NextResponse.json({ error: 'Invalid session metadata' }, { status: 400 })
     }
 
-    // Create or get guest user
-    let user = await prisma.user.findUnique({
-      where: { email: guestEmail },
-    })
+    const checkInDate = new Date(checkIn)
+    const checkOutDate = new Date(checkOut)
+    const paymentIntentId = session.payment_intent as string
 
-    user ??= await prisma.user.create({
-      data: {
-        email: guestEmail,
-        name: guestName,
-        phone: guestPhone ?? null,
-        role: 'GUEST',
-      },
-    })
+    // Use transaction for atomic availability check and booking creation
+    try {
+      const booking = await prisma.$transaction(async (tx) => {
+        // Check availability within transaction to prevent race conditions
+        const [existingBookings, blockedDates] = await Promise.all([
+          tx.booking.findMany({
+            where: { status: { in: ['CONFIRMED', 'PENDING'] } },
+            select: { checkIn: true, checkOut: true },
+          }),
+          tx.blockedDate.findMany({
+            select: { startDate: true, endDate: true },
+          }),
+        ])
 
-    // Create booking
-    const booking = await prisma.booking.create({
-      data: {
-        guestId: user.id,
-        checkIn: new Date(checkIn),
-        checkOut: new Date(checkOut),
-        guestName: guestName,
-        guestEmail: guestEmail,
-        guestPhone: guestPhone ?? null,
-        basePrice: parseFloat(basePrice),
-        addonsTotal: parseFloat(addonsTotal),
-        depositAmount: parseFloat(depositAmount),
-        totalAmount: parseFloat(totalAmount),
-        paymentIntentId: session.payment_intent as string,
-        status: 'CONFIRMED',
-      },
-    })
+        if (!isDateRangeAvailable(checkInDate, checkOutDate, existingBookings, blockedDates)) {
+          throw new Error('DATES_UNAVAILABLE')
+        }
 
-    // Create booking addons
-    const addons = JSON.parse(addonsJson ?? '[]') as AddonMetadata[]
-    for (const addon of addons) {
-      const addonData = await prisma.addon.findUnique({ where: { id: addon.id } })
-      if (addonData) {
-        await prisma.bookingAddon.create({
+        // Create or get guest user
+        let user = await tx.user.findUnique({
+          where: { email: guestEmail },
+        })
+
+        user ??= await tx.user.create({
           data: {
-            bookingId: booking.id,
-            addonId: addon.id,
-            quantity: addon.quantity,
-            price: addonData.price,
+            email: guestEmail,
+            name: guestName,
+            phone: guestPhone ?? null,
+            role: 'GUEST',
           },
         })
-      }
-    }
 
-    // Log income transaction
-    const incomeCategory = await prisma.expenseCategory.findFirst({
-      where: { name: 'Rental Income' },
-    })
+        // Create booking
+        const newBooking = await tx.booking.create({
+          data: {
+            guestId: user.id,
+            checkIn: checkInDate,
+            checkOut: checkOutDate,
+            guestName: guestName,
+            guestEmail: guestEmail,
+            guestPhone: guestPhone ?? null,
+            basePrice: parseFloat(basePrice),
+            addonsTotal: parseFloat(addonsTotal),
+            depositAmount: parseFloat(depositAmount),
+            totalAmount: parseFloat(totalAmount),
+            paymentIntentId,
+            status: 'CONFIRMED',
+          },
+        })
 
-    if (incomeCategory) {
-      await prisma.transaction.create({
-        data: {
-          type: 'INCOME',
-          categoryId: incomeCategory.id,
-          amount: parseFloat(totalAmount),
-          date: new Date(),
-          description: `Booking #${booking.id.slice(-6)}`,
-          bookingId: booking.id,
-        },
+        // Create booking addons
+        const addons = JSON.parse(addonsJson ?? '[]') as AddonMetadata[]
+        for (const addon of addons) {
+          const addonData = await tx.addon.findUnique({ where: { id: addon.id } })
+          if (addonData) {
+            await tx.bookingAddon.create({
+              data: {
+                bookingId: newBooking.id,
+                addonId: addon.id,
+                quantity: addon.quantity,
+                price: addonData.price,
+              },
+            })
+          }
+        }
+
+        // Log income transaction
+        const incomeCategory = await tx.expenseCategory.findFirst({
+          where: { name: 'Rental Income' },
+        })
+
+        if (incomeCategory) {
+          await tx.transaction.create({
+            data: {
+              type: 'INCOME',
+              categoryId: incomeCategory.id,
+              amount: parseFloat(totalAmount),
+              date: new Date(),
+              description: `Booking #${newBooking.id.slice(-6)}`,
+              bookingId: newBooking.id,
+            },
+          })
+        }
+
+        return newBooking
       })
-    }
 
-    // Send notifications (guest confirmation + owner notification)
-    await sendBookingConfirmation(booking)
-    sendPaymentReceived(booking, OWNER_EMAIL).catch(() => {
-      // Owner notification failure should not affect webhook response
-    })
+      // Send notifications (guest confirmation + owner notification)
+      await sendBookingConfirmation(booking)
+      sendPaymentReceived(booking, OWNER_EMAIL).catch(() => {
+        // Owner notification failure should not affect webhook response
+      })
+    } catch (error) {
+      if (error instanceof Error && error.message === 'DATES_UNAVAILABLE') {
+        // Dates are no longer available - issue refund
+        console.error('Double-booking prevented: dates no longer available, issuing refund')
+
+        await stripe.refunds.create({ payment_intent: paymentIntentId })
+
+        // Notify guest about the issue and refund
+        await sendBookingFailedRefund({
+          guestEmail,
+          guestName,
+          checkIn,
+          checkOut,
+        })
+
+        return NextResponse.json(
+          { error: 'Dates no longer available - refund issued' },
+          { status: 409 }
+        )
+      }
+      throw error
+    }
   }
 
   if (event.type === 'payment_intent.payment_failed') {

@@ -17,6 +17,7 @@ export const POST = async (request: Request): Promise<NextResponse> => {
 
         return {
           allowedContentTypes: ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'],
+          maximumSizeInBytes: 10 * 1024 * 1024, // 10MB limit
           addRandomSuffix: true,
         }
       },

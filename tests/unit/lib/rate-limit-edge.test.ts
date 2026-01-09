@@ -143,21 +143,17 @@ describe('Rate Limiting Edge Cases', () => {
     })
   })
 
-  describe('Production Warning', () => {
-    it('should log warning when using in-memory in production', async () => {
-      const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => { /* noop */ })
+  describe('Production Enforcement', () => {
+    it('should throw error when using in-memory in production', async () => {
       vi.stubEnv('NODE_ENV', 'production')
 
       vi.resetModules()
       const { checkRateLimit } = await import('@/lib/rate-limit')
 
-      await checkRateLimit('test:ip', { limit: 5, windowSeconds: 60 })
+      await expect(
+        checkRateLimit('test:ip', { limit: 5, windowSeconds: 60 })
+      ).rejects.toThrow('UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN are required in production')
 
-      expect(consoleSpy).toHaveBeenCalledWith(
-        expect.stringContaining('Using in-memory rate limiting in production')
-      )
-
-      consoleSpy.mockRestore()
       vi.unstubAllEnvs()
     })
   })

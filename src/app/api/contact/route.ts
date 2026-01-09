@@ -1,16 +1,17 @@
 import { type NextRequest, NextResponse } from 'next/server'
 import { Resend } from 'resend'
+import { z } from 'zod'
 import { escapeHtml } from '@/lib/security'
 import { checkRateLimit, getClientIdentifier, RATE_LIMITS } from '@/lib/rate-limit'
 
 const resend = new Resend(process.env.AUTH_RESEND_KEY)
 
-interface ContactFormData {
-  name: string
-  email: string
-  subject: string
-  message: string
-}
+const contactSchema = z.object({
+  name: z.string().min(1, 'Name is required').max(100, 'Name is too long'),
+  email: z.email({ message: 'Invalid email address' }),
+  subject: z.string().min(1, 'Subject is required').max(200, 'Subject is too long'),
+  message: z.string().min(1, 'Message is required').max(5000, 'Message is too long'),
+})
 
 export const POST = async (request: NextRequest): Promise<NextResponse> => {
   // Check rate limit
@@ -33,12 +34,18 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
   }
 
   try {
-    const body = (await request.json()) as ContactFormData
-    const { name, email, subject, message } = body
+    const rawBody: unknown = await request.json()
 
-    if (!name || !email || !subject || !message) {
-      return NextResponse.json({ error: 'All fields are required' }, { status: 400 })
+    const result = contactSchema.safeParse(rawBody)
+    if (!result.success) {
+      const errors = result.error.issues.map((issue) => ({
+        field: issue.path.join('.'),
+        message: issue.message,
+      }))
+      return NextResponse.json({ error: 'Validation failed', details: errors }, { status: 400 })
     }
+
+    const { name, email, subject, message } = result.data
 
     // Sanitize user input to prevent XSS in emails
     const safeName = escapeHtml(name)

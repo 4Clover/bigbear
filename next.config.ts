@@ -1,5 +1,12 @@
 import type { NextConfig } from 'next'
 
+const isDev = process.env.NODE_ENV === 'development'
+
+// Script-src CSP: include unsafe-eval only in development (required for Next.js hot reload)
+const scriptSrc = isDev
+  ? "'self' 'unsafe-eval' 'unsafe-inline' https://js.stripe.com"
+  : "'self' 'unsafe-inline' https://js.stripe.com"
+
 // Security headers for all routes
 const securityHeaders = [
   {
@@ -30,8 +37,8 @@ const securityHeaders = [
     key: 'Content-Security-Policy',
     value: [
       "default-src 'self'",
-      // Scripts: self + Stripe + unsafe-inline/eval for Next.js dev
-      "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://js.stripe.com",
+      // Scripts: self + Stripe (unsafe-eval only in development)
+      `script-src ${scriptSrc}`,
       // Styles: self + unsafe-inline for Tailwind
       "style-src 'self' 'unsafe-inline'",
       // Images: self + blob + data + Vercel Blob storage

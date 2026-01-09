@@ -180,6 +180,54 @@ export const sendBookingCancellation = async (booking: Booking, refundAmount: nu
   }
 }
 
+
+interface BookingFailedRefundInfo {
+  guestEmail: string
+  guestName: string
+  checkIn: string
+  checkOut: string
+}
+
+export const sendBookingFailedRefund = async (info: BookingFailedRefundInfo) => {
+  const { guestEmail, guestName, checkIn, checkOut } = info
+  const safeGuestName = escapeHtml(guestName)
+
+  try {
+    await resend.emails.send({
+      from: fromEmail,
+      to: guestEmail,
+      subject: 'Booking Could Not Be Completed - Refund Issued',
+      html: `
+        <h1>Booking Could Not Be Completed</h1>
+        <p>Hello ${safeGuestName},</p>
+        <p>We're sorry, but your booking for ${checkIn} to ${checkOut} could not be completed because the dates are no longer available.</p>
+        <p>A full refund has been issued to your payment method. Please allow 5-10 business days for the refund to appear on your statement.</p>
+        <p>We apologize for the inconvenience. Please visit our website to check available dates and make a new booking.</p>
+        <p>If you have any questions, please don't hesitate to contact us.</p>
+      `,
+    })
+
+    await logNotification(
+      'BOOKING_CANCELLED',
+      guestEmail,
+      'email',
+      'Booking Failed - Refund Issued',
+      'sent'
+    )
+  } catch (error) {
+    await logNotification(
+      'BOOKING_CANCELLED',
+      guestEmail,
+      'email',
+      'Booking Failed - Refund Issued',
+      'failed',
+      error instanceof Error ? error.message : 'Unknown error'
+    )
+    // Re-throw to ensure caller knows notification failed
+    throw error
+  }
+}
+
 export const sendCheckinReminder = async (booking: Booking) => {
   const preference = await prisma.notificationPreference.findUnique({
     where: { event: 'GUEST_CHECKIN_REMINDER' },
