@@ -125,7 +125,7 @@ const JobCard = ({
         <div className="mt-4 flex flex-wrap gap-2">
           {job.status === 'OPEN' && onQuote && (
             <button
-              onClick={() => onQuote(job.id)}
+              onClick={() => { onQuote(job.id); }}
               className="px-3 py-1.5 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700 transition-colors"
             >
               Submit Quote
@@ -133,7 +133,7 @@ const JobCard = ({
           )}
           {job.status === 'ASSIGNED' && onSchedule && (
             <button
-              onClick={() => onSchedule(job.id)}
+              onClick={() => { onSchedule(job.id); }}
               className="px-3 py-1.5 bg-purple-600 text-white text-sm font-medium rounded hover:bg-purple-700 transition-colors"
             >
               Book Timeslot
@@ -141,7 +141,7 @@ const JobCard = ({
           )}
           {job.status === 'SCHEDULED' && onStart && (
             <button
-              onClick={() => onStart(job.id)}
+              onClick={() => { onStart(job.id); }}
               className="px-3 py-1.5 bg-orange-600 text-white text-sm font-medium rounded hover:bg-orange-700 transition-colors"
             >
               Start Work
@@ -149,7 +149,7 @@ const JobCard = ({
           )}
           {(job.status === 'SCHEDULED' || job.status === 'IN_PROGRESS') && onComplete && (
             <button
-              onClick={() => onComplete(job.id)}
+              onClick={() => { onComplete(job.id); }}
               className="px-3 py-1.5 bg-emerald-600 text-white text-sm font-medium rounded hover:bg-emerald-700 transition-colors"
             >
               Mark Complete

@@ -64,7 +64,7 @@ export const TransactionFilters = ({
             <input
               type="text"
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e) => { setSearch(e.target.value); }}
               placeholder="Description or vendor..."
               className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
             />
@@ -81,7 +81,7 @@ export const TransactionFilters = ({
           <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
           <select
             value={currentType ?? ''}
-            onChange={(e) => updateParams('type', e.target.value || null)}
+            onChange={(e) => { updateParams('type', e.target.value || null); }}
             className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-white"
           >
             <option value="">All types</option>
@@ -97,7 +97,7 @@ export const TransactionFilters = ({
           <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
           <select
             value={currentCategoryId ?? ''}
-            onChange={(e) => updateParams('categoryId', e.target.value || null)}
+            onChange={(e) => { updateParams('categoryId', e.target.value || null); }}
             className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-white"
           >
             <option value="">All categories</option>
@@ -114,7 +114,7 @@ export const TransactionFilters = ({
           <input
             type="date"
             value={currentFrom ?? ''}
-            onChange={(e) => updateParams('from', e.target.value || null)}
+            onChange={(e) => { updateParams('from', e.target.value || null); }}
             className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
           />
         </div>
@@ -124,7 +124,7 @@ export const TransactionFilters = ({
           <input
             type="date"
             value={currentTo ?? ''}
-            onChange={(e) => updateParams('to', e.target.value || null)}
+            onChange={(e) => { updateParams('to', e.target.value || null); }}
             className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
           />
         </div>

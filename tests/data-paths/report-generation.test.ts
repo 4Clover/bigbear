@@ -110,14 +110,14 @@ describe('Report Generation Data Paths', () => {
       expect(Object.keys(report.byCategory)).toHaveLength(3)
       expect(report.byCategory['Rental Income']?.income).toBe(3000)
       expect(report.byCategory['Rental Income']?.expenses).toBe(0)
-      expect(report.byCategory['Utilities']?.income).toBe(0)
-      expect(report.byCategory['Utilities']?.expenses).toBe(350)
-      expect(report.byCategory['Repairs']?.expenses).toBe(500)
+      expect(report.byCategory.Utilities?.income).toBe(0)
+      expect(report.byCategory.Utilities?.expenses).toBe(350)
+      expect(report.byCategory.Repairs?.expenses).toBe(500)
 
       // Verify transaction counts per category
       expect(report.byCategory['Rental Income']?.transactions).toHaveLength(2)
-      expect(report.byCategory['Utilities']?.transactions).toHaveLength(2)
-      expect(report.byCategory['Repairs']?.transactions).toHaveLength(1)
+      expect(report.byCategory.Utilities?.transactions).toHaveLength(2)
+      expect(report.byCategory.Repairs?.transactions).toHaveLength(1)
     })
 
     it('should handle months with no transactions', async () => {

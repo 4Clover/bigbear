@@ -131,7 +131,7 @@ export const TransactionTable = ({ transactions, onViewReceipts }: TransactionTa
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
                 <button
-                  onClick={() => handleDelete(transaction.id)}
+                  onClick={() => { handleDelete(transaction.id); }}
                   disabled={isPending}
                   className="text-red-600 hover:text-red-700 disabled:opacity-50"
                 >

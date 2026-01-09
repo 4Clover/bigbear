@@ -64,7 +64,7 @@ const TimeslotPicker = ({ jobId, jobTitle, onSuccess, onCancel }: TimeslotPicker
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={(e) => { void handleSubmit(e); }} className="space-y-4">
         <div>
           <label htmlFor="date" className="block text-sm font-medium text-gray-700 mb-1">
             Select Date *
@@ -73,7 +73,7 @@ const TimeslotPicker = ({ jobId, jobTitle, onSuccess, onCancel }: TimeslotPicker
             type="date"
             id="date"
             value={selectedDate}
-            onChange={(e) => setSelectedDate(e.target.value)}
+            onChange={(e) => { setSelectedDate(e.target.value); }}
             min={minDate}
             required
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -89,7 +89,7 @@ const TimeslotPicker = ({ jobId, jobTitle, onSuccess, onCancel }: TimeslotPicker
               <button
                 key={time}
                 type="button"
-                onClick={() => setSelectedTime(time)}
+                onClick={() => { setSelectedTime(time); }}
                 className={`px-3 py-2 text-sm font-medium rounded-lg border transition-colors ${
                   selectedTime === time
                     ? 'bg-blue-600 text-white border-blue-600'

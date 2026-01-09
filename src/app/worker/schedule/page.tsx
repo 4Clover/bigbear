@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { getAssignedJobs, startWork } from '@/actions/maintenance'
 import type { JobPriority, JobStatus } from '@prisma/client'
 
-type Job = {
+interface Job {
   id: string
   title: string
   description: string | null
@@ -49,7 +49,7 @@ const WorkerSchedulePage = () => {
   }, [])
 
   useEffect(() => {
-    loadJobs()
+    void loadJobs()
   }, [loadJobs])
 
   const handleStart = async (jobId: string) => {
@@ -70,14 +70,17 @@ const WorkerSchedulePage = () => {
   const scheduledJobs = jobs.filter((j) => j.scheduledDate && ['SCHEDULED', 'IN_PROGRESS'].includes(j.status))
   const unscheduledJobs = jobs.filter((j) => !j.scheduledDate && j.status === 'ASSIGNED')
 
-  const jobsByDate = scheduledJobs.reduce(
+  const jobsByDate = scheduledJobs.reduce<Record<string, Job[]>>(
     (acc, job) => {
-      const dateKey = new Date(job.scheduledDate!).toISOString().split('T')[0] ?? ''
-      if (!acc[dateKey]) acc[dateKey] = []
-      acc[dateKey]!.push(job)
+      // scheduledDate is guaranteed non-null due to filter above
+      // eslint-disable-next-line @typescript-eslint/non-nullable-type-assertion-style
+      const scheduledDate = job.scheduledDate as Date
+      const dateKey = new Date(scheduledDate).toISOString().split('T')[0] ?? ''
+      acc[dateKey] ??= []
+      acc[dateKey].push(job)
       return acc
     },
-    {} as Record<string, Job[]>
+    {}
   )
 
   const sortedDates = Object.keys(jobsByDate).sort()
@@ -122,7 +125,7 @@ const WorkerSchedulePage = () => {
                     )}
                   </div>
                   <button
-                    onClick={() => router.push('/worker/jobs')}
+                    onClick={() => { router.push('/worker/jobs'); }}
                     className="px-3 py-1.5 bg-purple-600 text-white text-sm font-medium rounded hover:bg-purple-700 transition-colors"
                   >
                     Schedule
@@ -167,14 +170,14 @@ const WorkerSchedulePage = () => {
                       <div className="flex gap-2">
                         {job.status === 'SCHEDULED' && (
                           <button
-                            onClick={() => handleStart(job.id)}
+                            onClick={() => { void handleStart(job.id); }}
                             className="px-3 py-1.5 bg-orange-600 text-white text-sm font-medium rounded hover:bg-orange-700 transition-colors"
                           >
                             Start
                           </button>
                         )}
                         <button
-                          onClick={() => handleComplete(job.id)}
+                          onClick={() => { handleComplete(job.id); }}
                           className="px-3 py-1.5 bg-emerald-600 text-white text-sm font-medium rounded hover:bg-emerald-700 transition-colors"
                         >
                           Complete

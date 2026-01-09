@@ -4,7 +4,10 @@ import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 import { assertOwner, assertWorker, assertOwnerOrWorker } from '@/lib/auth/guards'
 import { auth } from '@/lib/auth'
+import { sendQuoteReceived, sendMaintenanceCompleted } from '@/lib/notifications'
 import type { JobPriority, JobStatus } from '@prisma/client'
+
+const OWNER_EMAIL = process.env.OWNER_EMAIL ?? 'owner@example.com'
 
 // ============================================================================
 // Worker Actions
@@ -74,7 +77,7 @@ export const submitQuote = async (data: {
     where: { id: data.jobId },
   })
 
-  if (!job || job.status !== 'OPEN') {
+  if (job?.status !== 'OPEN') {
     throw new Error('Job not available for quoting')
   }
 
@@ -99,6 +102,11 @@ export const submitQuote = async (data: {
   await prisma.maintenanceJob.update({
     where: { id: data.jobId },
     data: { status: 'QUOTED' },
+  })
+
+  // Send owner notification (non-blocking)
+  sendQuoteReceived(job, { ...data, id: quote.id }, OWNER_EMAIL).catch(() => {
+    // Notification failure should not affect quote submission
   })
 
   revalidatePath('/worker/jobs')
@@ -127,7 +135,7 @@ export const bookTimeslot = async (data: {
     where: { id: data.jobId },
   })
 
-  if (!job || job.assignedWorkerId !== workerProfile.id) {
+  if (job?.assignedWorkerId !== workerProfile.id) {
     throw new Error('Job not assigned to you')
   }
 
@@ -174,7 +182,7 @@ export const submitWorkCompletion = async (data: {
     where: { id: data.jobId },
   })
 
-  if (!job || job.assignedWorkerId !== workerProfile.id) {
+  if (job?.assignedWorkerId !== workerProfile.id) {
     throw new Error('Job not assigned to you')
   }
 
@@ -203,6 +211,15 @@ export const submitWorkCompletion = async (data: {
     },
   })
 
+  // Send owner notification (non-blocking)
+  sendMaintenanceCompleted(
+    job,
+    { id: completion.id, finalAmount: data.finalAmount, description: data.description },
+    OWNER_EMAIL
+  ).catch(() => {
+    // Notification failure should not affect work completion
+  })
+
   revalidatePath('/worker/jobs')
   revalidatePath('/owner/maintenance')
 
@@ -224,7 +241,7 @@ export const startWork = async (jobId: string) => {
     where: { id: jobId },
   })
 
-  if (!job || job.assignedWorkerId !== workerProfile.id) {
+  if (job?.assignedWorkerId !== workerProfile.id) {
     throw new Error('Job not assigned to you')
   }
 

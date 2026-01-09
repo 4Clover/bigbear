@@ -6,7 +6,7 @@ import { getMaintenanceJob } from '@/actions/maintenance'
 import CompletionForm from '@/components/worker/CompletionForm'
 import type { JobPriority, JobStatus } from '@prisma/client'
 
-type Job = {
+interface Job {
   id: string
   title: string
   description: string | null
@@ -44,7 +44,7 @@ const WorkerCompletePage = () => {
         setIsLoading(false)
       }
     }
-    loadJob()
+    void loadJob()
   }, [jobId])
 
   const handleSuccess = () => {
@@ -82,7 +82,7 @@ const WorkerCompletePage = () => {
           </svg>
           <p className="mt-4 text-red-700">{error || 'Job not found'}</p>
           <button
-            onClick={() => router.push('/worker/jobs')}
+            onClick={() => { router.push('/worker/jobs'); }}
             className="mt-4 px-4 py-2 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700 transition-colors"
           >
             Back to Jobs

@@ -298,10 +298,10 @@ describe('Owner Notification Preferences Data Path', () => {
         {}
       )
 
-      expect(prefsMap['BOOKING_REQUEST']?.email).toBe(true)
-      expect(prefsMap['BOOKING_REQUEST']?.sms).toBe(false)
-      expect(prefsMap['PAYMENT_RECEIVED']?.email).toBe(true)
-      expect(prefsMap['PAYMENT_RECEIVED']?.sms).toBe(true)
+      expect(prefsMap.BOOKING_REQUEST?.email).toBe(true)
+      expect(prefsMap.BOOKING_REQUEST?.sms).toBe(false)
+      expect(prefsMap.PAYMENT_RECEIVED?.email).toBe(true)
+      expect(prefsMap.PAYMENT_RECEIVED?.sms).toBe(true)
     })
 
     it('should provide default values for unconfigured events', () => {

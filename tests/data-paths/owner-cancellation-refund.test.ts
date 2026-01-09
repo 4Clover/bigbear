@@ -7,8 +7,8 @@ import {
   resetBookingCounter,
 } from '../fixtures/booking.factory'
 
-// Simple Decimal-like class for tests
-class Decimal {
+// Simple Decimal-like class for tests (reserved for future use)
+class _Decimal {
   private value: number
 
   constructor(value: string | number) {
@@ -234,7 +234,7 @@ describe('Owner Cancellation Refund Data Path', () => {
       const cancelledBooking = {
         ...confirmedBooking,
         status: 'CANCELLED' as const,
-        notes: `${confirmedBooking.notes}\n\n${cancellationNote}`,
+        notes: `${confirmedBooking.notes ?? ''}\n\n${cancellationNote}`,
       }
 
       prismaMock.booking.update.mockResolvedValue(cancelledBooking)
@@ -243,7 +243,7 @@ describe('Owner Cancellation Refund Data Path', () => {
         where: { id: confirmedBooking.id },
         data: {
           status: 'CANCELLED',
-          notes: `${confirmedBooking.notes}\n\n${cancellationNote}`,
+          notes: `${confirmedBooking.notes ?? ''}\n\n${cancellationNote}`,
         },
       })
 

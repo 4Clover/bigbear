@@ -11,7 +11,7 @@ const envSchema = z.object({
   // Auth
   AUTH_SECRET: z.string().min(1, 'AUTH_SECRET is required'),
   AUTH_RESEND_KEY: z.string().min(1, 'AUTH_RESEND_KEY is required'),
-  RESEND_FROM_EMAIL: z.string().email('RESEND_FROM_EMAIL must be a valid email'),
+  RESEND_FROM_EMAIL: z.email({ message: 'RESEND_FROM_EMAIL must be a valid email' }),
 
   // Stripe
   STRIPE_SECRET_KEY: z.string().startsWith('sk_', 'STRIPE_SECRET_KEY must start with sk_'),
@@ -22,13 +22,13 @@ const envSchema = z.object({
   CRON_SECRET: z.string().min(16, 'CRON_SECRET must be at least 16 characters'),
 
   // Upstash Redis (for rate limiting) - optional, falls back to in-memory
-  UPSTASH_REDIS_REST_URL: z.string().url().optional(),
+  UPSTASH_REDIS_REST_URL: z.url().optional(),
   UPSTASH_REDIS_REST_TOKEN: z.string().optional(),
 
   // Optional
   BLOB_READ_WRITE_TOKEN: z.string().optional(),
-  NEXT_PUBLIC_APP_URL: z.string().url().optional(),
-  OWNER_EMAIL: z.string().email().optional(),
+  NEXT_PUBLIC_APP_URL: z.url().optional(),
+  OWNER_EMAIL: z.email().optional(),
 })
 
 export type Env = z.infer<typeof envSchema>
@@ -59,8 +59,6 @@ let validatedEnv: Env | null = null
  * Validates on first call and caches the result
  */
 export const env = (): Env => {
-  if (!validatedEnv) {
-    validatedEnv = validateEnv()
-  }
+  validatedEnv ??= validateEnv()
   return validatedEnv
 }

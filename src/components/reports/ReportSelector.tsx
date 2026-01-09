@@ -65,7 +65,7 @@ export const ReportSelector = ({ currentType, currentYear, currentMonth }: Repor
             {(['monthly', 'annual', 'schedule-e'] as ReportType[]).map((type) => (
               <button
                 key={type}
-                onClick={() => handleTypeChange(type)}
+                onClick={() => { handleTypeChange(type); }}
                 className={`px-4 py-2 text-sm font-medium transition-colors ${
                   currentType === type
                     ? 'bg-emerald-600 text-white'
@@ -83,7 +83,7 @@ export const ReportSelector = ({ currentType, currentYear, currentMonth }: Repor
           <label className="block text-sm font-medium text-gray-700 mb-1">Year</label>
           <select
             value={currentYear}
-            onChange={(e) => updateParams('year', e.target.value)}
+            onChange={(e) => { updateParams('year', e.target.value); }}
             className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
           >
             {years.map((year) => (
@@ -100,7 +100,7 @@ export const ReportSelector = ({ currentType, currentYear, currentMonth }: Repor
             <label className="block text-sm font-medium text-gray-700 mb-1">Month</label>
             <select
               value={currentMonth || new Date().getMonth() + 1}
-              onChange={(e) => updateParams('month', e.target.value)}
+              onChange={(e) => { updateParams('month', e.target.value); }}
               className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
             >
               {months.map((month) => (

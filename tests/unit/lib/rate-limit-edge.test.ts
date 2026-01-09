@@ -145,7 +145,7 @@ describe('Rate Limiting Edge Cases', () => {
 
   describe('Production Warning', () => {
     it('should log warning when using in-memory in production', async () => {
-      const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+      const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => { /* noop */ })
       vi.stubEnv('NODE_ENV', 'production')
 
       vi.resetModules()

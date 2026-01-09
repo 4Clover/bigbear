@@ -193,14 +193,14 @@ export const getFinanceSummary = async (year: number, month?: number) => {
     .filter((t) => t.type === 'EXPENSE')
     .reduce((sum, t) => sum + Number(t.amount), 0)
 
-  const byCategory = transactions.reduce(
+  const byCategory = transactions.reduce<Record<string, number>>(
     (acc, t) => {
       const key = t.category.name
       if (!acc[key]) acc[key] = 0
       acc[key] += Number(t.amount) * (t.type === 'EXPENSE' ? -1 : 1)
       return acc
     },
-    {} as Record<string, number>
+    {}
   )
 
   return {

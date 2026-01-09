@@ -3,6 +3,7 @@
 import { prisma } from '@/lib/prisma'
 import { stripe } from '@/lib/stripe'
 import { calculateRefund } from '@/lib/utils/refund'
+import { sendBookingConfirmation, sendBookingCancellation } from '@/lib/notifications'
 import { revalidatePath } from 'next/cache'
 import { assertOwner } from '@/lib/auth/guards'
 
@@ -49,6 +50,11 @@ export const cancelBooking = async (bookingId: string, initiatedBy: 'guest' | 'o
     },
   })
 
+  // Send cancellation notification (non-blocking)
+  sendBookingCancellation(booking, refund.amount).catch(() => {
+    // Notification failure should not affect booking cancellation
+  })
+
   revalidatePath('/owner/bookings')
   revalidatePath('/owner/dashboard')
 
@@ -70,7 +76,10 @@ export const approveBookingRequest = async (bookingId: string) => {
     data: { status: 'CONFIRMED' },
   })
 
-  // TODO: Send approval email to guest
+  // Send confirmation notification (non-blocking)
+  sendBookingConfirmation(booking).catch(() => {
+    // Notification failure should not affect booking approval
+  })
 
   revalidatePath('/owner/bookings')
   revalidatePath('/owner/dashboard')
@@ -96,7 +105,10 @@ export const rejectBookingRequest = async (bookingId: string, reason?: string) =
     },
   })
 
-  // TODO: Send rejection email to guest with reason
+  // Send rejection notification (refund amount is 0 since no payment was made)
+  sendBookingCancellation(booking, 0).catch(() => {
+    // Notification failure should not affect booking rejection
+  })
 
   revalidatePath('/owner/bookings')
   revalidatePath('/owner/dashboard')

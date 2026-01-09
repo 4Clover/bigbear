@@ -3,7 +3,7 @@ import {
   isDateRangeAvailable,
   getUnavailableDates,
   formatICalDate,
-  type DateRange,
+  type DateRange as _DateRange,
 } from '@/lib/utils/calendar'
 import { addDays } from 'date-fns'
 

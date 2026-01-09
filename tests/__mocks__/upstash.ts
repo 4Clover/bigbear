@@ -34,9 +34,9 @@ export class MockRatelimit {
   limit = mockLimit
 }
 
-// Mock Redis class
-export class MockRedis {
-  static fromEnv = vi.fn().mockReturnValue({})
+// Mock Redis object
+export const MockRedis = {
+  fromEnv: vi.fn().mockReturnValue({}),
 }
 
 // Helper to simulate rate limit exceeded

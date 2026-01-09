@@ -62,7 +62,7 @@ const InviteWorkerForm = ({ onSuccess, onCancel }: InviteWorkerFormProps) => {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={(e) => { void handleSubmit(e); }} className="space-y-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
@@ -129,8 +129,8 @@ const InviteWorkerForm = ({ onSuccess, onCancel }: InviteWorkerFormProps) => {
             <input
               type="text"
               value={serviceInput}
-              onChange={(e) => setServiceInput(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddService())}
+              onChange={(e) => { setServiceInput(e.target.value); }}
+              onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleAddService(); } }}
               className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
               placeholder="e.g., Plumbing, Electrical"
             />
@@ -152,7 +152,7 @@ const InviteWorkerForm = ({ onSuccess, onCancel }: InviteWorkerFormProps) => {
                   {service}
                   <button
                     type="button"
-                    onClick={() => handleRemoveService(index)}
+                    onClick={() => { handleRemoveService(index); }}
                     className="text-emerald-600 hover:text-emerald-800"
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

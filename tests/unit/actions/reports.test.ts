@@ -96,7 +96,7 @@ describe('Report Actions', () => {
       expect(result.income).toBe(1000)
       expect(result.expenses).toBe(350)
       expect(result.netIncome).toBe(650)
-      expect(result.byCategory['Utilities']?.expenses).toBe(350)
+      expect(result.byCategory.Utilities?.expenses).toBe(350)
       expect(result.byCategory['Rental Income']?.income).toBe(1000)
     })
 

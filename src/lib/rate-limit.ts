@@ -41,19 +41,18 @@ const rateLimiters = new Map<string, Ratelimit>()
 const getRateLimiter = (prefix: string, options: RateLimitOptions): Ratelimit => {
   const cacheKey = `${prefix}:${options.limit}:${options.windowSeconds}`
 
-  if (!rateLimiters.has(cacheKey)) {
-    rateLimiters.set(
-      cacheKey,
-      new Ratelimit({
-        redis: getRedis(),
-        limiter: Ratelimit.slidingWindow(options.limit, `${options.windowSeconds} s`),
-        prefix: `@bigbear/ratelimit:${prefix}`,
-        analytics: true,
-      })
-    )
+  let limiter = rateLimiters.get(cacheKey)
+  if (!limiter) {
+    limiter = new Ratelimit({
+      redis: getRedis(),
+      limiter: Ratelimit.slidingWindow(options.limit, `${options.windowSeconds} s`),
+      prefix: `@bigbear/ratelimit:${prefix}`,
+      analytics: true,
+    })
+    rateLimiters.set(cacheKey, limiter)
   }
 
-  return rateLimiters.get(cacheKey)!
+  return limiter
 }
 
 // --- In-Memory Fallback Implementation ---

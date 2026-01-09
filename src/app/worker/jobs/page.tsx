@@ -8,7 +8,7 @@ import QuoteForm from '@/components/worker/QuoteForm'
 import TimeslotPicker from '@/components/worker/TimeslotPicker'
 import type { JobPriority, JobStatus } from '@prisma/client'
 
-type Job = {
+interface Job {
   id: string
   title: string
   description: string | null
@@ -49,7 +49,7 @@ const WorkerJobsPage = () => {
   }, [])
 
   useEffect(() => {
-    loadJobs()
+    void loadJobs()
   }, [loadJobs])
 
   const handleQuote = (jobId: string) => {
@@ -82,7 +82,7 @@ const WorkerJobsPage = () => {
 
   const handleModalSuccess = () => {
     setActiveModal(null)
-    loadJobs()
+    void loadJobs()
   }
 
   if (isLoading) {
@@ -100,7 +100,7 @@ const WorkerJobsPage = () => {
       {/* Tabs */}
       <div className="flex gap-4 mb-6 border-b border-gray-200">
         <button
-          onClick={() => setActiveTab('available')}
+          onClick={() => { setActiveTab('available'); }}
           className={`pb-3 px-1 text-sm font-medium border-b-2 transition-colors ${
             activeTab === 'available'
               ? 'border-blue-600 text-blue-600'
@@ -110,7 +110,7 @@ const WorkerJobsPage = () => {
           Available Jobs ({availableJobs.length})
         </button>
         <button
-          onClick={() => setActiveTab('assigned')}
+          onClick={() => { setActiveTab('assigned'); }}
           className={`pb-3 px-1 text-sm font-medium border-b-2 transition-colors ${
             activeTab === 'assigned'
               ? 'border-blue-600 text-blue-600'
@@ -135,7 +135,7 @@ const WorkerJobsPage = () => {
           jobs={assignedJobs}
           emptyMessage="No jobs assigned to you"
           onSchedule={handleSchedule}
-          onStart={handleStart}
+          onStart={(jobId) => { void handleStart(jobId); }}
           onComplete={handleComplete}
         />
       )}
@@ -149,7 +149,7 @@ const WorkerJobsPage = () => {
                 jobId={activeModal.jobId}
                 jobTitle={activeModal.jobTitle}
                 onSuccess={handleModalSuccess}
-                onCancel={() => setActiveModal(null)}
+                onCancel={() => { setActiveModal(null); }}
               />
             )}
             {activeModal.type === 'schedule' && (
@@ -157,7 +157,7 @@ const WorkerJobsPage = () => {
                 jobId={activeModal.jobId}
                 jobTitle={activeModal.jobTitle}
                 onSuccess={handleModalSuccess}
-                onCancel={() => setActiveModal(null)}
+                onCancel={() => { setActiveModal(null); }}
               />
             )}
           </div>

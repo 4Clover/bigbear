@@ -68,8 +68,8 @@ export const ReceiptUploader = ({ onUpload, existingReceipts = [] }: ReceiptUplo
       e.stopPropagation()
       setDragActive(false)
 
-      if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-        handleFiles(e.dataTransfer.files)
+      if (e.dataTransfer.files.length > 0) {
+        void handleFiles(e.dataTransfer.files)
       }
     },
     [handleFiles]
@@ -78,7 +78,7 @@ export const ReceiptUploader = ({ onUpload, existingReceipts = [] }: ReceiptUplo
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       if (e.target.files && e.target.files.length > 0) {
-        handleFiles(e.target.files)
+        void handleFiles(e.target.files)
       }
     },
     [handleFiles]

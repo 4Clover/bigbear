@@ -70,7 +70,7 @@ export const ReceiptGallery = ({ receipts, canDelete = true }: ReceiptGalleryPro
             </a>
             {canDelete && (
               <button
-                onClick={() => handleDelete(receipt.id)}
+                onClick={() => { handleDelete(receipt.id); }}
                 disabled={isPending}
                 className="px-3 py-1.5 bg-red-600 text-white text-xs font-medium rounded-lg hover:bg-red-700 disabled:opacity-50"
               >

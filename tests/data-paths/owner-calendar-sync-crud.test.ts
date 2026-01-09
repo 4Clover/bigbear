@@ -136,7 +136,7 @@ describe('Owner Calendar Sync CRUD Data Path', () => {
       // When a calendar sync is removed, its imported blocked dates should be cleaned up
       // This tests the data relationship expectation
       const syncId = 'sync-123'
-      const externalIdPattern = `sync-${syncId}-%`
+      const _externalIdPattern = `sync-${syncId}-%`
 
       prismaMock.blockedDate.deleteMany.mockResolvedValue({ count: 3 })
 

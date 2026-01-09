@@ -82,7 +82,7 @@ export const ExpenseForm = ({ categories }: ExpenseFormProps) => {
                 step="0.01"
                 min="0"
                 value={amount}
-                onChange={(e) => setAmount(e.target.value)}
+                onChange={(e) => { setAmount(e.target.value); }}
                 placeholder="0.00"
                 className="w-full pl-7 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
               />
@@ -96,7 +96,7 @@ export const ExpenseForm = ({ categories }: ExpenseFormProps) => {
             <input
               type="date"
               value={date}
-              onChange={(e) => setDate(e.target.value)}
+              onChange={(e) => { setDate(e.target.value); }}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
             />
           </div>
@@ -106,7 +106,7 @@ export const ExpenseForm = ({ categories }: ExpenseFormProps) => {
             <input
               type="text"
               value={vendor}
-              onChange={(e) => setVendor(e.target.value)}
+              onChange={(e) => { setVendor(e.target.value); }}
               placeholder="e.g., Home Depot"
               className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
             />
@@ -117,7 +117,7 @@ export const ExpenseForm = ({ categories }: ExpenseFormProps) => {
           <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
           <textarea
             value={description}
-            onChange={(e) => setDescription(e.target.value)}
+            onChange={(e) => { setDescription(e.target.value); }}
             placeholder="What was this expense for?"
             rows={3}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
@@ -131,7 +131,7 @@ export const ExpenseForm = ({ categories }: ExpenseFormProps) => {
       </div>
 
       <div className="flex justify-end gap-3">
-        <Button type="button" variant="ghost" onClick={() => router.back()} disabled={isPending}>
+        <Button type="button" variant="ghost" onClick={() => { router.back(); }} disabled={isPending}>
           Cancel
         </Button>
         <Button type="submit" isLoading={isPending}>

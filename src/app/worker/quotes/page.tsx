@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { getWorkerQuotes } from '@/actions/maintenance'
 import type { JobPriority, JobStatus } from '@prisma/client'
 
-type Quote = {
+interface Quote {
   id: string
   amount: number
   description: string | null
@@ -50,7 +50,7 @@ const WorkerQuotesPage = () => {
         setIsLoading(false)
       }
     }
-    loadQuotes()
+    void loadQuotes()
   }, [])
 
   if (isLoading) {
@@ -102,7 +102,7 @@ const WorkerQuotesPage = () => {
                 </div>
                 <div className="flex flex-col items-end gap-2">
                   <span className="text-lg font-bold text-gray-900">
-                    {formatCurrency(Number(quote.amount))}
+                    {formatCurrency(quote.amount)}
                   </span>
                   <span
                     className={`px-2 py-1 text-xs font-medium rounded ${

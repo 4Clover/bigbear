@@ -64,7 +64,7 @@ const OwnerMaintenancePage = () => {
       await Promise.all([loadJobs(), loadWorkers()])
       setIsLoading(false)
     }
-    loadData()
+    void loadData()
   }, [loadJobs, loadWorkers])
 
   const handleCancelJob = async (jobId: string) => {
@@ -98,7 +98,7 @@ const OwnerMaintenancePage = () => {
         <div className="flex gap-2">
           {activeTab === 'jobs' && (
             <button
-              onClick={() => setActiveModal({ type: 'createJob' })}
+              onClick={() => { setActiveModal({ type: 'createJob' }); }}
               className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white font-medium rounded-lg hover:bg-emerald-700 transition-colors"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -114,7 +114,7 @@ const OwnerMaintenancePage = () => {
           )}
           {activeTab === 'workers' && (
             <button
-              onClick={() => setActiveModal({ type: 'inviteWorker' })}
+              onClick={() => { setActiveModal({ type: 'inviteWorker' }); }}
               className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white font-medium rounded-lg hover:bg-emerald-700 transition-colors"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -134,7 +134,7 @@ const OwnerMaintenancePage = () => {
       {/* Tabs */}
       <div className="flex gap-4 mb-6 border-b border-gray-200">
         <button
-          onClick={() => setActiveTab('jobs')}
+          onClick={() => { setActiveTab('jobs'); }}
           className={`pb-3 px-1 text-sm font-medium border-b-2 transition-colors ${
             activeTab === 'jobs'
               ? 'border-emerald-600 text-emerald-600'
@@ -144,7 +144,7 @@ const OwnerMaintenancePage = () => {
           Jobs ({jobs.length})
         </button>
         <button
-          onClick={() => setActiveTab('workers')}
+          onClick={() => { setActiveTab('workers'); }}
           className={`pb-3 px-1 text-sm font-medium border-b-2 transition-colors ${
             activeTab === 'workers'
               ? 'border-emerald-600 text-emerald-600'
@@ -159,14 +159,14 @@ const OwnerMaintenancePage = () => {
       {activeTab === 'jobs' && (
         <JobList
           jobs={jobs}
-          onViewQuotes={(job) => setActiveModal({ type: 'quotes', job })}
-          onViewCompletion={(job) => setActiveModal({ type: 'completion', job })}
-          onCancel={handleCancelJob}
+          onViewQuotes={(job) => { setActiveModal({ type: 'quotes', job }); }}
+          onViewCompletion={(job) => { setActiveModal({ type: 'completion', job }); }}
+          onCancel={(jobId) => { void handleCancelJob(jobId); }}
         />
       )}
 
       {activeTab === 'workers' && (
-        <WorkerList workers={workers} onRefresh={loadWorkers} />
+        <WorkerList workers={workers} onRefresh={() => { void loadWorkers(); }} />
       )}
 
       {/* Modals */}
@@ -175,16 +175,16 @@ const OwnerMaintenancePage = () => {
           <div className="w-full max-w-lg">
             {activeModal.type === 'createJob' && (
               <JobForm
-                onSuccess={handleModalSuccess}
-                onCancel={() => setActiveModal(null)}
+                onSuccess={() => { void handleModalSuccess(); }}
+                onCancel={() => { setActiveModal(null); }}
               />
             )}
             {activeModal.type === 'quotes' && (
               <QuoteReview
                 jobTitle={activeModal.job.title}
                 quotes={activeModal.job.quotes}
-                onSuccess={handleModalSuccess}
-                onCancel={() => setActiveModal(null)}
+                onSuccess={() => { void handleModalSuccess(); }}
+                onCancel={() => { setActiveModal(null); }}
               />
             )}
             {activeModal.type === 'completion' && (
@@ -192,14 +192,14 @@ const OwnerMaintenancePage = () => {
                 jobTitle={activeModal.job.title}
                 completions={activeModal.job.workCompletions}
                 jobStatus={activeModal.job.status}
-                onSuccess={handleModalSuccess}
-                onCancel={() => setActiveModal(null)}
+                onSuccess={() => { void handleModalSuccess(); }}
+                onCancel={() => { setActiveModal(null); }}
               />
             )}
             {activeModal.type === 'inviteWorker' && (
               <InviteWorkerForm
-                onSuccess={handleModalSuccess}
-                onCancel={() => setActiveModal(null)}
+                onSuccess={() => { void handleModalSuccess(); }}
+                onCancel={() => { setActiveModal(null); }}
               />
             )}
           </div>

@@ -52,7 +52,7 @@ const QuoteForm = ({ jobId, jobTitle, onSuccess, onCancel }: QuoteFormProps) => 
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={(e) => { void handleSubmit(e); }} className="space-y-4">
         <div>
           <label htmlFor="amount" className="block text-sm font-medium text-gray-700 mb-1">
             Quote Amount ($) *

@@ -120,7 +120,7 @@ const WorkerList = ({ workers, onRefresh }: WorkerListProps) => {
                 {[1, 2, 3, 4, 5].map((star) => (
                   <button
                     key={star}
-                    onClick={() => handleUpdateTrust(worker.id, star)}
+                    onClick={() => { void handleUpdateTrust(worker.id, star); }}
                     disabled={isSubmitting}
                     className="focus:outline-none"
                   >
@@ -153,7 +153,7 @@ const WorkerList = ({ workers, onRefresh }: WorkerListProps) => {
                 onSubmit={(e) => {
                   e.preventDefault()
                   const formData = new FormData(e.currentTarget)
-                  handleSaveNotes(worker.id, formData.get('notes') as string)
+                  void handleSaveNotes(worker.id, formData.get('notes') as string)
                 }}
                 className="space-y-2"
               >
@@ -174,7 +174,7 @@ const WorkerList = ({ workers, onRefresh }: WorkerListProps) => {
                   </button>
                   <button
                     type="button"
-                    onClick={() => setEditingId(null)}
+                    onClick={() => { setEditingId(null); }}
                     className="px-3 py-1 text-sm text-gray-600 hover:text-gray-900 transition-colors"
                   >
                     Cancel
@@ -187,7 +187,7 @@ const WorkerList = ({ workers, onRefresh }: WorkerListProps) => {
                   {worker.notes || <span className="italic text-gray-400">No notes</span>}
                 </p>
                 <button
-                  onClick={() => setEditingId(worker.id)}
+                  onClick={() => { setEditingId(worker.id); }}
                   className="text-sm text-emerald-600 hover:text-emerald-700 transition-colors"
                 >
                   Edit
@@ -199,7 +199,7 @@ const WorkerList = ({ workers, onRefresh }: WorkerListProps) => {
           {/* Toggle Active */}
           <div className="mt-4 pt-4 border-t border-gray-100">
             <button
-              onClick={() => handleToggleActive(worker.id, worker.isActive)}
+              onClick={() => { void handleToggleActive(worker.id, worker.isActive); }}
               disabled={isSubmitting}
               className={`text-sm font-medium ${
                 worker.isActive

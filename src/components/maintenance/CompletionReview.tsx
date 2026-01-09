@@ -165,7 +165,7 @@ const CompletionReview = ({ jobTitle, completions, jobStatus, onSuccess, onCance
             <div className="mt-4 flex gap-2">
               {jobStatus === 'COMPLETED' && !completion.isApproved && (
                 <button
-                  onClick={() => handleApprove(completion.id)}
+                  onClick={() => { void handleApprove(completion.id); }}
                   disabled={isSubmitting}
                   className="flex-1 px-4 py-2 bg-emerald-600 text-white text-sm font-medium rounded-lg hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
@@ -174,7 +174,7 @@ const CompletionReview = ({ jobTitle, completions, jobStatus, onSuccess, onCance
               )}
               {jobStatus === 'APPROVED' && completion.isApproved && !completion.isPaid && (
                 <button
-                  onClick={() => handleMarkPaid(completion.id)}
+                  onClick={() => { void handleMarkPaid(completion.id); }}
                   disabled={isSubmitting}
                   className="flex-1 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >

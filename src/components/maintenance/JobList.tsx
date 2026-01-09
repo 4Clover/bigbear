@@ -127,7 +127,7 @@ const JobList = ({ jobs, onViewQuotes, onViewCompletion, onCancel }: JobListProp
                   <div className="flex flex-wrap gap-1">
                     {job.status === 'QUOTED' && job.quotes.length > 0 && (
                       <button
-                        onClick={() => onViewQuotes(job)}
+                        onClick={() => { onViewQuotes(job); }}
                         className="px-2 py-1 text-xs font-medium bg-yellow-100 text-yellow-700 rounded hover:bg-yellow-200 transition-colors"
                       >
                         View Quotes ({job.quotes.length})
@@ -135,7 +135,7 @@ const JobList = ({ jobs, onViewQuotes, onViewCompletion, onCancel }: JobListProp
                     )}
                     {job.status === 'COMPLETED' && job.workCompletions.length > 0 && (
                       <button
-                        onClick={() => onViewCompletion(job)}
+                        onClick={() => { onViewCompletion(job); }}
                         className="px-2 py-1 text-xs font-medium bg-teal-100 text-teal-700 rounded hover:bg-teal-200 transition-colors"
                       >
                         Review Work
@@ -143,7 +143,7 @@ const JobList = ({ jobs, onViewQuotes, onViewCompletion, onCancel }: JobListProp
                     )}
                     {job.status === 'APPROVED' && job.workCompletions.some(c => !c.isPaid) && (
                       <button
-                        onClick={() => onViewCompletion(job)}
+                        onClick={() => { onViewCompletion(job); }}
                         className="px-2 py-1 text-xs font-medium bg-emerald-100 text-emerald-700 rounded hover:bg-emerald-200 transition-colors"
                       >
                         Mark Paid
@@ -151,7 +151,7 @@ const JobList = ({ jobs, onViewQuotes, onViewCompletion, onCancel }: JobListProp
                     )}
                     {!['COMPLETED', 'APPROVED', 'PAID', 'CANCELLED'].includes(job.status) && (
                       <button
-                        onClick={() => onCancel(job.id)}
+                        onClick={() => { onCancel(job.id); }}
                         className="px-2 py-1 text-xs font-medium bg-red-100 text-red-700 rounded hover:bg-red-200 transition-colors"
                       >
                         Cancel

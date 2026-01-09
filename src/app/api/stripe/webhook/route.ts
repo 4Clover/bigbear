@@ -2,8 +2,10 @@ import { type NextRequest, NextResponse } from 'next/server'
 import { headers } from 'next/headers'
 import { stripe } from '@/lib/stripe'
 import { prisma } from '@/lib/prisma'
-import { sendBookingConfirmation } from '@/lib/notifications'
+import { sendBookingConfirmation, sendPaymentReceived, sendPaymentFailed } from '@/lib/notifications'
 import { type Stripe } from 'stripe'
+
+const OWNER_EMAIL = process.env.OWNER_EMAIL ?? 'owner@example.com'
 
 interface AddonMetadata {
   id: string
@@ -135,8 +137,32 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
       })
     }
 
-    // Send confirmation email
+    // Send notifications (guest confirmation + owner notification)
     await sendBookingConfirmation(booking)
+    sendPaymentReceived(booking, OWNER_EMAIL).catch(() => {
+      // Owner notification failure should not affect webhook response
+    })
+  }
+
+  if (event.type === 'payment_intent.payment_failed') {
+    const paymentIntent = event.data.object
+    const errorMessage = paymentIntent.last_payment_error?.message ?? 'Unknown payment error'
+
+    // Try to find associated booking via metadata
+    const bookingId = paymentIntent.metadata.bookingId
+    if (bookingId) {
+      const booking = await prisma.booking.findUnique({
+        where: { id: bookingId },
+      })
+
+      if (booking) {
+        sendPaymentFailed(booking, OWNER_EMAIL, errorMessage).catch(() => {
+          // Owner notification failure should not affect webhook response
+        })
+      }
+    }
+
+    console.error('Payment failed:', errorMessage)
   }
 
   return NextResponse.json({ received: true })
