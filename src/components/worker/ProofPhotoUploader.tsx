@@ -94,8 +94,8 @@ const ProofPhotoUploader = ({ onUpload, existingPhotos = [] }: ProofPhotoUploade
           transition-colors cursor-pointer
           ${
             dragActive
-              ? 'border-blue-500 bg-blue-50'
-              : 'border-gray-300 hover:border-gray-400'
+              ? 'border-secondary bg-secondary/10'
+              : 'border-border hover:border-muted-foreground'
           }
           ${isUploading ? 'opacity-50 pointer-events-none' : ''}
         `}
@@ -111,7 +111,7 @@ const ProofPhotoUploader = ({ onUpload, existingPhotos = [] }: ProofPhotoUploade
         />
 
         <svg
-          className="mx-auto h-12 w-12 text-gray-400"
+          className="mx-auto h-12 w-12 text-muted-foreground"
           stroke="currentColor"
           fill="none"
           viewBox="0 0 48 48"
@@ -124,21 +124,21 @@ const ProofPhotoUploader = ({ onUpload, existingPhotos = [] }: ProofPhotoUploade
           />
         </svg>
 
-        <p className="mt-2 text-sm text-gray-600">
+        <p className="mt-2 text-sm text-muted-foreground">
           {isUploading ? (
             'Uploading...'
           ) : (
             <>
-              <span className="font-medium text-blue-600">Click to upload</span> or drag and drop
+              <span className="font-medium text-secondary">Click to upload</span> or drag and drop
             </>
           )}
         </p>
-        <p className="mt-1 text-xs text-gray-500">PNG, JPG, or WebP up to 10MB</p>
+        <p className="mt-1 text-xs text-muted-foreground">PNG, JPG, or WebP up to 10MB</p>
       </div>
 
       {uploadedPhotos.length > 0 && (
         <div className="space-y-2">
-          <p className="text-sm font-medium text-gray-700">Uploaded photos:</p>
+          <p className="text-sm font-medium text-foreground">Uploaded photos:</p>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
             {uploadedPhotos.map((url, index) => (
               <div key={index} className="relative group">
@@ -155,7 +155,7 @@ const ProofPhotoUploader = ({ onUpload, existingPhotos = [] }: ProofPhotoUploade
                     e.stopPropagation()
                     removePhoto(index)
                   }}
-                  className="absolute top-1 right-1 w-6 h-6 bg-red-600 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="absolute top-1 right-1 w-6 h-6 bg-destructive text-destructive-foreground rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path

@@ -65,40 +65,40 @@ const CompletionReview = ({ jobTitle, completions, jobStatus, onSuccess, onCance
   }
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 p-6 max-w-2xl max-h-[80vh] overflow-y-auto">
-      <h3 className="text-lg font-semibold text-gray-900 mb-2">Review Work Completion</h3>
-      <p className="text-sm text-gray-600 mb-4">Job: {jobTitle}</p>
+    <div className="bg-card rounded-lg border border-border p-6 max-w-2xl max-h-[80vh] overflow-y-auto">
+      <h3 className="text-lg font-semibold text-foreground mb-2">Review Work Completion</h3>
+      <p className="text-sm text-muted-foreground mb-4">Job: {jobTitle}</p>
 
       {error && (
-        <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">
+        <div className="mb-4 p-3 bg-destructive/10 border border-destructive/20 text-destructive rounded-lg text-sm">
           {error}
         </div>
       )}
 
       <div className="space-y-6">
         {completions.map((completion) => (
-          <div key={completion.id} className="border border-gray-200 rounded-lg p-4">
+          <div key={completion.id} className="border border-border rounded-lg p-4">
             <div className="flex items-start justify-between gap-4 mb-4">
               <div>
-                <p className="font-medium text-gray-900">
+                <p className="font-medium text-foreground">
                   {completion.worker.businessName ?? completion.worker.user.name ?? completion.worker.user.email}
                 </p>
-                <p className="text-sm text-gray-500">Submitted: {formatDate(completion.submittedAt)}</p>
+                <p className="text-sm text-muted-foreground">Submitted: {formatDate(completion.submittedAt)}</p>
               </div>
               <div className="text-right">
                 {completion.finalAmount && (
-                  <p className="text-lg font-bold text-gray-900">
+                  <p className="text-lg font-bold text-foreground">
                     {formatCurrency(completion.finalAmount)}
                   </p>
                 )}
                 <div className="flex gap-2 mt-1">
                   {completion.isApproved && (
-                    <span className="px-2 py-0.5 text-xs font-medium bg-emerald-100 text-emerald-700 rounded">
+                    <span className="px-2 py-0.5 text-xs font-medium bg-success/20 text-success rounded">
                       Approved
                     </span>
                   )}
                   {completion.isPaid && (
-                    <span className="px-2 py-0.5 text-xs font-medium bg-gray-100 text-gray-700 rounded">
+                    <span className="px-2 py-0.5 text-xs font-medium bg-muted text-muted-foreground rounded">
                       Paid
                     </span>
                   )}
@@ -109,7 +109,7 @@ const CompletionReview = ({ jobTitle, completions, jobStatus, onSuccess, onCance
             {/* Proof Photos */}
             {completion.images.length > 0 && (
               <div className="mb-4">
-                <p className="text-sm font-medium text-gray-700 mb-2">Proof Photos:</p>
+                <p className="text-sm font-medium text-foreground mb-2">Proof Photos:</p>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                   {completion.images.map((url, index) => (
                     <a
@@ -135,31 +135,31 @@ const CompletionReview = ({ jobTitle, completions, jobStatus, onSuccess, onCance
             {/* Details */}
             <div className="space-y-3">
               {completion.description && (
-                <div className="p-3 bg-gray-50 rounded-lg">
-                  <p className="text-xs font-medium text-gray-500 mb-1">Description</p>
-                  <p className="text-sm text-gray-700">{completion.description}</p>
+                <div className="p-3 bg-muted rounded-lg">
+                  <p className="text-xs font-medium text-muted-foreground mb-1">Description</p>
+                  <p className="text-sm text-foreground">{completion.description}</p>
                 </div>
               )}
 
               <div className="grid grid-cols-2 gap-3">
                 {completion.hoursWorked && (
-                  <div className="p-3 bg-gray-50 rounded-lg">
-                    <p className="text-xs font-medium text-gray-500 mb-1">Hours Worked</p>
-                    <p className="text-sm text-gray-700">{Number(completion.hoursWorked)}</p>
+                  <div className="p-3 bg-muted rounded-lg">
+                    <p className="text-xs font-medium text-muted-foreground mb-1">Hours Worked</p>
+                    <p className="text-sm text-foreground">{Number(completion.hoursWorked)}</p>
                   </div>
                 )}
                 {completion.materialsUsed && (
-                  <div className="p-3 bg-gray-50 rounded-lg">
-                    <p className="text-xs font-medium text-gray-500 mb-1">Materials Used</p>
-                    <p className="text-sm text-gray-700">{completion.materialsUsed}</p>
+                  <div className="p-3 bg-muted rounded-lg">
+                    <p className="text-xs font-medium text-muted-foreground mb-1">Materials Used</p>
+                    <p className="text-sm text-foreground">{completion.materialsUsed}</p>
                   </div>
                 )}
               </div>
 
               {completion.unexpectedIssues && (
-                <div className="p-3 bg-yellow-50 rounded-lg">
-                  <p className="text-xs font-medium text-yellow-700 mb-1">Unexpected Issues</p>
-                  <p className="text-sm text-yellow-800">{completion.unexpectedIssues}</p>
+                <div className="p-3 bg-warning/10 rounded-lg">
+                  <p className="text-xs font-medium text-warning mb-1">Unexpected Issues</p>
+                  <p className="text-sm text-foreground">{completion.unexpectedIssues}</p>
                 </div>
               )}
             </div>
@@ -170,7 +170,7 @@ const CompletionReview = ({ jobTitle, completions, jobStatus, onSuccess, onCance
                 <button
                   onClick={() => { void handleApprove(completion.id); }}
                   disabled={isSubmitting}
-                  className="flex-1 px-4 py-2 bg-emerald-600 text-white text-sm font-medium rounded-lg hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="flex-1 px-4 py-2 bg-primary text-primary-foreground text-sm font-medium rounded-lg hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
                   {isSubmitting ? 'Approving...' : 'Approve Work'}
                 </button>
@@ -179,7 +179,7 @@ const CompletionReview = ({ jobTitle, completions, jobStatus, onSuccess, onCance
                 <button
                   onClick={() => { void handleMarkPaid(completion.id); }}
                   disabled={isSubmitting}
-                  className="flex-1 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="flex-1 px-4 py-2 bg-secondary text-secondary-foreground text-sm font-medium rounded-lg hover:bg-secondary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
                   {isSubmitting ? 'Processing...' : 'Mark as Paid'}
                 </button>
@@ -189,11 +189,11 @@ const CompletionReview = ({ jobTitle, completions, jobStatus, onSuccess, onCance
         ))}
       </div>
 
-      <div className="mt-4 pt-4 border-t border-gray-200">
+      <div className="mt-4 pt-4 border-t border-border">
         <button
           onClick={onCancel}
           disabled={isSubmitting}
-          className="w-full px-4 py-2 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="w-full px-4 py-2 border border-border text-foreground font-medium rounded-lg hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           Close
         </button>

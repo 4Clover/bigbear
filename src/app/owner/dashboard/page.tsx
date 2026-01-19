@@ -1,6 +1,9 @@
-import { prisma } from '@/lib/prisma'
+import { Ban, Calendar, ClipboardList } from 'lucide-react'
 import Link from 'next/link'
 import { format, startOfMonth, endOfMonth, startOfYear } from 'date-fns'
+import { prisma } from '@/lib/prisma'
+import { Badge } from '@/components/ui'
+import { bookingStatusVariant, bookingStatusLabel } from '@/lib/ui/status'
 
 const getStats = async () => {
   const now = new Date()
@@ -63,10 +66,10 @@ const StatCard = ({
   href?: string
 }) => {
   const content = (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-      <h3 className="text-sm font-medium text-gray-500">{title}</h3>
-      <p className="mt-2 text-3xl font-bold text-gray-900">{value}</p>
-      {subtitle && <p className="mt-1 text-sm text-gray-500">{subtitle}</p>}
+    <div className="bg-card rounded-xl shadow-sm border border-border p-6">
+      <h3 className="text-sm font-medium text-muted-foreground">{title}</h3>
+      <p className="mt-2 text-3xl font-bold text-foreground">{value}</p>
+      {subtitle && <p className="mt-1 text-sm text-muted-foreground">{subtitle}</p>}
     </div>
   )
 
@@ -74,7 +77,7 @@ const StatCard = ({
     return (
       <Link
         href={href}
-        className="block hover:ring-2 hover:ring-emerald-500 rounded-xl transition-shadow"
+        className="block hover:ring-2 hover:ring-forest-500 rounded-xl transition-shadow"
       >
         {content}
       </Link>
@@ -84,22 +87,14 @@ const StatCard = ({
   return content
 }
 
-const statusColors: Record<string, string> = {
-  PENDING: 'bg-yellow-100 text-yellow-800',
-  CONFIRMED: 'bg-green-100 text-green-800',
-  CANCELLED: 'bg-red-100 text-red-800',
-  COMPLETED: 'bg-blue-100 text-blue-800',
-  NO_SHOW: 'bg-gray-100 text-gray-800',
-}
-
 const DashboardPage = async () => {
   const stats = await getStats()
 
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-        <p className="text-gray-500">Welcome back! Here&apos;s an overview of your property.</p>
+        <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
+        <p className="text-muted-foreground">Welcome back! Here&apos;s an overview of your property.</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -128,32 +123,32 @@ const DashboardPage = async () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div className="bg-card rounded-xl shadow-sm border border-border p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-gray-900">Upcoming Bookings</h2>
+            <h2 className="text-lg font-semibold text-foreground">Upcoming Bookings</h2>
             <Link
               href="/owner/bookings"
-              className="text-sm text-emerald-600 hover:text-emerald-700 font-medium"
+              className="text-sm text-forest-600 dark:text-forest-400 hover:text-forest-700 dark:hover:text-forest-300 font-medium"
             >
               View all
             </Link>
           </div>
           {stats.upcomingBookings.length === 0 ? (
-            <p className="text-gray-500 text-sm">No upcoming bookings.</p>
+            <p className="text-muted-foreground text-sm">No upcoming bookings.</p>
           ) : (
             <div className="space-y-3">
               {stats.upcomingBookings.map((booking) => (
                 <div
                   key={booking.id}
-                  className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                  className="flex items-center justify-between p-3 bg-muted rounded-lg"
                 >
                   <div>
-                    <p className="font-medium text-gray-900">{booking.guestName}</p>
-                    <p className="text-sm text-gray-500">
+                    <p className="font-medium text-foreground">{booking.guestName}</p>
+                    <p className="text-sm text-muted-foreground">
                       {format(booking.checkIn, 'MMM d')} - {format(booking.checkOut, 'MMM d, yyyy')}
                     </p>
                   </div>
-                  <span className="text-sm font-medium text-gray-700">
+                  <span className="text-sm font-medium text-foreground">
                     ${Number(booking.totalAmount).toLocaleString()}
                   </span>
                 </div>
@@ -162,30 +157,28 @@ const DashboardPage = async () => {
           )}
         </div>
 
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div className="bg-card rounded-xl shadow-sm border border-border p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-gray-900">Recent Activity</h2>
+            <h2 className="text-lg font-semibold text-foreground">Recent Activity</h2>
           </div>
           {stats.recentBookings.length === 0 ? (
-            <p className="text-gray-500 text-sm">No recent activity.</p>
+            <p className="text-muted-foreground text-sm">No recent activity.</p>
           ) : (
             <div className="space-y-3">
               {stats.recentBookings.map((booking) => (
                 <div
                   key={booking.id}
-                  className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                  className="flex items-center justify-between p-3 bg-muted rounded-lg"
                 >
                   <div>
-                    <p className="font-medium text-gray-900">{booking.guestName}</p>
-                    <p className="text-sm text-gray-500">
+                    <p className="font-medium text-foreground">{booking.guestName}</p>
+                    <p className="text-sm text-muted-foreground">
                       {format(booking.createdAt, 'MMM d, yyyy')}
                     </p>
                   </div>
-                  <span
-                    className={`text-xs font-medium px-2 py-1 rounded-full ${statusColors[booking.status] ?? ''}`}
-                  >
-                    {booking.status}
-                  </span>
+                  <Badge variant={bookingStatusVariant[booking.status] ?? 'default'}>
+                    {bookingStatusLabel[booking.status] ?? booking.status}
+                  </Badge>
                 </div>
               ))}
             </div>
@@ -193,49 +186,28 @@ const DashboardPage = async () => {
         </div>
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
+      <div className="bg-card rounded-xl shadow-sm border border-border p-6">
+        <h2 className="text-lg font-semibold text-foreground mb-4">Quick Actions</h2>
         <div className="flex flex-wrap gap-3">
           <Link
             href="/owner/calendar"
-            className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-forest-600 text-white rounded-lg hover:bg-forest-700 transition-colors"
           >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-              />
-            </svg>
+            <Calendar className="w-4 h-4" />
             View Calendar
           </Link>
           <Link
             href="/owner/calendar?action=block"
-            className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-muted text-foreground rounded-lg hover:bg-stone-200 dark:hover:bg-stone-700 transition-colors"
           >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"
-              />
-            </svg>
+            <Ban className="w-4 h-4" />
             Block Dates
           </Link>
           <Link
             href="/owner/bookings?status=PENDING"
-            className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-muted text-foreground rounded-lg hover:bg-stone-200 dark:hover:bg-stone-700 transition-colors"
           >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
-              />
-            </svg>
+            <ClipboardList className="w-4 h-4" />
             Review Pending
           </Link>
         </div>

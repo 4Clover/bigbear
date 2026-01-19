@@ -52,14 +52,14 @@ const ReportsPage = async ({ searchParams }: ReportsPageProps) => {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <div className="flex items-center gap-2 text-sm text-gray-500 mb-2">
-            <Link href="/owner/finance" className="hover:text-emerald-600">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
+            <Link href="/owner/finance" className="hover:text-forest-600 dark:hover:text-forest-400">
               Finance
             </Link>
             <span>/</span>
             <span>Reports</span>
           </div>
-          <h1 className="text-2xl font-bold text-gray-900">Financial Reports</h1>
+          <h1 className="text-2xl font-bold text-foreground">Financial Reports</h1>
         </div>
         <div className="flex items-center gap-3">
           <ExportButton year={year} month={type === 'monthly' ? month : undefined} />

@@ -16,7 +16,7 @@ export default async function NotificationLogsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">Notification Logs</h1>
+        <h1 className="text-2xl font-bold text-foreground">Notification Logs</h1>
         <p className="text-muted-foreground">Recent email and SMS notifications</p>
       </div>
 

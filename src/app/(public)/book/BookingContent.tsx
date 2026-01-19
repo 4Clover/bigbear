@@ -155,15 +155,15 @@ export const BookingContent = () => {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <div className="text-center mb-12">
-        <h1 className="text-4xl font-bold mb-4">Book Your Stay</h1>
-        <p className="text-gray-600 max-w-2xl mx-auto">
+        <h1 className="text-4xl font-bold mb-4 text-foreground">Book Your Stay</h1>
+        <p className="text-muted-foreground max-w-2xl mx-auto">
           Select your dates, provide your information, and complete your booking. We can&apos;t wait
           to host you!
         </p>
       </div>
 
       {cancelled && (
-        <div className="mb-8 p-4 bg-yellow-50 border border-yellow-200 rounded-lg text-yellow-800">
+        <div className="mb-8 p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg text-amber-800 dark:text-amber-200">
           Your booking was cancelled. Feel free to start over when you&apos;re ready.
         </div>
       )}
@@ -172,7 +172,7 @@ export const BookingContent = () => {
         <div className="lg:col-span-2 space-y-8">
           <Card>
             <CardContent className="py-6">
-              <h2 className="text-xl font-semibold mb-4">Select Dates</h2>
+              <h2 className="text-xl font-semibold mb-4 text-foreground">Select Dates</h2>
               <Calendar
                 checkIn={checkIn}
                 checkOut={checkOut}
@@ -182,7 +182,7 @@ export const BookingContent = () => {
                 maxNights={config.maxNights}
               />
               {checkIn && checkOut && (
-                <div className="mt-4 p-3 bg-emerald-50 rounded-lg text-emerald-700 text-sm">
+                <div className="mt-4 p-3 bg-forest-50 dark:bg-forest-900/30 rounded-lg text-forest-700 dark:text-forest-300 text-sm">
                   {Math.ceil((checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24))}{' '}
                   nights selected
                 </div>
@@ -229,7 +229,7 @@ export const BookingContent = () => {
             >
               Proceed to Payment
             </Button>
-            <p className="text-xs text-gray-500 text-center">
+            <p className="text-xs text-muted-foreground text-center">
               You will be redirected to Stripe for secure payment processing.
             </p>
           </div>

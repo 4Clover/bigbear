@@ -21,7 +21,7 @@ export const GuestForm = ({ guestInfo, onChange, errors = {} }: GuestFormProps) 
 
   return (
     <div className="space-y-4">
-      <h3 className="text-lg font-semibold">Guest Information</h3>
+      <h3 className="text-lg font-semibold text-foreground">Guest Information</h3>
       <Input
         label="Full Name"
         value={guestInfo.name}

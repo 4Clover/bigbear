@@ -88,23 +88,23 @@ const WorkerJobsPage = () => {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-gray-500">Loading jobs...</div>
+        <div className="text-muted-foreground">Loading jobs...</div>
       </div>
     )
   }
 
   return (
     <div className="max-w-4xl mx-auto">
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">Jobs</h1>
+      <h1 className="text-2xl font-bold text-foreground mb-6">Jobs</h1>
 
       {/* Tabs */}
-      <div className="flex gap-4 mb-6 border-b border-gray-200">
+      <div className="flex gap-4 mb-6 border-b border-border">
         <button
           onClick={() => { setActiveTab('available'); }}
           className={`pb-3 px-1 text-sm font-medium border-b-2 transition-colors ${
             activeTab === 'available'
-              ? 'border-blue-600 text-blue-600'
-              : 'border-transparent text-gray-500 hover:text-gray-700'
+              ? 'border-wood-600 text-wood-600 dark:text-wood-400'
+              : 'border-transparent text-muted-foreground hover:text-foreground'
           }`}
         >
           Available Jobs ({availableJobs.length})
@@ -113,8 +113,8 @@ const WorkerJobsPage = () => {
           onClick={() => { setActiveTab('assigned'); }}
           className={`pb-3 px-1 text-sm font-medium border-b-2 transition-colors ${
             activeTab === 'assigned'
-              ? 'border-blue-600 text-blue-600'
-              : 'border-transparent text-gray-500 hover:text-gray-700'
+              ? 'border-wood-600 text-wood-600 dark:text-wood-400'
+              : 'border-transparent text-muted-foreground hover:text-foreground'
           }`}
         >
           Assigned to Me ({assignedJobs.length})

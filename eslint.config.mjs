@@ -8,7 +8,7 @@ const eslintConfig = defineConfig([
   // Base ESLint recommended rules
   eslint.configs.recommended,
 
-  // Next.js core web vitals (includes React, React Hooks, and Next.js rules)
+  // Next.js core web vitals (includes React, React Hooks, Next.js, and jsx-a11y rules)
   ...nextVitals,
 
   // TypeScript strict type-checked rules (catches more bugs than recommended)

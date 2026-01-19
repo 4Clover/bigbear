@@ -59,9 +59,9 @@ const WorkerList = ({ workers, onRefresh }: WorkerListProps) => {
 
   if (workers.length === 0) {
     return (
-      <div className="bg-white rounded-lg border border-gray-200 p-8 text-center">
+      <div className="bg-card rounded-lg border border-border p-8 text-center">
         <svg
-          className="mx-auto h-12 w-12 text-gray-400"
+          className="mx-auto h-12 w-12 text-muted-foreground"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -73,7 +73,7 @@ const WorkerList = ({ workers, onRefresh }: WorkerListProps) => {
             d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
           />
         </svg>
-        <p className="mt-4 text-gray-600">No workers found</p>
+        <p className="mt-4 text-muted-foreground">No workers found</p>
       </div>
     )
   }
@@ -83,30 +83,30 @@ const WorkerList = ({ workers, onRefresh }: WorkerListProps) => {
       {workers.map((worker) => (
         <div
           key={worker.id}
-          className={`bg-white rounded-lg border ${worker.isActive ? 'border-gray-200' : 'border-red-200 bg-red-50/50'} p-4`}
+          className={`bg-card rounded-lg border ${worker.isActive ? 'border-border' : 'border-destructive/50 bg-destructive/5'} p-4`}
         >
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1">
               <div className="flex items-center gap-2">
-                <h3 className="font-semibold text-gray-900">
+                <h3 className="font-semibold text-foreground">
                   {worker.businessName ?? worker.user.name ?? 'Unknown'}
                 </h3>
                 {!worker.isActive && (
-                  <span className="px-2 py-0.5 text-xs font-medium bg-red-100 text-red-700 rounded">
+                  <span className="px-2 py-0.5 text-xs font-medium bg-destructive/20 text-destructive rounded">
                     Inactive
                   </span>
                 )}
               </div>
-              <p className="text-sm text-gray-500">{worker.user.email}</p>
+              <p className="text-sm text-muted-foreground">{worker.user.email}</p>
               {worker.phoneNumber && (
-                <p className="text-sm text-gray-500">{worker.phoneNumber}</p>
+                <p className="text-sm text-muted-foreground">{worker.phoneNumber}</p>
               )}
               {worker.services.length > 0 && (
                 <div className="mt-2 flex flex-wrap gap-1">
                   {worker.services.map((service, i) => (
                     <span
                       key={i}
-                      className="px-2 py-0.5 text-xs bg-gray-100 text-gray-600 rounded"
+                      className="px-2 py-0.5 text-xs bg-muted text-muted-foreground rounded"
                     >
                       {service}
                     </span>
@@ -128,7 +128,7 @@ const WorkerList = ({ workers, onRefresh }: WorkerListProps) => {
                       className={`w-5 h-5 ${
                         (worker.trustworthiness ?? 0) >= star
                           ? 'text-yellow-400'
-                          : 'text-gray-300'
+                          : 'text-muted-foreground/40'
                       } hover:text-yellow-400 transition-colors`}
                       fill="currentColor"
                       viewBox="0 0 20 20"
@@ -138,7 +138,7 @@ const WorkerList = ({ workers, onRefresh }: WorkerListProps) => {
                   </button>
                 ))}
               </div>
-              <div className="text-xs text-gray-500 space-y-0.5">
+              <div className="text-xs text-muted-foreground space-y-0.5">
                 <p>{worker._count.quotes} quotes</p>
                 <p>{worker._count.workCompletions} completions</p>
                 <p>{worker._count.assignedJobs} active jobs</p>
@@ -147,7 +147,7 @@ const WorkerList = ({ workers, onRefresh }: WorkerListProps) => {
           </div>
 
           {/* Notes */}
-          <div className="mt-4 pt-4 border-t border-gray-100">
+          <div className="mt-4 pt-4 border-t border-border">
             {editingId === worker.id ? (
               <form
                 onSubmit={(e) => {
@@ -161,21 +161,21 @@ const WorkerList = ({ workers, onRefresh }: WorkerListProps) => {
                   name="notes"
                   defaultValue={worker.notes ?? ''}
                   rows={2}
-                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                  className="w-full px-3 py-2 text-sm border border-border rounded-lg bg-background text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary focus:border-primary"
                   placeholder="Add notes about this worker..."
                 />
                 <div className="flex gap-2">
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="px-3 py-1 text-sm bg-emerald-600 text-white rounded hover:bg-emerald-700 disabled:opacity-50 transition-colors"
+                    className="px-3 py-1 text-sm bg-primary text-primary-foreground rounded hover:bg-primary/90 disabled:opacity-50 transition-colors"
                   >
                     Save
                   </button>
                   <button
                     type="button"
                     onClick={() => { setEditingId(null); }}
-                    className="px-3 py-1 text-sm text-gray-600 hover:text-gray-900 transition-colors"
+                    className="px-3 py-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
                   >
                     Cancel
                   </button>
@@ -183,12 +183,12 @@ const WorkerList = ({ workers, onRefresh }: WorkerListProps) => {
               </form>
             ) : (
               <div className="flex items-start justify-between gap-2">
-                <p className="text-sm text-gray-600 flex-1">
-                  {worker.notes ?? <span className="italic text-gray-400">No notes</span>}
+                <p className="text-sm text-muted-foreground flex-1">
+                  {worker.notes ?? <span className="italic">No notes</span>}
                 </p>
                 <button
                   onClick={() => { setEditingId(worker.id); }}
-                  className="text-sm text-emerald-600 hover:text-emerald-700 transition-colors"
+                  className="text-sm text-primary hover:text-primary/80 transition-colors"
                 >
                   Edit
                 </button>
@@ -197,14 +197,14 @@ const WorkerList = ({ workers, onRefresh }: WorkerListProps) => {
           </div>
 
           {/* Toggle Active */}
-          <div className="mt-4 pt-4 border-t border-gray-100">
+          <div className="mt-4 pt-4 border-t border-border">
             <button
               onClick={() => { void handleToggleActive(worker.id, worker.isActive); }}
               disabled={isSubmitting}
               className={`text-sm font-medium ${
                 worker.isActive
-                  ? 'text-red-600 hover:text-red-700'
-                  : 'text-emerald-600 hover:text-emerald-700'
+                  ? 'text-destructive hover:text-destructive/80'
+                  : 'text-primary hover:text-primary/80'
               } transition-colors`}
             >
               {worker.isActive ? 'Deactivate Worker' : 'Activate Worker'}

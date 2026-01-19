@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
+import { AlertTriangle, Calendar } from 'lucide-react'
 import { getAssignedJobs, startWork } from '@/actions/maintenance'
 import type { JobPriority, JobStatus } from '@prisma/client'
 
@@ -18,10 +19,10 @@ interface Job {
 }
 
 const priorityColors: Record<JobPriority, string> = {
-  LOW: 'border-l-gray-400',
-  MEDIUM: 'border-l-blue-400',
-  HIGH: 'border-l-orange-400',
-  URGENT: 'border-l-red-400',
+  LOW: 'border-l-stone-400',
+  MEDIUM: 'border-l-wood-400',
+  HIGH: 'border-l-amber-500',
+  URGENT: 'border-l-red-500',
 }
 
 const formatDate = (date: Date) => {
@@ -88,45 +89,38 @@ const WorkerSchedulePage = () => {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-gray-500">Loading schedule...</div>
+        <div className="text-muted-foreground">Loading schedule...</div>
       </div>
     )
   }
 
   return (
     <div className="max-w-4xl mx-auto">
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">My Schedule</h1>
+      <h1 className="text-2xl font-bold text-foreground mb-6">My Schedule</h1>
 
       {/* Unscheduled Jobs */}
       {unscheduledJobs.length > 0 && (
         <div className="mb-8">
-          <h2 className="text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2">
-            <svg className="w-5 h-5 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-              />
-            </svg>
+          <h2 className="text-lg font-semibold text-foreground mb-3 flex items-center gap-2">
+            <AlertTriangle className="w-5 h-5 text-amber-500" />
             Needs Scheduling ({unscheduledJobs.length})
           </h2>
           <div className="space-y-2">
             {unscheduledJobs.map((job) => (
               <div
                 key={job.id}
-                className={`bg-white rounded-lg border-l-4 ${priorityColors[job.priority]} border border-gray-200 p-4`}
+                className={`bg-card rounded-lg border-l-4 ${priorityColors[job.priority]} border border-border p-4`}
               >
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="font-medium text-gray-900">{job.title}</h3>
+                    <h3 className="font-medium text-foreground">{job.title}</h3>
                     {job.dueDate && (
-                      <p className="text-sm text-gray-500">Due: {formatDate(job.dueDate)}</p>
+                      <p className="text-sm text-muted-foreground">Due: {formatDate(job.dueDate)}</p>
                     )}
                   </div>
                   <button
                     onClick={() => { router.push('/worker/jobs'); }}
-                    className="px-3 py-1.5 bg-purple-600 text-white text-sm font-medium rounded hover:bg-purple-700 transition-colors"
+                    className="px-3 py-1.5 bg-wood-600 text-white text-sm font-medium rounded hover:bg-wood-700 transition-colors"
                   >
                     Schedule
                   </button>
@@ -142,43 +136,43 @@ const WorkerSchedulePage = () => {
         <div className="space-y-6">
           {sortedDates.map((date) => (
             <div key={date}>
-              <h2 className="text-lg font-semibold text-gray-900 mb-3">
+              <h2 className="text-lg font-semibold text-foreground mb-3">
                 {formatDate(new Date(date))}
               </h2>
               <div className="space-y-2">
                 {jobsByDate[date]?.map((job) => (
                   <div
                     key={job.id}
-                    className={`bg-white rounded-lg border-l-4 ${priorityColors[job.priority]} border border-gray-200 p-4`}
+                    className={`bg-card rounded-lg border-l-4 ${priorityColors[job.priority]} border border-border p-4`}
                   >
                     <div className="flex items-center justify-between">
                       <div>
                         <div className="flex items-center gap-2">
-                          <h3 className="font-medium text-gray-900">{job.title}</h3>
+                          <h3 className="font-medium text-foreground">{job.title}</h3>
                           <span
                             className={`px-2 py-0.5 text-xs font-medium rounded ${
                               job.status === 'IN_PROGRESS'
-                                ? 'bg-orange-100 text-orange-700'
-                                : 'bg-blue-100 text-blue-700'
+                                ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
+                                : 'bg-wood-100 text-wood-700 dark:bg-wood-900/30 dark:text-wood-400'
                             }`}
                           >
                             {job.status === 'IN_PROGRESS' ? 'In Progress' : 'Scheduled'}
                           </span>
                         </div>
-                        <p className="text-sm text-gray-500">{job.scheduledTime}</p>
+                        <p className="text-sm text-muted-foreground">{job.scheduledTime}</p>
                       </div>
                       <div className="flex gap-2">
                         {job.status === 'SCHEDULED' && (
                           <button
                             onClick={() => { void handleStart(job.id); }}
-                            className="px-3 py-1.5 bg-orange-600 text-white text-sm font-medium rounded hover:bg-orange-700 transition-colors"
+                            className="px-3 py-1.5 bg-amber-600 text-white text-sm font-medium rounded hover:bg-amber-700 transition-colors"
                           >
                             Start
                           </button>
                         )}
                         <button
                           onClick={() => { handleComplete(job.id); }}
-                          className="px-3 py-1.5 bg-emerald-600 text-white text-sm font-medium rounded hover:bg-emerald-700 transition-colors"
+                          className="px-3 py-1.5 bg-forest-600 text-white text-sm font-medium rounded hover:bg-forest-700 transition-colors"
                         >
                           Complete
                         </button>
@@ -191,21 +185,9 @@ const WorkerSchedulePage = () => {
           ))}
         </div>
       ) : unscheduledJobs.length === 0 ? (
-        <div className="bg-white rounded-lg border border-gray-200 p-8 text-center">
-          <svg
-            className="mx-auto h-12 w-12 text-gray-400"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-            />
-          </svg>
-          <p className="mt-4 text-gray-600">No scheduled jobs</p>
+        <div className="bg-card rounded-lg border border-border p-8 text-center">
+          <Calendar className="mx-auto h-12 w-12 text-muted-foreground" />
+          <p className="mt-4 text-muted-foreground">No scheduled jobs</p>
         </div>
       ) : null}
     </div>

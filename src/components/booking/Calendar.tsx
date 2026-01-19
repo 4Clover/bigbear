@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useCallback } from 'react'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 import {
   format,
   startOfMonth,
@@ -95,25 +96,21 @@ export const Calendar = ({
         onClick={() => {
           setCurrentMonth(subMonths(currentMonth, 1))
         }}
-        className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+        className="p-2 hover:bg-muted rounded-lg transition-colors text-muted-foreground hover:text-foreground"
         aria-label="Previous month"
       >
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-        </svg>
+        <ChevronLeft className="w-5 h-5" />
       </button>
-      <h3 className="text-lg font-semibold">{format(currentMonth, 'MMMM yyyy')}</h3>
+      <h3 className="text-lg font-semibold text-foreground">{format(currentMonth, 'MMMM yyyy')}</h3>
       <button
         type="button"
         onClick={() => {
           setCurrentMonth(addMonths(currentMonth, 1))
         }}
-        className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+        className="p-2 hover:bg-muted rounded-lg transition-colors text-muted-foreground hover:text-foreground"
         aria-label="Next month"
       >
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-        </svg>
+        <ChevronRight className="w-5 h-5" />
       </button>
     </div>
   )
@@ -123,7 +120,7 @@ export const Calendar = ({
     return (
       <div className="grid grid-cols-7 mb-2">
         {days.map((day) => (
-          <div key={day} className="text-center text-sm font-medium text-gray-500 py-2">
+          <div key={day} className="text-center text-sm font-medium text-muted-foreground py-2">
             {day}
           </div>
         ))}
@@ -161,10 +158,10 @@ export const Calendar = ({
             disabled={disabled}
             className={`
               aspect-square p-2 text-sm rounded-lg transition-colors
-              ${!isCurrentMonth ? 'text-gray-300' : ''}
-              ${disabled ? 'text-gray-300 cursor-not-allowed' : 'hover:bg-emerald-100'}
-              ${isSelected ? 'bg-emerald-600 text-white hover:bg-emerald-700' : ''}
-              ${inRange ? 'bg-emerald-100' : ''}
+              ${!isCurrentMonth ? 'text-stone-300 dark:text-stone-600' : 'text-foreground'}
+              ${disabled ? 'text-stone-300 dark:text-stone-600 cursor-not-allowed' : 'hover:bg-forest-100 dark:hover:bg-forest-900/30'}
+              ${isSelected ? 'bg-forest-600 text-white hover:bg-forest-700' : ''}
+              ${inRange ? 'bg-forest-100 dark:bg-forest-900/30' : ''}
             `}
           >
             {format(currentDay, 'd')}
@@ -184,11 +181,11 @@ export const Calendar = ({
   }
 
   return (
-    <div className="bg-white p-4 rounded-xl border border-gray-200">
+    <div className="bg-card p-4 rounded-xl border border-border">
       {renderHeader()}
       {renderDays()}
       {renderCells()}
-      <div className="mt-4 text-sm text-gray-500 text-center">
+      <div className="mt-4 text-sm text-muted-foreground text-center">
         {selectingCheckOut
           ? `Select check-out date (${minNights}-${maxNights} nights)`
           : 'Select check-in date'}

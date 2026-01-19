@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import { Plus, UserPlus } from 'lucide-react'
 import { getMaintenanceJobs, getWorkers, cancelJob } from '@/actions/maintenance'
 import { DEFAULT_PAGE_SIZE } from '@/types/pagination'
 import JobList from '@/components/maintenance/JobList'
@@ -106,7 +107,7 @@ const OwnerMaintenancePage = () => {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-gray-500">Loading...</div>
+        <div className="text-muted-foreground">Loading...</div>
       </div>
     )
   }
@@ -114,37 +115,23 @@ const OwnerMaintenancePage = () => {
   return (
     <div className="max-w-6xl mx-auto">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Maintenance</h1>
+        <h1 className="text-2xl font-bold text-foreground">Maintenance</h1>
         <div className="flex gap-2">
           {activeTab === 'jobs' && (
             <button
               onClick={() => { setActiveModal({ type: 'createJob' }); }}
-              className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white font-medium rounded-lg hover:bg-emerald-700 transition-colors"
+              className="flex items-center gap-2 px-4 py-2 bg-forest-600 text-white font-medium rounded-lg hover:bg-forest-700 transition-colors"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 4v16m8-8H4"
-                />
-              </svg>
+              <Plus className="w-5 h-5" />
               New Job
             </button>
           )}
           {activeTab === 'workers' && (
             <button
               onClick={() => { setActiveModal({ type: 'inviteWorker' }); }}
-              className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white font-medium rounded-lg hover:bg-emerald-700 transition-colors"
+              className="flex items-center gap-2 px-4 py-2 bg-forest-600 text-white font-medium rounded-lg hover:bg-forest-700 transition-colors"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"
-                />
-              </svg>
+              <UserPlus className="w-5 h-5" />
               Invite Worker
             </button>
           )}
@@ -152,13 +139,13 @@ const OwnerMaintenancePage = () => {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-4 mb-6 border-b border-gray-200">
+      <div className="flex gap-4 mb-6 border-b border-border">
         <button
           onClick={() => { setActiveTab('jobs'); }}
           className={`pb-3 px-1 text-sm font-medium border-b-2 transition-colors ${
             activeTab === 'jobs'
-              ? 'border-emerald-600 text-emerald-600'
-              : 'border-transparent text-gray-500 hover:text-gray-700'
+              ? 'border-forest-600 text-forest-600 dark:text-forest-400'
+              : 'border-transparent text-muted-foreground hover:text-foreground'
           }`}
         >
           Jobs ({paginatedJobs.total})
@@ -167,8 +154,8 @@ const OwnerMaintenancePage = () => {
           onClick={() => { setActiveTab('workers'); }}
           className={`pb-3 px-1 text-sm font-medium border-b-2 transition-colors ${
             activeTab === 'workers'
-              ? 'border-emerald-600 text-emerald-600'
-              : 'border-transparent text-gray-500 hover:text-gray-700'
+              ? 'border-forest-600 text-forest-600 dark:text-forest-400'
+              : 'border-transparent text-muted-foreground hover:text-foreground'
           }`}
         >
           Workers ({workers.length})

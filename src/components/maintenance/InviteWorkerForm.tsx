@@ -53,11 +53,11 @@ const InviteWorkerForm = ({ onSuccess, onCancel }: InviteWorkerFormProps) => {
   }
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 p-6">
-      <h3 className="text-lg font-semibold text-gray-900 mb-4">Invite Worker</h3>
+    <div className="bg-card rounded-lg border border-border p-6">
+      <h3 className="text-lg font-semibold text-foreground mb-4">Invite Worker</h3>
 
       {error && (
-        <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">
+        <div className="mb-4 p-3 bg-destructive/10 border border-destructive/20 text-destructive rounded-lg text-sm">
           {error}
         </div>
       )}
@@ -65,7 +65,7 @@ const InviteWorkerForm = ({ onSuccess, onCancel }: InviteWorkerFormProps) => {
       <form onSubmit={(e) => { void handleSubmit(e); }} className="space-y-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="name" className="block text-sm font-medium text-foreground mb-1">
               Name *
             </label>
             <input
@@ -73,13 +73,13 @@ const InviteWorkerForm = ({ onSuccess, onCancel }: InviteWorkerFormProps) => {
               id="name"
               name="name"
               required
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+              className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary focus:border-primary"
               placeholder="John Smith"
             />
           </div>
 
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="email" className="block text-sm font-medium text-foreground mb-1">
               Email *
             </label>
             <input
@@ -87,7 +87,7 @@ const InviteWorkerForm = ({ onSuccess, onCancel }: InviteWorkerFormProps) => {
               id="email"
               name="email"
               required
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+              className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary focus:border-primary"
               placeholder="worker@example.com"
             />
           </div>
@@ -95,34 +95,34 @@ const InviteWorkerForm = ({ onSuccess, onCancel }: InviteWorkerFormProps) => {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label htmlFor="businessName" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="businessName" className="block text-sm font-medium text-foreground mb-1">
               Business Name
             </label>
             <input
               type="text"
               id="businessName"
               name="businessName"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+              className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary focus:border-primary"
               placeholder="Smith Repairs LLC"
             />
           </div>
 
           <div>
-            <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="phoneNumber" className="block text-sm font-medium text-foreground mb-1">
               Phone Number
             </label>
             <input
               type="tel"
               id="phoneNumber"
               name="phoneNumber"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+              className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary focus:border-primary"
               placeholder="(555) 123-4567"
             />
           </div>
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-foreground mb-1">
             Services Offered
           </label>
           <div className="flex gap-2">
@@ -131,13 +131,13 @@ const InviteWorkerForm = ({ onSuccess, onCancel }: InviteWorkerFormProps) => {
               value={serviceInput}
               onChange={(e) => { setServiceInput(e.target.value); }}
               onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleAddService(); } }}
-              className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+              className="flex-1 px-3 py-2 border border-border rounded-lg bg-background text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary focus:border-primary"
               placeholder="e.g., Plumbing, Electrical"
             />
             <button
               type="button"
               onClick={handleAddService}
-              className="px-4 py-2 bg-gray-100 text-gray-700 font-medium rounded-lg hover:bg-gray-200 transition-colors"
+              className="px-4 py-2 bg-muted text-foreground font-medium rounded-lg hover:bg-muted/80 transition-colors"
             >
               Add
             </button>
@@ -147,13 +147,13 @@ const InviteWorkerForm = ({ onSuccess, onCancel }: InviteWorkerFormProps) => {
               {services.map((service, index) => (
                 <span
                   key={index}
-                  className="inline-flex items-center gap-1 px-2 py-1 bg-emerald-100 text-emerald-700 text-sm rounded"
+                  className="inline-flex items-center gap-1 px-2 py-1 bg-primary/20 text-primary text-sm rounded"
                 >
                   {service}
                   <button
                     type="button"
                     onClick={() => { handleRemoveService(index); }}
-                    className="text-emerald-600 hover:text-emerald-800"
+                    className="text-primary/70 hover:text-primary"
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path
@@ -174,7 +174,7 @@ const InviteWorkerForm = ({ onSuccess, onCancel }: InviteWorkerFormProps) => {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="flex-1 px-4 py-2 bg-emerald-600 text-white font-medium rounded-lg hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="flex-1 px-4 py-2 bg-primary text-primary-foreground font-medium rounded-lg hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             {isSubmitting ? 'Inviting...' : 'Send Invitation'}
           </button>
@@ -182,7 +182,7 @@ const InviteWorkerForm = ({ onSuccess, onCancel }: InviteWorkerFormProps) => {
             type="button"
             onClick={onCancel}
             disabled={isSubmitting}
-            className="px-4 py-2 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="px-4 py-2 border border-border text-foreground font-medium rounded-lg hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             Cancel
           </button>

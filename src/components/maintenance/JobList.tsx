@@ -1,5 +1,6 @@
 'use client'
 
+import { ClipboardList, ChevronLeft, ChevronRight } from 'lucide-react'
 import type { Prisma, JobPriority, JobStatus } from '@prisma/client'
 
 type Job = Prisma.MaintenanceJobGetPayload<{
@@ -23,22 +24,22 @@ interface JobListProps {
 }
 
 const priorityColors: Record<JobPriority, string> = {
-  LOW: 'bg-gray-100 text-gray-700',
-  MEDIUM: 'bg-blue-100 text-blue-700',
-  HIGH: 'bg-orange-100 text-orange-700',
-  URGENT: 'bg-red-100 text-red-700',
+  LOW: 'bg-stone-100 text-stone-700 dark:bg-stone-800 dark:text-stone-300',
+  MEDIUM: 'bg-wood-100 text-wood-700 dark:bg-wood-900/30 dark:text-wood-400',
+  HIGH: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
+  URGENT: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
 }
 
 const statusColors: Record<JobStatus, string> = {
-  OPEN: 'bg-green-100 text-green-700',
-  QUOTED: 'bg-yellow-100 text-yellow-700',
-  ASSIGNED: 'bg-purple-100 text-purple-700',
-  SCHEDULED: 'bg-blue-100 text-blue-700',
-  IN_PROGRESS: 'bg-orange-100 text-orange-700',
-  COMPLETED: 'bg-teal-100 text-teal-700',
-  APPROVED: 'bg-emerald-100 text-emerald-700',
-  PAID: 'bg-gray-100 text-gray-700',
-  CANCELLED: 'bg-red-100 text-red-700',
+  OPEN: 'bg-forest-100 text-forest-700 dark:bg-forest-900/30 dark:text-forest-400',
+  QUOTED: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
+  ASSIGNED: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
+  SCHEDULED: 'bg-wood-100 text-wood-700 dark:bg-wood-900/30 dark:text-wood-400',
+  IN_PROGRESS: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
+  COMPLETED: 'bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-400',
+  APPROVED: 'bg-forest-100 text-forest-700 dark:bg-forest-900/30 dark:text-forest-400',
+  PAID: 'bg-stone-100 text-stone-700 dark:bg-stone-800 dark:text-stone-300',
+  CANCELLED: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
 }
 
 const formatDate = (date: Date | null) => {
@@ -65,59 +66,47 @@ const JobList = ({
 
   if (jobs.length === 0) {
     return (
-      <div className="bg-white rounded-lg border border-gray-200 p-8 text-center">
-        <svg
-          className="mx-auto h-12 w-12 text-gray-400"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
-          />
-        </svg>
-        <p className="mt-4 text-gray-600">No maintenance jobs found</p>
+      <div className="bg-card rounded-lg border border-border p-8 text-center">
+        <ClipboardList className="mx-auto h-12 w-12 text-muted-foreground" />
+        <p className="mt-4 text-muted-foreground">No maintenance jobs found</p>
       </div>
     )
   }
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+    <div className="bg-card rounded-lg border border-border overflow-hidden">
       <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
+        <table className="min-w-full divide-y divide-border">
+          <thead className="bg-muted">
             <tr>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                 Job
               </th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                 Priority
               </th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                 Status
               </th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                 Due
               </th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                 Assigned
               </th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                 Actions
               </th>
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
+          <tbody className="bg-card divide-y divide-border">
             {jobs.map((job) => (
-              <tr key={job.id} className="hover:bg-gray-50">
+              <tr key={job.id} className="hover:bg-muted/50">
                 <td className="px-4 py-4">
                   <div className="max-w-xs">
-                    <p className="font-medium text-gray-900 truncate">{job.title}</p>
+                    <p className="font-medium text-foreground truncate">{job.title}</p>
                     {job.description && (
-                      <p className="text-sm text-gray-500 truncate">{job.description}</p>
+                      <p className="text-sm text-muted-foreground truncate">{job.description}</p>
                     )}
                   </div>
                 </td>
@@ -131,10 +120,10 @@ const JobList = ({
                     {job.status.replace('_', ' ')}
                   </span>
                 </td>
-                <td className="px-4 py-4 text-sm text-gray-500">
+                <td className="px-4 py-4 text-sm text-muted-foreground">
                   {formatDate(job.dueDate)}
                 </td>
-                <td className="px-4 py-4 text-sm text-gray-500">
+                <td className="px-4 py-4 text-sm text-muted-foreground">
                   {job.assignedWorker ? (
                     job.assignedWorker.user.name ?? job.assignedWorker.user.email
                   ) : (
@@ -146,7 +135,7 @@ const JobList = ({
                     {job.status === 'QUOTED' && job.quotes.length > 0 && (
                       <button
                         onClick={() => { onViewQuotes(job); }}
-                        className="px-2 py-1 text-xs font-medium bg-yellow-100 text-yellow-700 rounded hover:bg-yellow-200 transition-colors"
+                        className="px-2 py-1 text-xs font-medium bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 rounded hover:bg-amber-200 dark:hover:bg-amber-900/50 transition-colors"
                       >
                         View Quotes ({job.quotes.length})
                       </button>
@@ -154,7 +143,7 @@ const JobList = ({
                     {job.status === 'COMPLETED' && job.workCompletions.length > 0 && (
                       <button
                         onClick={() => { onViewCompletion(job); }}
-                        className="px-2 py-1 text-xs font-medium bg-teal-100 text-teal-700 rounded hover:bg-teal-200 transition-colors"
+                        className="px-2 py-1 text-xs font-medium bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-400 rounded hover:bg-teal-200 dark:hover:bg-teal-900/50 transition-colors"
                       >
                         Review Work
                       </button>
@@ -162,7 +151,7 @@ const JobList = ({
                     {job.status === 'APPROVED' && job.workCompletions.some(c => !c.isPaid) && (
                       <button
                         onClick={() => { onViewCompletion(job); }}
-                        className="px-2 py-1 text-xs font-medium bg-emerald-100 text-emerald-700 rounded hover:bg-emerald-200 transition-colors"
+                        className="px-2 py-1 text-xs font-medium bg-forest-100 text-forest-700 dark:bg-forest-900/30 dark:text-forest-400 rounded hover:bg-forest-200 dark:hover:bg-forest-900/50 transition-colors"
                       >
                         Mark Paid
                       </button>
@@ -170,7 +159,7 @@ const JobList = ({
                     {!['COMPLETED', 'APPROVED', 'PAID', 'CANCELLED'].includes(job.status) && (
                       <button
                         onClick={() => { onCancel(job.id); }}
-                        className="px-2 py-1 text-xs font-medium bg-red-100 text-red-700 rounded hover:bg-red-200 transition-colors"
+                        className="px-2 py-1 text-xs font-medium bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 rounded hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors"
                       >
                         Cancel
                       </button>
@@ -183,29 +172,29 @@ const JobList = ({
         </table>
       </div>
       {totalPages > 1 && (
-        <div className="flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6">
+        <div className="flex items-center justify-between border-t border-border bg-card px-4 py-3 sm:px-6">
           <div className="flex flex-1 justify-between sm:hidden">
             <button
               onClick={() => { onPageChange(page - 1); }}
               disabled={page <= 1}
-              className="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
+              className="relative inline-flex items-center rounded-md border border-border bg-card px-4 py-2 text-sm font-medium text-foreground hover:bg-muted disabled:bg-muted disabled:text-muted-foreground disabled:cursor-not-allowed"
             >
               Previous
             </button>
             <button
               onClick={() => { onPageChange(page + 1); }}
               disabled={page >= totalPages}
-              className="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
+              className="relative ml-3 inline-flex items-center rounded-md border border-border bg-card px-4 py-2 text-sm font-medium text-foreground hover:bg-muted disabled:bg-muted disabled:text-muted-foreground disabled:cursor-not-allowed"
             >
               Next
             </button>
           </div>
           <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
             <div>
-              <p className="text-sm text-gray-700">
-                Showing <span className="font-medium">{start}</span> to{' '}
-                <span className="font-medium">{end}</span> of{' '}
-                <span className="font-medium">{total}</span> results
+              <p className="text-sm text-muted-foreground">
+                Showing <span className="font-medium text-foreground">{start}</span> to{' '}
+                <span className="font-medium text-foreground">{end}</span> of{' '}
+                <span className="font-medium text-foreground">{total}</span> results
               </p>
             </div>
             <div>
@@ -213,33 +202,21 @@ const JobList = ({
                 <button
                   onClick={() => { onPageChange(page - 1); }}
                   disabled={page <= 1}
-                  className="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 disabled:text-gray-300 disabled:cursor-not-allowed"
+                  className="relative inline-flex items-center rounded-l-md px-2 py-2 text-muted-foreground ring-1 ring-inset ring-border hover:bg-muted focus:z-20 disabled:text-muted-foreground/50 disabled:cursor-not-allowed"
                 >
                   <span className="sr-only">Previous</span>
-                  <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                    <path
-                      fillRule="evenodd"
-                      d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
+                  <ChevronLeft className="h-5 w-5" />
                 </button>
-                <span className="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300">
+                <span className="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-foreground ring-1 ring-inset ring-border">
                   Page {page} of {totalPages}
                 </span>
                 <button
                   onClick={() => { onPageChange(page + 1); }}
                   disabled={page >= totalPages}
-                  className="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 disabled:text-gray-300 disabled:cursor-not-allowed"
+                  className="relative inline-flex items-center rounded-r-md px-2 py-2 text-muted-foreground ring-1 ring-inset ring-border hover:bg-muted focus:z-20 disabled:text-muted-foreground/50 disabled:cursor-not-allowed"
                 >
                   <span className="sr-only">Next</span>
-                  <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                    <path
-                      fillRule="evenodd"
-                      d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
+                  <ChevronRight className="h-5 w-5" />
                 </button>
               </nav>
             </div>

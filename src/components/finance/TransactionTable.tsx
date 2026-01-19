@@ -1,6 +1,7 @@
 'use client'
 
 import { useTransition } from 'react'
+import { Paperclip } from 'lucide-react'
 import { deleteTransaction } from '@/actions/finance'
 import { formatCurrency, formatDate } from '@/lib/format'
 import { Pagination } from '@/components/ui/Pagination'
@@ -46,72 +47,72 @@ export const TransactionTable = ({
 
   if (transactions.length === 0) {
     return (
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-center">
-        <p className="text-gray-500">No transactions found</p>
+      <div className="bg-card rounded-xl shadow-sm border border-border p-8 text-center">
+        <p className="text-muted-foreground">No transactions found</p>
       </div>
     )
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-      <table className="min-w-full divide-y divide-gray-200">
-        <thead className="bg-gray-50">
+    <div className="bg-card rounded-xl shadow-sm border border-border overflow-hidden">
+      <table className="min-w-full divide-y divide-border">
+        <thead className="bg-muted">
           <tr>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
               Date
             </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
               Type
             </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
               Category
             </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
               Description
             </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
               Vendor
             </th>
-            <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th className="px-6 py-3 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider">
               Amount
             </th>
-            <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th className="px-6 py-3 text-center text-xs font-medium text-muted-foreground uppercase tracking-wider">
               Receipts
             </th>
-            <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th className="px-6 py-3 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider">
               Actions
             </th>
           </tr>
         </thead>
-        <tbody className="bg-white divide-y divide-gray-200">
+        <tbody className="bg-card divide-y divide-border">
           {transactions.map((transaction) => (
-            <tr key={transaction.id} className="hover:bg-gray-50">
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+            <tr key={transaction.id} className="hover:bg-muted/50">
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground">
                 {formatDate(transaction.date)}
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
                 <span
                   className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
                     transaction.type === 'INCOME'
-                      ? 'bg-emerald-100 text-emerald-800'
-                      : 'bg-red-100 text-red-800'
+                      ? 'bg-forest-100 text-forest-800 dark:bg-forest-900/30 dark:text-forest-400'
+                      : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
                   }`}
                 >
                   {transaction.type}
                 </span>
               </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground">
                 {transaction.category.name}
               </td>
-              <td className="px-6 py-4 text-sm text-gray-900 max-w-xs truncate">
+              <td className="px-6 py-4 text-sm text-foreground max-w-xs truncate">
                 {transaction.description ?? '-'}
               </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
                 {transaction.vendor ?? '-'}
               </td>
               <td
                 className={`px-6 py-4 whitespace-nowrap text-sm font-medium text-right ${
-                  transaction.type === 'INCOME' ? 'text-emerald-600' : 'text-red-600'
+                  transaction.type === 'INCOME' ? 'text-forest-600 dark:text-forest-400' : 'text-red-600 dark:text-red-400'
                 }`}
               >
                 {transaction.type === 'EXPENSE' ? '-' : '+'}
@@ -121,25 +122,13 @@ export const TransactionTable = ({
                 {transaction.receipts.length > 0 ? (
                   <button
                     onClick={() => onViewReceipts?.(transaction)}
-                    className="text-emerald-600 hover:text-emerald-700"
+                    className="text-forest-600 hover:text-forest-700 dark:text-forest-400 dark:hover:text-forest-300"
                   >
-                    <svg
-                      className="w-5 h-5 inline"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"
-                      />
-                    </svg>
+                    <Paperclip className="w-5 h-5 inline" />
                     <span className="ml-1">{transaction.receipts.length}</span>
                   </button>
                 ) : (
-                  <span className="text-gray-400">-</span>
+                  <span className="text-muted-foreground">-</span>
                 )}
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
@@ -148,7 +137,7 @@ export const TransactionTable = ({
                     handleDelete(transaction.id)
                   }}
                   disabled={isPending}
-                  className="text-red-600 hover:text-red-700 disabled:opacity-50"
+                  className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 disabled:opacity-50"
                 >
                   Delete
                 </button>

@@ -1,6 +1,7 @@
 'use client'
 
 import { format } from 'date-fns'
+import { Calendar } from 'lucide-react'
 import type { Booking } from '@prisma/client'
 import { useState, useTransition } from 'react'
 import { approveBookingRequest, rejectBookingRequest, cancelBooking } from '@/actions/bookings'
@@ -10,11 +11,11 @@ interface BookingTableProps {
 }
 
 const statusColors: Record<string, string> = {
-  PENDING: 'bg-yellow-100 text-yellow-800',
-  CONFIRMED: 'bg-green-100 text-green-800',
-  CANCELLED: 'bg-red-100 text-red-800',
-  COMPLETED: 'bg-blue-100 text-blue-800',
-  NO_SHOW: 'bg-gray-100 text-gray-800',
+  PENDING: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400',
+  CONFIRMED: 'bg-forest-100 text-forest-800 dark:bg-forest-900/30 dark:text-forest-400',
+  CANCELLED: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400',
+  COMPLETED: 'bg-wood-100 text-wood-800 dark:bg-wood-900/30 dark:text-wood-400',
+  NO_SHOW: 'bg-stone-100 text-stone-800 dark:bg-stone-800 dark:text-stone-300',
 }
 
 const BookingTable = ({ bookings }: BookingTableProps) => {
@@ -66,73 +67,61 @@ const BookingTable = ({ bookings }: BookingTableProps) => {
 
   if (bookings.length === 0) {
     return (
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
-        <svg
-          className="mx-auto h-12 w-12 text-gray-400"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-          />
-        </svg>
-        <h3 className="mt-4 text-lg font-medium text-gray-900">No bookings found</h3>
-        <p className="mt-2 text-gray-500">No bookings match your current filters.</p>
+      <div className="bg-card rounded-xl shadow-sm border border-border p-12 text-center">
+        <Calendar className="mx-auto h-12 w-12 text-muted-foreground" />
+        <h3 className="mt-4 text-lg font-medium text-foreground">No bookings found</h3>
+        <p className="mt-2 text-muted-foreground">No bookings match your current filters.</p>
       </div>
     )
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+    <div className="bg-card rounded-xl shadow-sm border border-border overflow-hidden">
       <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
+        <table className="min-w-full divide-y divide-border">
+          <thead className="bg-muted">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                 Guest
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                 Dates
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                 Guests
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                 Total
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                 Status
               </th>
-              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider">
                 Actions
               </th>
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
+          <tbody className="bg-card divide-y divide-border">
             {bookings.map((booking) => {
               const isActionPending = isPending && actionId === booking.id
               return (
-                <tr key={booking.id} className="hover:bg-gray-50">
+                <tr key={booking.id} className="hover:bg-muted/50">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div>
-                      <div className="text-sm font-medium text-gray-900">{booking.guestName}</div>
-                      <div className="text-sm text-gray-500">{booking.guestEmail}</div>
+                      <div className="text-sm font-medium text-foreground">{booking.guestName}</div>
+                      <div className="text-sm text-muted-foreground">{booking.guestEmail}</div>
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">
+                    <div className="text-sm text-foreground">
                       {format(booking.checkIn, 'MMM d')} - {format(booking.checkOut, 'MMM d')}
                     </div>
-                    <div className="text-sm text-gray-500">{format(booking.checkIn, 'yyyy')}</div>
+                    <div className="text-sm text-muted-foreground">{format(booking.checkIn, 'yyyy')}</div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground">
                     {booking.numberOfGuests}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-foreground">
                     ${Number(booking.totalAmount).toLocaleString()}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
@@ -151,7 +140,7 @@ const BookingTable = ({ bookings }: BookingTableProps) => {
                               handleApprove(booking.id)
                             }}
                             disabled={isActionPending}
-                            className="text-emerald-600 hover:text-emerald-900 font-medium disabled:opacity-50"
+                            className="text-forest-600 hover:text-forest-700 dark:text-forest-400 dark:hover:text-forest-300 font-medium disabled:opacity-50"
                           >
                             {isActionPending ? '...' : 'Approve'}
                           </button>
@@ -160,7 +149,7 @@ const BookingTable = ({ bookings }: BookingTableProps) => {
                               handleReject(booking.id)
                             }}
                             disabled={isActionPending}
-                            className="text-gray-600 hover:text-gray-900 font-medium disabled:opacity-50"
+                            className="text-muted-foreground hover:text-foreground font-medium disabled:opacity-50"
                           >
                             Reject
                           </button>
@@ -172,7 +161,7 @@ const BookingTable = ({ bookings }: BookingTableProps) => {
                             handleCancel(booking.id)
                           }}
                           disabled={isActionPending}
-                          className="text-red-600 hover:text-red-900 font-medium disabled:opacity-50"
+                          className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 font-medium disabled:opacity-50"
                         >
                           {isActionPending ? '...' : 'Cancel'}
                         </button>

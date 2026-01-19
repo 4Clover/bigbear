@@ -102,8 +102,8 @@ export const ReceiptUploader = ({ onUpload, existingReceipts = [] }: ReceiptUplo
           transition-colors cursor-pointer
           ${
             dragActive
-              ? 'border-emerald-500 bg-emerald-50'
-              : 'border-gray-300 hover:border-gray-400'
+              ? 'border-primary bg-primary/10'
+              : 'border-border hover:border-muted-foreground'
           }
           ${isUploading ? 'opacity-50 pointer-events-none' : ''}
         `}
@@ -119,7 +119,7 @@ export const ReceiptUploader = ({ onUpload, existingReceipts = [] }: ReceiptUplo
         />
 
         <svg
-          className="mx-auto h-12 w-12 text-gray-400"
+          className="mx-auto h-12 w-12 text-muted-foreground"
           stroke="currentColor"
           fill="none"
           viewBox="0 0 48 48"
@@ -132,32 +132,32 @@ export const ReceiptUploader = ({ onUpload, existingReceipts = [] }: ReceiptUplo
           />
         </svg>
 
-        <p className="mt-2 text-sm text-gray-600">
+        <p className="mt-2 text-sm text-muted-foreground">
           {isUploading ? (
             'Uploading...'
           ) : (
             <>
-              <span className="font-medium text-emerald-600">Click to upload</span> or drag and drop
+              <span className="font-medium text-primary">Click to upload</span> or drag and drop
             </>
           )}
         </p>
-        <p className="mt-1 text-xs text-gray-500">PNG, JPG, WebP, or PDF up to 10MB</p>
+        <p className="mt-1 text-xs text-muted-foreground">PNG, JPG, WebP, or PDF up to 10MB</p>
       </div>
 
       {uploadedReceipts.length > 0 && (
         <div className="space-y-2">
-          <p className="text-sm font-medium text-gray-700">Uploaded files:</p>
+          <p className="text-sm font-medium text-foreground">Uploaded files:</p>
           <ul className="space-y-2">
             {uploadedReceipts.map((receipt, index) => (
               <li
                 key={index}
-                className="flex items-center justify-between bg-gray-50 px-3 py-2 rounded-lg"
+                className="flex items-center justify-between bg-muted px-3 py-2 rounded-lg"
               >
                 <a
                   href={receipt.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-sm text-emerald-600 hover:text-emerald-700 truncate max-w-xs"
+                  className="text-sm text-primary hover:text-primary/80 truncate max-w-xs"
                 >
                   {receipt.fileName}
                 </a>
@@ -167,7 +167,7 @@ export const ReceiptUploader = ({ onUpload, existingReceipts = [] }: ReceiptUplo
                     e.stopPropagation()
                     removeReceipt(index)
                   }}
-                  className="text-red-600 hover:text-red-700 text-sm"
+                  className="text-destructive hover:text-destructive/80 text-sm"
                 >
                   Remove
                 </button>

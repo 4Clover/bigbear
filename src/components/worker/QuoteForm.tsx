@@ -41,20 +41,20 @@ const QuoteForm = ({ jobId, jobTitle, onSuccess, onCancel }: QuoteFormProps) => 
   }
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 p-6">
-      <h3 className="text-lg font-semibold text-gray-900 mb-4">
+    <div className="bg-card rounded-lg border border-border p-6">
+      <h3 className="text-lg font-semibold text-foreground mb-4">
         Submit Quote for: {jobTitle}
       </h3>
 
       {error && (
-        <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">
+        <div className="mb-4 p-3 bg-destructive/10 border border-destructive/20 text-destructive rounded-lg text-sm">
           {error}
         </div>
       )}
 
       <form onSubmit={(e) => { void handleSubmit(e); }} className="space-y-4">
         <div>
-          <label htmlFor="amount" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="amount" className="block text-sm font-medium text-foreground mb-1">
             Quote Amount ($) *
           </label>
           <input
@@ -64,13 +64,13 @@ const QuoteForm = ({ jobId, jobTitle, onSuccess, onCancel }: QuoteFormProps) => 
             step="0.01"
             min="0"
             required
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-secondary focus:border-secondary"
             placeholder="0.00"
           />
         </div>
 
         <div>
-          <label htmlFor="estimatedDays" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="estimatedDays" className="block text-sm font-medium text-foreground mb-1">
             Estimated Days to Complete
           </label>
           <input
@@ -78,20 +78,20 @@ const QuoteForm = ({ jobId, jobTitle, onSuccess, onCancel }: QuoteFormProps) => 
             id="estimatedDays"
             name="estimatedDays"
             min="1"
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-secondary focus:border-secondary"
             placeholder="1"
           />
         </div>
 
         <div>
-          <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="description" className="block text-sm font-medium text-foreground mb-1">
             Description / Notes
           </label>
           <textarea
             id="description"
             name="description"
             rows={3}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-secondary focus:border-secondary"
             placeholder="Describe what the quote includes..."
           />
         </div>
@@ -100,7 +100,7 @@ const QuoteForm = ({ jobId, jobTitle, onSuccess, onCancel }: QuoteFormProps) => 
           <button
             type="submit"
             disabled={isSubmitting}
-            className="flex-1 px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="flex-1 px-4 py-2 bg-secondary text-secondary-foreground font-medium rounded-lg hover:bg-secondary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             {isSubmitting ? 'Submitting...' : 'Submit Quote'}
           </button>
@@ -108,7 +108,7 @@ const QuoteForm = ({ jobId, jobTitle, onSuccess, onCancel }: QuoteFormProps) => 
             type="button"
             onClick={onCancel}
             disabled={isSubmitting}
-            className="px-4 py-2 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="px-4 py-2 border border-border text-foreground font-medium rounded-lg hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             Cancel
           </button>

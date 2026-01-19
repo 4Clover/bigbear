@@ -1,8 +1,8 @@
 'use client'
 
-import { useState } from 'react'
-import { signIn } from 'next-auth/react'
 import Link from 'next/link'
+import { signIn } from 'next-auth/react'
+import { useState } from 'react'
 import { Button, Input } from '@/components/ui'
 
 export default function LoginPage() {
@@ -36,7 +36,7 @@ export default function LoginPage() {
 
   return (
     <div>
-      <h3 className="text-lg font-medium text-gray-900 text-center mb-6">
+      <h3 className="text-lg font-medium text-foreground text-center mb-6">
         Sign in to your account
       </h3>
 
@@ -61,21 +61,21 @@ export default function LoginPage() {
       <div className="mt-6">
         <div className="relative">
           <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-gray-300" />
+            <div className="w-full border-t border-border" />
           </div>
           <div className="relative flex justify-center text-sm">
-            <span className="px-2 bg-white text-gray-500">No password needed</span>
+            <span className="px-2 bg-card text-muted-foreground">No password needed</span>
           </div>
         </div>
       </div>
 
-      <p className="mt-6 text-center text-sm text-gray-600">
+      <p className="mt-6 text-center text-sm text-muted-foreground">
         We&apos;ll send a magic link to your email. Click the link to sign in - no password
         required!
       </p>
 
       <div className="mt-6 text-center">
-        <Link href="/" className="text-sm text-emerald-600 hover:underline">
+        <Link href="/" className="text-sm text-forest-600 dark:text-forest-400 hover:underline">
           &larr; Back to home
         </Link>
       </div>

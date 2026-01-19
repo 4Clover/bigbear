@@ -22,22 +22,22 @@ interface JobCardProps {
 }
 
 const priorityColors: Record<JobPriority, string> = {
-  LOW: 'bg-gray-100 text-gray-700',
-  MEDIUM: 'bg-blue-100 text-blue-700',
-  HIGH: 'bg-orange-100 text-orange-700',
-  URGENT: 'bg-red-100 text-red-700',
+  LOW: 'bg-muted text-muted-foreground',
+  MEDIUM: 'bg-secondary/20 text-secondary',
+  HIGH: 'bg-warning/20 text-warning',
+  URGENT: 'bg-destructive/20 text-destructive',
 }
 
 const statusColors: Record<JobStatus, string> = {
-  OPEN: 'bg-green-100 text-green-700',
-  QUOTED: 'bg-yellow-100 text-yellow-700',
-  ASSIGNED: 'bg-purple-100 text-purple-700',
-  SCHEDULED: 'bg-blue-100 text-blue-700',
-  IN_PROGRESS: 'bg-orange-100 text-orange-700',
-  COMPLETED: 'bg-teal-100 text-teal-700',
-  APPROVED: 'bg-emerald-100 text-emerald-700',
-  PAID: 'bg-gray-100 text-gray-700',
-  CANCELLED: 'bg-red-100 text-red-700',
+  OPEN: 'bg-success/20 text-success',
+  QUOTED: 'bg-warning/20 text-warning',
+  ASSIGNED: 'bg-violet-500/20 text-violet-600 dark:text-violet-400',
+  SCHEDULED: 'bg-secondary/20 text-secondary',
+  IN_PROGRESS: 'bg-warning/20 text-warning',
+  COMPLETED: 'bg-teal-500/20 text-teal-600 dark:text-teal-400',
+  APPROVED: 'bg-success/20 text-success',
+  PAID: 'bg-muted text-muted-foreground',
+  CANCELLED: 'bg-destructive/20 text-destructive',
 }
 
 const formatDate = (date: Date | null | undefined) => {
@@ -58,12 +58,12 @@ const JobCard = ({
   showActions = true,
 }: JobCardProps) => {
   return (
-    <div className="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-shadow">
+    <div className="bg-card rounded-lg border border-border p-4 hover:shadow-md transition-shadow">
       <div className="flex items-start justify-between gap-4">
         <div className="flex-1 min-w-0">
-          <h3 className="text-lg font-semibold text-gray-900 truncate">{job.title}</h3>
+          <h3 className="text-lg font-semibold text-foreground truncate">{job.title}</h3>
           {job.description && (
-            <p className="mt-1 text-sm text-gray-600 line-clamp-2">{job.description}</p>
+            <p className="mt-1 text-sm text-muted-foreground line-clamp-2">{job.description}</p>
           )}
         </div>
         <div className="flex flex-col items-end gap-2">
@@ -76,7 +76,7 @@ const JobCard = ({
         </div>
       </div>
 
-      <div className="mt-4 flex flex-wrap gap-4 text-sm text-gray-500">
+      <div className="mt-4 flex flex-wrap gap-4 text-sm text-muted-foreground">
         {job.dueDate && (
           <div className="flex items-center gap-1">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -126,7 +126,7 @@ const JobCard = ({
           {job.status === 'OPEN' && onQuote && (
             <button
               onClick={() => { onQuote(job.id); }}
-              className="px-3 py-1.5 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700 transition-colors"
+              className="px-3 py-1.5 bg-secondary text-secondary-foreground text-sm font-medium rounded hover:bg-secondary/90 transition-colors"
             >
               Submit Quote
             </button>
@@ -134,7 +134,7 @@ const JobCard = ({
           {job.status === 'ASSIGNED' && onSchedule && (
             <button
               onClick={() => { onSchedule(job.id); }}
-              className="px-3 py-1.5 bg-purple-600 text-white text-sm font-medium rounded hover:bg-purple-700 transition-colors"
+              className="px-3 py-1.5 bg-violet-600 text-white text-sm font-medium rounded hover:bg-violet-700 transition-colors"
             >
               Book Timeslot
             </button>
@@ -142,7 +142,7 @@ const JobCard = ({
           {job.status === 'SCHEDULED' && onStart && (
             <button
               onClick={() => { onStart(job.id); }}
-              className="px-3 py-1.5 bg-orange-600 text-white text-sm font-medium rounded hover:bg-orange-700 transition-colors"
+              className="px-3 py-1.5 bg-warning text-warning-foreground text-sm font-medium rounded hover:bg-warning/90 transition-colors"
             >
               Start Work
             </button>
@@ -150,7 +150,7 @@ const JobCard = ({
           {(job.status === 'SCHEDULED' || job.status === 'IN_PROGRESS') && onComplete && (
             <button
               onClick={() => { onComplete(job.id); }}
-              className="px-3 py-1.5 bg-emerald-600 text-white text-sm font-medium rounded hover:bg-emerald-700 transition-colors"
+              className="px-3 py-1.5 bg-primary text-primary-foreground text-sm font-medium rounded hover:bg-primary/90 transition-colors"
             >
               Mark Complete
             </button>

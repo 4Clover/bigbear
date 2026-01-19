@@ -1,6 +1,8 @@
 import { prisma } from '@/lib/prisma'
 import BookingTable from '@/components/owner/BookingTable'
 import BookingFilters from '@/components/owner/BookingFilters'
+import { Badge } from '@/components/ui'
+import { bookingStatusVariant, bookingStatusLabel } from '@/lib/ui/status'
 import type { BookingStatus } from '@prisma/client'
 
 interface SearchParams {
@@ -62,21 +64,25 @@ const BookingsPage = async ({ searchParams }: { searchParams: Promise<SearchPara
     return acc
   }, {})
 
+  const statuses = ['PENDING', 'CONFIRMED', 'COMPLETED', 'CANCELLED', 'NO_SHOW'] as const
+
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Bookings</h1>
-        <p className="text-gray-500">Manage all your property bookings.</p>
+        <h1 className="text-2xl font-bold text-foreground">Bookings</h1>
+        <p className="text-muted-foreground">Manage all your property bookings.</p>
       </div>
 
       <div className="flex flex-wrap gap-3">
-        {(['PENDING', 'CONFIRMED', 'COMPLETED', 'CANCELLED', 'NO_SHOW'] as const).map((status) => (
+        {statuses.map((status) => (
           <div
             key={status}
-            className="bg-white px-4 py-2 rounded-lg border border-gray-200 text-sm"
+            className="bg-card px-4 py-2 rounded-lg border border-border text-sm flex items-center gap-2"
           >
-            <span className="text-gray-500">{status}:</span>{' '}
-            <span className="font-medium">{counts[status] ?? 0}</span>
+            <Badge variant={bookingStatusVariant[status]}>
+              {bookingStatusLabel[status]}
+            </Badge>
+            <span className="font-medium text-foreground">{counts[status] ?? 0}</span>
           </div>
         ))}
       </div>

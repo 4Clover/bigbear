@@ -10,7 +10,7 @@ const WorkerLayout = async ({ children }: { children: React.ReactNode }) => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-background flex">
       <WorkerNav user={session.user} />
       <main className="flex-1 p-8">{children}</main>
     </div>

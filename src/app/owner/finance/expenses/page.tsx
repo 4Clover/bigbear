@@ -10,12 +10,12 @@ const AddExpensePage = async () => {
       <div>
         <Link
           href="/owner/finance"
-          className="text-sm text-emerald-600 hover:text-emerald-700 font-medium"
+          className="text-sm text-forest-600 hover:text-forest-700 dark:text-forest-400 dark:hover:text-forest-300 font-medium"
         >
           &larr; Back to Finance
         </Link>
-        <h1 className="mt-2 text-2xl font-bold text-gray-900">Add Expense</h1>
-        <p className="text-gray-500">Record a new expense with receipts</p>
+        <h1 className="mt-2 text-2xl font-bold text-foreground">Add Expense</h1>
+        <p className="text-muted-foreground">Record a new expense with receipts</p>
       </div>
 
       <ExpenseForm categories={categories} />

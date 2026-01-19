@@ -57,11 +57,11 @@ export const ExpenseForm = ({ categories }: ExpenseFormProps) => {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-6">
+      <div className="bg-card rounded-xl shadow-sm border border-border p-6 space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Category <span className="text-red-500">*</span>
+            <label className="block text-sm font-medium text-foreground mb-1">
+              Category <span className="text-destructive">*</span>
             </label>
             <CategorySelect
               categories={categories}
@@ -72,11 +72,11 @@ export const ExpenseForm = ({ categories }: ExpenseFormProps) => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Amount <span className="text-red-500">*</span>
+            <label className="block text-sm font-medium text-foreground mb-1">
+              Amount <span className="text-destructive">*</span>
             </label>
             <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
               <input
                 type="number"
                 step="0.01"
@@ -84,48 +84,48 @@ export const ExpenseForm = ({ categories }: ExpenseFormProps) => {
                 value={amount}
                 onChange={(e) => { setAmount(e.target.value); }}
                 placeholder="0.00"
-                className="w-full pl-7 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                className="w-full pl-7 pr-3 py-2 border border-border rounded-lg text-sm bg-background text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary focus:border-primary"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Date <span className="text-red-500">*</span>
+            <label className="block text-sm font-medium text-foreground mb-1">
+              Date <span className="text-destructive">*</span>
             </label>
             <input
               type="date"
               value={date}
               onChange={(e) => { setDate(e.target.value); }}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+              className="w-full px-3 py-2 border border-border rounded-lg text-sm bg-background text-foreground focus:ring-2 focus:ring-primary focus:border-primary"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Vendor</label>
+            <label className="block text-sm font-medium text-foreground mb-1">Vendor</label>
             <input
               type="text"
               value={vendor}
               onChange={(e) => { setVendor(e.target.value); }}
               placeholder="e.g., Home Depot"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+              className="w-full px-3 py-2 border border-border rounded-lg text-sm bg-background text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary focus:border-primary"
             />
           </div>
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+          <label className="block text-sm font-medium text-foreground mb-1">Description</label>
           <textarea
             value={description}
             onChange={(e) => { setDescription(e.target.value); }}
             placeholder="What was this expense for?"
             rows={3}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+            className="w-full px-3 py-2 border border-border rounded-lg text-sm bg-background text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary focus:border-primary"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Receipts</label>
+          <label className="block text-sm font-medium text-foreground mb-2">Receipts</label>
           <ReceiptUploader onUpload={setReceipts} existingReceipts={receipts} />
         </div>
       </div>
