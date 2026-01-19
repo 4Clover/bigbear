@@ -1,6 +1,6 @@
 'use client'
 
-import dynamic from 'next/dynamic'
+import { useState, useEffect } from 'react'
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts'
 import { useTheme } from 'next-themes'
 import { formatCurrency } from '@/lib/format'
@@ -77,11 +77,17 @@ function CategoryBreakdownInner({ data, title }: Readonly<CategoryBreakdownProps
   )
 }
 
-// Export with ssr: false to avoid hydration mismatch with theme
-export const CategoryBreakdown = dynamic(
-  () => Promise.resolve((props: CategoryBreakdownProps) => <CategoryBreakdownInner {...props} />),
-  {
-    ssr: false,
-    loading: () => <CategoryBreakdownSkeleton />,
+// Client-only wrapper to avoid hydration mismatch with theme
+export function CategoryBreakdown(props: Readonly<CategoryBreakdownProps>) {
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  if (!mounted) {
+    return <CategoryBreakdownSkeleton title={props.title} />
   }
-)
+
+  return <CategoryBreakdownInner {...props} />
+}

@@ -62,38 +62,44 @@ export const blockDates = async (
 
 ## Dynamic Import Loading Props
 
-Next.js `dynamic()` loading function receives no props. Pass data through wrapper components.
+Next.js `dynamic()` loading function receives no props. Use a mounted-state pattern when skeleton needs props.
 
 **Anti-pattern:**
 
 ```typescript
-export const Chart = dynamic(
-  () => Promise.resolve(ChartInner),
-  {
-    loading: ({ title }: { title?: string }) => <Skeleton title={title} />,
-  }
-)
-```
-
-**Correct pattern:**
-
-```typescript
+// loading callback CANNOT receive props - this won't work
 export const Chart = dynamic(
   () => Promise.resolve(ChartInner),
   {
     ssr: false,
-    loading: () => <Skeleton />,
+    loading: () => <Skeleton title={???} />, // No access to props here
   }
 )
-
-// If title needed in skeleton, wrap the dynamic component
-export const ChartWithTitle = ({ title, ...props }) => (
-  <div>
-    {title && <h3>{title}</h3>}
-    <Chart {...props} />
-  </div>
-)
 ```
+
+**Correct pattern (mounted state):**
+
+```typescript
+// Use useState/useEffect to detect client mount
+export function Chart(props: Readonly<ChartProps>) {
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  if (!mounted) {
+    return <ChartSkeleton title={props.title} /> // Props accessible!
+  }
+
+  return <ChartInner {...props} />
+}
+```
+
+This pattern:
+- Avoids hydration mismatches (like `dynamic` with `ssr: false`)
+- Allows passing props to the skeleton component
+- Renders skeleton on server/initial client, then swaps to real component
 
 ---
 

@@ -317,3 +317,24 @@ When in **Plan Mode** (or when asked to create a plan), follow this protocol:
 1. **Research First**: Use Ref tools (see MCP Servers section) to verify libraries/APIs before writing the plan
 2. **No Assumptions**: Validate API signatures with documentation, not guesses
 3. **Minimize Output**: Plans should be concise and actionable
+
+## External Review Tool Suggestions (CodeRabbit, etc.)
+
+When fixing issues reported by external code review tools (CodeRabbit, etc.), **verify suggestions via Ref before applying**. These tools may use outdated API information.
+
+**Workflow:**
+
+1. Receive suggestion (e.g., "change `z.treeifyError()` to `error.format()`")
+2. Use `ref_search_documentation` to verify the correct API for the library version
+3. Apply only verified fixes; reject incorrect suggestions
+
+**Example verification:**
+
+```
+# CodeRabbit suggests: "z.url() doesn't exist, use z.string().url()"
+# Before applying, verify:
+ref_search_documentation("zod 4 z.url standalone string validation")
+# Docs confirm z.url() IS correct for Zod 4 - reject the suggestion
+```
+
+Keep verifications minimal (one search when possible) to avoid overhead.
