@@ -1,17 +1,15 @@
 import { config } from 'dotenv'
 import { PrismaClient, type NotificationEvent } from '@prisma/client'
 
-// Load env files in Next.js order (matching prisma.config.ts)
-config({ path: '.env.local' })
-
-// Capture prod DATABASE_URL before dev overrides it
+// Load .env.local with override to capture prod DATABASE_URL
+// (Prisma may have already loaded env files before seed runs)
+config({ path: '.env.local', override: true })
 const prodConnectionString = process.env.DATABASE_URL
 
+// Load .env.development.local to get local DATABASE_URL
 if (process.env.NODE_ENV !== 'production') {
   config({ path: '.env.development.local', override: true })
 }
-
-// After override, DATABASE_URL is now the local dev connection
 const localConnectionString = process.env.DATABASE_URL
 
 async function createPrismaClient(connectionString: string): Promise<PrismaClient> {
