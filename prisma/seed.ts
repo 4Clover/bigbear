@@ -3,19 +3,20 @@ import { PrismaClient, type NotificationEvent } from '@prisma/client'
 
 // Load env files in Next.js order (matching prisma.config.ts)
 config({ path: '.env.local' })
+
+// Capture prod DATABASE_URL before dev overrides it
+const prodConnectionString = process.env.DATABASE_URL
+
 if (process.env.NODE_ENV !== 'production') {
   config({ path: '.env.development.local', override: true })
 }
 
-const connectionString = process.env.DATABASE_URL
-if (!connectionString) {
-  throw new Error('DATABASE_URL environment variable is not set')
-}
+// After override, DATABASE_URL is now the local dev connection
+const localConnectionString = process.env.DATABASE_URL
 
-// Conditionally use Neon adapter only for Neon connections
-const isNeonConnection = connectionString.includes('.neon.tech')
+async function createPrismaClient(connectionString: string): Promise<PrismaClient> {
+  const isNeonConnection = connectionString.includes('.neon.tech')
 
-async function createPrismaClient(): Promise<PrismaClient> {
   if (isNeonConnection) {
     const { PrismaNeon } = await import('@prisma/adapter-neon')
     const adapter = new PrismaNeon({ connectionString })
@@ -120,74 +121,118 @@ const addons = [
   },
 ]
 
-const main = async () => {
-  const prisma = await createPrismaClient()
-
-  try {
-    console.log(`Seeding database (${isNeonConnection ? 'Neon' : 'local PostgreSQL'})...`)
-
-    console.log('Seeding expense categories...')
-    for (const [index, category] of expenseCategories.entries()) {
-      await prisma.expenseCategory.upsert({
-        where: { name: category.name },
-        update: {},
-        create: {
-          ...category,
-          isTaxDeductible: category.isTaxDeductible ?? true,
-          sortOrder: index,
-        },
-      })
-    }
-    console.log(`Created ${expenseCategories.length} expense categories`)
-
-    console.log('Creating default pricing config...')
-    await prisma.pricingConfig.upsert({
-      where: { id: 'default' },
+async function seedDatabase(prisma: PrismaClient): Promise<void> {
+  console.log('Seeding expense categories...')
+  for (const [index, category] of expenseCategories.entries()) {
+    await prisma.expenseCategory.upsert({
+      where: { name: category.name },
       update: {},
       create: {
-        id: 'default',
-        baseNightlyRate: 150.0,
-        weekendRate: 175.0,
-        cleaningFee: 75.0,
-        depositPercentage: 20,
-        minNights: 2,
-        maxNights: 14,
-        maxGuests: 8,
+        ...category,
+        isTaxDeductible: category.isTaxDeductible ?? true,
+        sortOrder: index,
       },
     })
-    console.log('Created default pricing config')
-
-    console.log('Seeding addons...')
-    for (const [index, addon] of addons.entries()) {
-      await prisma.addon.upsert({
-        where: { name: addon.name },
-        update: {},
-        create: {
-          ...addon,
-          sortOrder: index,
-        },
-      })
-    }
-    console.log(`Created ${addons.length} addons`)
-
-    console.log('Creating notification preferences...')
-    for (const event of notificationEvents) {
-      await prisma.notificationPreference.upsert({
-        where: { event },
-        update: {},
-        create: {
-          event,
-          emailEnabled: true,
-          smsEnabled: false,
-        },
-      })
-    }
-    console.log(`Created ${notificationEvents.length} notification preferences`)
-
-    console.log('Seed completed successfully!')
-  } finally {
-    await prisma.$disconnect()
   }
+  console.log(`Created ${expenseCategories.length} expense categories`)
+
+  console.log('Creating default pricing config...')
+  await prisma.pricingConfig.upsert({
+    where: { id: 'default' },
+    update: {},
+    create: {
+      id: 'default',
+      baseNightlyRate: 150.0,
+      weekendRate: 175.0,
+      cleaningFee: 75.0,
+      depositPercentage: 20,
+      minNights: 2,
+      maxNights: 14,
+      maxGuests: 8,
+    },
+  })
+  console.log('Created default pricing config')
+
+  console.log('Seeding addons...')
+  for (const [index, addon] of addons.entries()) {
+    await prisma.addon.upsert({
+      where: { name: addon.name },
+      update: {},
+      create: {
+        ...addon,
+        sortOrder: index,
+      },
+    })
+  }
+  console.log(`Created ${addons.length} addons`)
+
+  console.log('Creating notification preferences...')
+  for (const event of notificationEvents) {
+    await prisma.notificationPreference.upsert({
+      where: { event },
+      update: {},
+      create: {
+        event,
+        emailEnabled: true,
+        smsEnabled: false,
+      },
+    })
+  }
+  console.log(`Created ${notificationEvents.length} notification preferences`)
+
+  // Seed admin accounts
+  const adminEmails = process.env.ADMIN_EMAILS?.split(' ').filter(Boolean) ?? []
+  if (adminEmails.length > 0) {
+    console.log('Seeding admin accounts...')
+    for (const email of adminEmails) {
+      await prisma.user.upsert({
+        where: { email },
+        update: { role: 'OWNER' },
+        create: {
+          email,
+          role: 'OWNER',
+          emailVerified: new Date(),
+        },
+      })
+    }
+    console.log(`Created ${adminEmails.length} admin account(s)`)
+  }
+}
+
+const main = async () => {
+  if (!localConnectionString) {
+    throw new Error('DATABASE_URL not found in .env.development.local')
+  }
+
+  // Seed local database
+  console.log('\n========== SEEDING LOCAL DATABASE ==========')
+  const localPrisma = await createPrismaClient(localConnectionString)
+  try {
+    const isNeon = localConnectionString.includes('.neon.tech')
+    console.log(`Connecting to ${isNeon ? 'Neon' : 'local PostgreSQL'}...`)
+    await seedDatabase(localPrisma)
+    console.log('Local database seed completed!')
+  } finally {
+    await localPrisma.$disconnect()
+  }
+
+  // Seed production database if .env.local has a different DATABASE_URL
+  if (prodConnectionString && prodConnectionString !== localConnectionString) {
+    console.log('\n========== SEEDING PRODUCTION DATABASE ==========')
+    const prodPrisma = await createPrismaClient(prodConnectionString)
+    try {
+      const isNeon = prodConnectionString.includes('.neon.tech')
+      console.log(`Connecting to ${isNeon ? 'Neon' : 'PostgreSQL'}...`)
+      await seedDatabase(prodPrisma)
+      console.log('Production database seed completed!')
+    } finally {
+      await prodPrisma.$disconnect()
+    }
+  } else {
+    console.log('\nNo separate prod DATABASE_URL in .env.local, skipping production seed')
+  }
+
+  console.log('\n========== ALL SEEDS COMPLETED ==========')
 }
 
 main().catch((e: unknown) => {
