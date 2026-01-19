@@ -2,7 +2,7 @@
 
 import { format } from 'date-fns'
 import { Calendar } from 'lucide-react'
-import type { Booking } from '@prisma/client'
+import type { Booking, BookingStatus } from '@prisma/client'
 import { useState, useTransition } from 'react'
 import { approveBookingRequest, rejectBookingRequest, cancelBooking } from '@/actions/bookings'
 
@@ -10,7 +10,7 @@ interface BookingTableProps {
   bookings: Booking[]
 }
 
-const statusColors: Record<string, string> = {
+const statusColors: Record<BookingStatus, string> = {
   PENDING: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400',
   CONFIRMED: 'bg-forest-100 text-forest-800 dark:bg-forest-900/30 dark:text-forest-400',
   CANCELLED: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400',

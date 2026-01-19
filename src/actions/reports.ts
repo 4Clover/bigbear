@@ -140,32 +140,35 @@ export const generateAnnualReport = async (year: number): Promise<AnnualReportDa
 const getMonthlyBreakdown = async (
   year: number
 ): Promise<{ month: string; income: number; expenses: number; net: number }[]> => {
-  const months = []
-  for (let month = 1; month <= 12; month++) {
-    const start = startOfMonth(new Date(year, month - 1))
-    const end = endOfMonth(new Date(year, month - 1))
+  const start = startOfYear(new Date(year, 0))
+  const end = endOfYear(new Date(year, 0))
 
-    const transactions = await prisma.transaction.findMany({
-      where: {
-        date: { gte: start, lte: end },
-      },
-    })
+  const transactions = await prisma.transaction.findMany({
+    where: { date: { gte: start, lte: end } },
+  })
 
-    const income = transactions
+  const months = Array.from({ length: 12 }, (_, i) => {
+    const monthStart = startOfMonth(new Date(year, i))
+    const monthEnd = endOfMonth(new Date(year, i))
+
+    const monthTx = transactions.filter((t) => t.date >= monthStart && t.date <= monthEnd)
+
+    const income = monthTx
       .filter((t) => t.type === 'INCOME')
       .reduce((sum, t) => sum + Number(t.amount), 0)
 
-    const expenses = transactions
+    const expenses = monthTx
       .filter((t) => t.type === 'EXPENSE')
       .reduce((sum, t) => sum + Number(t.amount), 0)
 
-    months.push({
-      month: format(new Date(year, month - 1), 'MMM'),
+    return {
+      month: format(new Date(year, i), 'MMM'),
       income,
       expenses,
       net: income - expenses,
-    })
-  }
+    }
+  })
+
   return months
 }
 

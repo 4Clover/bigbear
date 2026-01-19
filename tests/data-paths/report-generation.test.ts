@@ -172,22 +172,17 @@ describe('Report Generation Data Paths', () => {
     it('should provide accurate 12-month breakdown', async () => {
       const category = createMockCategory({ id: 'rental', name: 'Rental Income', scheduleELine: 'Line 3', isTaxDeductible: false })
 
-      // Main query returns all transactions
-      prismaMock.transaction.findMany.mockResolvedValueOnce([])
-
-      // Monthly queries - simulate varying income across months
+      // Monthly incomes - simulate varying income across months
       const monthlyIncomes = [1000, 1200, 1500, 1800, 2000, 2500, 2500, 2000, 1800, 1500, 1200, 1000]
 
-      for (let month = 0; month < 12; month++) {
-        const income = monthlyIncomes[month]
-        if (income && income > 0) {
-          prismaMock.transaction.findMany.mockResolvedValueOnce([
-            createMockTransaction(`tx-${month}`, 'INCOME', income, new Date(2024, month, 15), category),
-          ] as never)
-        } else {
-          prismaMock.transaction.findMany.mockResolvedValueOnce([])
-        }
-      }
+      // Main query returns all transactions (empty for categories/receipts)
+      prismaMock.transaction.findMany.mockResolvedValueOnce([])
+
+      // Single query for monthly breakdown returns all year's transactions
+      const allTransactions = monthlyIncomes.map((income, month) =>
+        createMockTransaction(`tx-${month}`, 'INCOME', income, new Date(2024, month, 15), category)
+      )
+      prismaMock.transaction.findMany.mockResolvedValueOnce(allTransactions as never)
 
       const report = await generateAnnualReport(2024)
 

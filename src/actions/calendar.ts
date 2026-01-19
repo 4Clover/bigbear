@@ -1,5 +1,6 @@
 'use server'
 
+import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 import { assertOwner } from '@/lib/auth/guards'
@@ -9,15 +10,33 @@ export const blockDates = async (
   startDate: Date,
   endDate: Date,
   reason?: string,
-  _notes?: string
+  notes?: string
 ) => {
   await assertOwner()
 
+  const schema = z
+    .object({
+      startDate: z.coerce.date(),
+      endDate: z.coerce.date(),
+      reason: z.string().optional(),
+      notes: z.string().optional(),
+    })
+    .refine((data) => data.endDate >= data.startDate, {
+      message: 'End date must be after start date',
+      path: ['endDate'],
+    })
+
+  const validated = schema.safeParse({ startDate, endDate, reason, notes })
+  if (!validated.success) {
+    return { errors: z.treeifyError(validated.error).properties }
+  }
+
   await prisma.blockedDate.create({
     data: {
-      startDate,
-      endDate,
-      reason,
+      startDate: validated.data.startDate,
+      endDate: validated.data.endDate,
+      reason: validated.data.reason,
+      notes: validated.data.notes,
       source: 'manual',
     },
   })

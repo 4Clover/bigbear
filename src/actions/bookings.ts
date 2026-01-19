@@ -43,7 +43,7 @@ export const cancelBooking = async (bookingId: string, initiatedBy: 'guest' | 'o
   await prisma.booking.update({
     where: { id: bookingId },
     data: {
-      status: refund.type === 'full' ? 'CANCELLED' : 'CANCELLED',
+      status: 'CANCELLED',
       notes: booking.notes
         ? `${booking.notes}\n\nCancelled by ${initiatedBy}. Refund: ${refund.type} ($${refund.amount.toFixed(2)})`
         : `Cancelled by ${initiatedBy}. Refund: ${refund.type} ($${refund.amount.toFixed(2)})`,

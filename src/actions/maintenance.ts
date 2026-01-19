@@ -1,5 +1,6 @@
 'use server'
 
+import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 import { assertOwner, assertWorker, assertOwnerOrWorker } from '@/lib/auth/guards'
@@ -68,6 +69,18 @@ export const submitQuote = async (data: {
 }) => {
   const session = await assertWorker()
 
+  const schema = z.object({
+    jobId: z.string().min(1),
+    amount: z.number().positive(),
+    description: z.string().optional(),
+    estimatedDays: z.number().int().positive().optional(),
+  })
+
+  const validated = schema.safeParse(data)
+  if (!validated.success) {
+    return { errors: z.treeifyError(validated.error).properties }
+  }
+
   const workerProfile = await prisma.workerProfile.findUnique({
     where: { userId: session.user.id },
   })
@@ -77,7 +90,7 @@ export const submitQuote = async (data: {
   }
 
   const job = await prisma.maintenanceJob.findUnique({
-    where: { id: data.jobId },
+    where: { id: validated.data.jobId },
   })
 
   if (job?.status !== 'OPEN') {
@@ -85,7 +98,7 @@ export const submitQuote = async (data: {
   }
 
   const existingQuote = await prisma.quote.findFirst({
-    where: { jobId: data.jobId, workerId: workerProfile.id },
+    where: { jobId: validated.data.jobId, workerId: workerProfile.id },
   })
 
   if (existingQuote) {
@@ -94,21 +107,21 @@ export const submitQuote = async (data: {
 
   const quote = await prisma.quote.create({
     data: {
-      jobId: data.jobId,
+      jobId: validated.data.jobId,
       workerId: workerProfile.id,
-      amount: data.amount,
-      description: data.description,
-      estimatedDays: data.estimatedDays,
+      amount: validated.data.amount,
+      description: validated.data.description,
+      estimatedDays: validated.data.estimatedDays,
     },
   })
 
   await prisma.maintenanceJob.update({
-    where: { id: data.jobId },
+    where: { id: validated.data.jobId },
     data: { status: 'QUOTED' },
   })
 
   // Send owner notification (non-blocking)
-  sendQuoteReceived(job, { ...data, id: quote.id }, OWNER_EMAIL).catch(() => {
+  sendQuoteReceived(job, { ...validated.data, id: quote.id }, OWNER_EMAIL).catch(() => {
     // Notification failure should not affect quote submission
   })
 
@@ -126,6 +139,17 @@ export const bookTimeslot = async (data: {
 }) => {
   const session = await assertWorker()
 
+  const schema = z.object({
+    jobId: z.string().min(1),
+    scheduledDate: z.coerce.date(),
+    scheduledTime: z.string().regex(/^\d{2}:\d{2}$/),
+  })
+
+  const validated = schema.safeParse(data)
+  if (!validated.success) {
+    return { errors: z.treeifyError(validated.error).properties }
+  }
+
   const workerProfile = await prisma.workerProfile.findUnique({
     where: { userId: session.user.id },
   })
@@ -135,7 +159,7 @@ export const bookTimeslot = async (data: {
   }
 
   const job = await prisma.maintenanceJob.findUnique({
-    where: { id: data.jobId },
+    where: { id: validated.data.jobId },
   })
 
   if (job?.assignedWorkerId !== workerProfile.id) {
@@ -147,10 +171,10 @@ export const bookTimeslot = async (data: {
   }
 
   const updatedJob = await prisma.maintenanceJob.update({
-    where: { id: data.jobId },
+    where: { id: validated.data.jobId },
     data: {
-      scheduledDate: data.scheduledDate,
-      scheduledTime: data.scheduledTime,
+      scheduledDate: validated.data.scheduledDate,
+      scheduledTime: validated.data.scheduledTime,
       status: 'SCHEDULED',
     },
   })
@@ -173,6 +197,21 @@ export const submitWorkCompletion = async (data: {
 }) => {
   const session = await assertWorker()
 
+  const schema = z.object({
+    jobId: z.string().min(1),
+    description: z.string().optional(),
+    images: z.array(z.url()),
+    hoursWorked: z.number().positive().optional(),
+    materialsUsed: z.string().optional(),
+    unexpectedIssues: z.string().optional(),
+    finalAmount: z.number().nonnegative().optional(),
+  })
+
+  const validated = schema.safeParse(data)
+  if (!validated.success) {
+    return { errors: z.treeifyError(validated.error).properties }
+  }
+
   const workerProfile = await prisma.workerProfile.findUnique({
     where: { userId: session.user.id },
   })
@@ -182,7 +221,7 @@ export const submitWorkCompletion = async (data: {
   }
 
   const job = await prisma.maintenanceJob.findUnique({
-    where: { id: data.jobId },
+    where: { id: validated.data.jobId },
   })
 
   if (job?.assignedWorkerId !== workerProfile.id) {
@@ -195,19 +234,19 @@ export const submitWorkCompletion = async (data: {
 
   const completion = await prisma.workCompletion.create({
     data: {
-      jobId: data.jobId,
+      jobId: validated.data.jobId,
       workerId: workerProfile.id,
-      description: data.description,
-      images: data.images,
-      hoursWorked: data.hoursWorked,
-      materialsUsed: data.materialsUsed,
-      unexpectedIssues: data.unexpectedIssues,
-      finalAmount: data.finalAmount,
+      description: validated.data.description,
+      images: validated.data.images,
+      hoursWorked: validated.data.hoursWorked,
+      materialsUsed: validated.data.materialsUsed,
+      unexpectedIssues: validated.data.unexpectedIssues,
+      finalAmount: validated.data.finalAmount,
     },
   })
 
   await prisma.maintenanceJob.update({
-    where: { id: data.jobId },
+    where: { id: validated.data.jobId },
     data: {
       status: 'COMPLETED',
       completedAt: new Date(),
@@ -217,7 +256,7 @@ export const submitWorkCompletion = async (data: {
   // Send owner notification (non-blocking)
   sendMaintenanceCompleted(
     job,
-    { id: completion.id, finalAmount: data.finalAmount, description: data.description },
+    { id: completion.id, finalAmount: validated.data.finalAmount, description: validated.data.description },
     OWNER_EMAIL
   ).catch(() => {
     // Notification failure should not affect work completion

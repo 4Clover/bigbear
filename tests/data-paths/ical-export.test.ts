@@ -98,6 +98,7 @@ describe('iCal Export Data Path', () => {
         startDate: addDays(today, 10),
         endDate: addDays(today, 15),
         reason: 'Maintenance',
+        notes: null,
         source: 'manual',
         externalId: null,
         createdAt: new Date(),

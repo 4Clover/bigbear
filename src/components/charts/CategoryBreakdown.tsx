@@ -12,22 +12,22 @@ interface CategoryBreakdownProps {
   title?: string
 }
 
-function CategoryBreakdownSkeleton({ title }: { title?: string }) {
+function CategoryBreakdownSkeleton({ title }: Readonly<{ title?: string }>) {
   return (
     <div>
       {title && <h3 className="text-lg font-semibold text-foreground mb-4">{title}</h3>}
-      <div className="h-[300px] animate-pulse bg-muted rounded" />
+      <div className="h-75 animate-pulse bg-muted rounded" />
     </div>
   )
 }
 
-function CategoryBreakdownInner({ data, title }: CategoryBreakdownProps) {
+function CategoryBreakdownInner({ data, title }: Readonly<CategoryBreakdownProps>) {
   const { resolvedTheme } = useTheme()
   const isDark = resolvedTheme === 'dark'
 
   if (data.length === 0) {
     return (
-      <div className="h-[300px] flex items-center justify-center text-muted-foreground">
+      <div className="h-75 flex items-center justify-center text-muted-foreground">
         No data available
       </div>
     )
@@ -82,6 +82,6 @@ export const CategoryBreakdown = dynamic(
   () => Promise.resolve((props: CategoryBreakdownProps) => <CategoryBreakdownInner {...props} />),
   {
     ssr: false,
-    loading: ({ title }: { title?: string }) => <CategoryBreakdownSkeleton title={title} />,
+    loading: () => <CategoryBreakdownSkeleton />,
   }
 )

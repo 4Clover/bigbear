@@ -261,6 +261,8 @@ function getLabel(status: BookingStatus): string {
 
 ### Unused Variables
 
+Planned or in-limbo feature or function?
+
 ```typescript
 // Prefix with underscore to mark intentionally unused
 const [_first, second] = tuple
@@ -268,14 +270,50 @@ catch (_error) { /* error intentionally ignored */ }
 function handler(_req: Request) { /* req not needed */ }
 ```
 
+Include a comment block at its beginning:
+
+"#|--------------------------------|"
+"#| %%% XYZ SCAFFOLDING %%%%%%%%%%%|"
+"#| TODO: Implement when relevant. |"
+"#|--------------------------------|"
+
 ## Path Alias
 
 `@/*` maps to `src/*` (configured in tsconfig.json and vitest.config.ts)
 
+## MCP Servers
+
+### Ref (Documentation Search)
+
+Use `ref_search_documentation` and `ref_read_url` when:
+
+- Implementing features with project dependencies (Prisma, Stripe, Resend, Auth.js, etc.)
+- Encountering library-specific errors or deprecation warnings
+- Unsure about API signatures, method parameters, or return types
+- Working with utility libraries (Zod, date-fns, etc.)
+
+**Do NOT use Ref for:**
+
+- Internal project code (use Serena symbolic tools)
+- Basic TypeScript/JavaScript syntax
+- Patterns already in this file or Serena memories
+
+**IMPORTANT:** Fetch only the MINIMUM info needed. Avoid loading entire documentation pages.
+
+## Serena Memories
+
+Project-specific patterns in `.serena/memories/` (loaded on-demand by task relevance):
+
+- `zod-validation-patterns` - Zod 4 syntax, lenient ID validation
+- `react-ref-forwarding` - forwardRef for form components
+- `prisma-enum-type-safety` - Prisma enums in Record types
+- `test-mock-update-patterns` - Updating test mocks after changes
+- `coding-patterns-guide` - Conditional logic, unused params, dynamic imports
+
 ## Plan Mode Workflow Rules
 
-When in **Plan Mode** (or when asked to create a plan), you MUST follow this protocol:
+When in **Plan Mode** (or when asked to create a plan), follow this protocol:
 
-1. **Research First**: Before writing the plan file, use the `ref_search_documentation` or `ref_read_url` tools to verify any libraries, APIs, or versions involved in the task.
-2. **No Assumptions**: Do not assume API signatures or library methods. Use the Ref tool to find the official documentation.
-3. **Minmize the Clutter**: Only use the Ref tool to obtain the **MINIMUM** but still comprehensive info to complete the task.
+1. **Research First**: Use Ref tools (see MCP Servers section) to verify libraries/APIs before writing the plan
+2. **No Assumptions**: Validate API signatures with documentation, not guesses
+3. **Minimize Output**: Plans should be concise and actionable

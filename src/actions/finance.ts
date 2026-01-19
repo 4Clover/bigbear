@@ -1,5 +1,6 @@
 'use server'
 
+import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
 import { deleteBlob } from '@/lib/blob'
 import { revalidatePath } from 'next/cache'
@@ -18,19 +19,33 @@ export const createExpense = async (data: {
 }) => {
   await assertOwnerOrAccountant()
 
+  const schema = z.object({
+    categoryId: z.string().min(1),
+    amount: z.number().positive(),
+    date: z.coerce.date(),
+    description: z.string().optional(),
+    vendor: z.string().optional(),
+    receiptUrls: z.array(z.url()).optional(),
+  })
+
+  const validated = schema.safeParse(data)
+  if (!validated.success) {
+    return { errors: z.treeifyError(validated.error).properties }
+  }
+
   const transaction = await prisma.transaction.create({
     data: {
       type: 'EXPENSE',
-      categoryId: data.categoryId,
-      amount: data.amount,
-      date: data.date,
-      description: data.description,
-      vendor: data.vendor,
+      categoryId: validated.data.categoryId,
+      amount: validated.data.amount,
+      date: validated.data.date,
+      description: validated.data.description,
+      vendor: validated.data.vendor,
     },
   })
 
-  if (data.receiptUrls && data.receiptUrls.length > 0) {
-    for (const url of data.receiptUrls) {
+  if (validated.data.receiptUrls && validated.data.receiptUrls.length > 0) {
+    for (const url of validated.data.receiptUrls) {
       await prisma.receipt.create({
         data: {
           transactionId: transaction.id,
