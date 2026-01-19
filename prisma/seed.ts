@@ -1,14 +1,31 @@
-import 'dotenv/config'
+import { config } from 'dotenv'
 import { PrismaClient, type NotificationEvent } from '@prisma/client'
-import { PrismaNeon } from '@prisma/adapter-neon'
+
+// Load env files in Next.js order (matching prisma.config.ts)
+config({ path: '.env.local' })
+if (process.env.NODE_ENV !== 'production') {
+  config({ path: '.env.development.local', override: true })
+}
 
 const connectionString = process.env.DATABASE_URL
 if (!connectionString) {
   throw new Error('DATABASE_URL environment variable is not set')
 }
 
-const adapter = new PrismaNeon({ connectionString })
-const prisma = new PrismaClient({ adapter })
+// Conditionally use Neon adapter only for Neon connections
+const isNeonConnection = connectionString.includes('.neon.tech')
+
+async function createPrismaClient(): Promise<PrismaClient> {
+  if (isNeonConnection) {
+    const { PrismaNeon } = await import('@prisma/adapter-neon')
+    const adapter = new PrismaNeon({ connectionString })
+    return new PrismaClient({ adapter })
+  }
+  // Local PostgreSQL - use pg adapter
+  const { PrismaPg } = await import('@prisma/adapter-pg')
+  const adapter = new PrismaPg({ connectionString })
+  return new PrismaClient({ adapter })
+}
 
 const expenseCategories = [
   {
@@ -75,60 +92,105 @@ const notificationEvents: NotificationEvent[] = [
   'NEW_MESSAGE',
 ]
 
+const addons = [
+  {
+    name: 'Early Check-In',
+    description: 'Check in as early as 1 PM (subject to availability)',
+    price: 50.0,
+  },
+  {
+    name: 'Late Checkout',
+    description: 'Extend your checkout to 1 PM',
+    price: 50.0,
+  },
+  {
+    name: 'Pet Fee',
+    description: 'Bring your furry friend (max 2 pets, dogs only)',
+    price: 75.0,
+  },
+  {
+    name: 'Hot Tub Heating',
+    description: 'Have the hot tub heated and ready for your arrival',
+    price: 35.0,
+  },
+  {
+    name: 'Firewood Bundle',
+    description: 'Bundle of seasoned firewood for the fireplace',
+    price: 25.0,
+  },
+]
+
 const main = async () => {
-  console.log('Seeding expense categories...')
-  for (const [index, category] of expenseCategories.entries()) {
-    await prisma.expenseCategory.upsert({
-      where: { name: category.name },
+  const prisma = await createPrismaClient()
+
+  try {
+    console.log(`Seeding database (${isNeonConnection ? 'Neon' : 'local PostgreSQL'})...`)
+
+    console.log('Seeding expense categories...')
+    for (const [index, category] of expenseCategories.entries()) {
+      await prisma.expenseCategory.upsert({
+        where: { name: category.name },
+        update: {},
+        create: {
+          ...category,
+          isTaxDeductible: category.isTaxDeductible ?? true,
+          sortOrder: index,
+        },
+      })
+    }
+    console.log(`Created ${expenseCategories.length} expense categories`)
+
+    console.log('Creating default pricing config...')
+    await prisma.pricingConfig.upsert({
+      where: { id: 'default' },
       update: {},
       create: {
-        ...category,
-        isTaxDeductible: category.isTaxDeductible ?? true,
-        sortOrder: index,
+        id: 'default',
+        baseNightlyRate: 150.0,
+        weekendRate: 175.0,
+        cleaningFee: 75.0,
+        depositPercentage: 20,
+        minNights: 2,
+        maxNights: 14,
+        maxGuests: 8,
       },
     })
+    console.log('Created default pricing config')
+
+    console.log('Seeding addons...')
+    for (const [index, addon] of addons.entries()) {
+      await prisma.addon.upsert({
+        where: { name: addon.name },
+        update: {},
+        create: {
+          ...addon,
+          sortOrder: index,
+        },
+      })
+    }
+    console.log(`Created ${addons.length} addons`)
+
+    console.log('Creating notification preferences...')
+    for (const event of notificationEvents) {
+      await prisma.notificationPreference.upsert({
+        where: { event },
+        update: {},
+        create: {
+          event,
+          emailEnabled: true,
+          smsEnabled: false,
+        },
+      })
+    }
+    console.log(`Created ${notificationEvents.length} notification preferences`)
+
+    console.log('Seed completed successfully!')
+  } finally {
+    await prisma.$disconnect()
   }
-  console.log(`Created ${expenseCategories.length} expense categories`)
-
-  console.log('Creating default pricing config...')
-  await prisma.pricingConfig.upsert({
-    where: { id: 'default' },
-    update: {},
-    create: {
-      id: 'default',
-      baseNightlyRate: 150.0,
-      weekendRate: 175.0,
-      cleaningFee: 75.0,
-      depositPercentage: 20,
-      minNights: 2,
-      maxNights: 14,
-      maxGuests: 8,
-    },
-  })
-  console.log('Created default pricing config')
-
-  console.log('Creating notification preferences...')
-  for (const event of notificationEvents) {
-    await prisma.notificationPreference.upsert({
-      where: { event },
-      update: {},
-      create: {
-        event,
-        emailEnabled: true,
-        smsEnabled: false,
-      },
-    })
-  }
-  console.log(`Created ${notificationEvents.length} notification preferences`)
-
-  console.log('Seed completed successfully!')
 }
 
-main()
-  .catch((e: unknown) => {
-    console.error('Seed failed:', e)
-    process.exit(1)
-  })
-  .finally(async () => {
-    await prisma.$disconnect()
-  })
+main().catch((e: unknown) => {
+  console.error('Seed failed:', e)
+  process.exit(1)
+})
