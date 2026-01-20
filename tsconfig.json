@@ -1,10 +1,9 @@
 {
   "compilerOptions": {
-    "target": "ES2017",
-    "lib": ["dom", "dom.iterable", "esnext"],
+    "target": "ES2022",
+    "lib": ["dom", "dom.iterable", "ES2022", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
-    "strict": true,
     "noEmit": true,
     "esModuleInterop": true,
     "module": "esnext",
@@ -20,7 +19,16 @@
     ],
     "paths": {
       "@/*": ["./src/*"]
-    }
+    },
+    // Strict mode (already enabled, keeping explicit)
+    "strict": true,
+    // Additional strict checks for production quality
+    "noUncheckedIndexedAccess": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "forceConsistentCasingInFileNames": true,
+    // Improved error messages
+    "noErrorTruncation": true
   },
   "include": [
     "next-env.d.ts",
@@ -30,5 +38,5 @@
     ".next/dev/types/**/*.ts",
     "**/*.mts"
   ],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules", "prisma"]
 }

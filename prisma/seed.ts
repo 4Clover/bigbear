@@ -1,0 +1,239 @@
+import { config } from 'dotenv'
+import { PrismaClient, type NotificationEvent } from '@prisma/client'
+
+// Load .env.local with override to capture prod DATABASE_URL
+// (Prisma may have already loaded env files before seed runs)
+config({ path: '.env.local', override: true })
+const prodConnectionString = process.env.DATABASE_URL
+
+// Load .env.development.local to get local DATABASE_URL
+if (process.env.NODE_ENV !== 'production') {
+  config({ path: '.env.development.local', override: true })
+}
+const localConnectionString = process.env.DATABASE_URL
+
+async function createPrismaClient(connectionString: string): Promise<PrismaClient> {
+  const isNeonConnection = connectionString.includes('.neon.tech')
+
+  if (isNeonConnection) {
+    const { PrismaNeon } = await import('@prisma/adapter-neon')
+    const adapter = new PrismaNeon({ connectionString })
+    return new PrismaClient({ adapter })
+  }
+  // Local PostgreSQL - use pg adapter
+  const { PrismaPg } = await import('@prisma/adapter-pg')
+  const adapter = new PrismaPg({ connectionString })
+  return new PrismaClient({ adapter })
+}
+
+const expenseCategories = [
+  {
+    name: 'Rental Income',
+    description: 'Booking revenue',
+    scheduleELine: 'Line 3',
+    isTaxDeductible: false,
+  },
+  {
+    name: 'Advertising',
+    description: 'Listing fees, photography, marketing',
+    scheduleELine: 'Line 5',
+  },
+  { name: 'Auto & Travel', description: 'Mileage, trips to property', scheduleELine: 'Line 6' },
+  {
+    name: 'Cleaning & Maintenance',
+    description: 'Cleaning service, minor repairs',
+    scheduleELine: 'Line 7',
+  },
+  { name: 'Commissions', description: 'Platform fees (Airbnb, VRBO)', scheduleELine: 'Line 8' },
+  { name: 'Insurance', description: 'Property, liability insurance', scheduleELine: 'Line 9' },
+  {
+    name: 'Legal & Professional',
+    description: 'Accountant, attorney fees',
+    scheduleELine: 'Line 10',
+  },
+  { name: 'Management Fees', description: 'Property manager fees', scheduleELine: 'Line 11' },
+  { name: 'Mortgage Interest', description: 'Loan interest portion', scheduleELine: 'Line 12' },
+  { name: 'Other Interest', description: 'Other loan interest', scheduleELine: 'Line 13' },
+  { name: 'Repairs', description: 'Plumbing, HVAC, appliances', scheduleELine: 'Line 14' },
+  { name: 'Supplies', description: 'Linens, toiletries, kitchen items', scheduleELine: 'Line 15' },
+  { name: 'Property Taxes', description: 'Annual property taxes', scheduleELine: 'Line 16' },
+  {
+    name: 'Utilities',
+    description: 'Electric, gas, water, internet, trash',
+    scheduleELine: 'Line 17',
+  },
+  {
+    name: 'Depreciation',
+    description: 'Property depreciation',
+    scheduleELine: 'Line 18',
+    isTaxDeductible: true,
+  },
+  { name: 'HOA Fees', description: 'Homeowners association fees', scheduleELine: 'Line 19' },
+  { name: 'Pest Control', description: 'Extermination services', scheduleELine: 'Line 19' },
+  { name: 'Landscaping', description: 'Lawn care, snow removal', scheduleELine: 'Line 19' },
+  {
+    name: 'Licenses & Permits',
+    description: 'Business license, STR permit',
+    scheduleELine: 'Line 19',
+  },
+]
+
+const notificationEvents: NotificationEvent[] = [
+  'BOOKING_REQUEST',
+  'BOOKING_CONFIRMED',
+  'BOOKING_CANCELLED',
+  'PAYMENT_RECEIVED',
+  'PAYMENT_FAILED',
+  'GUEST_CHECKIN_REMINDER',
+  'GUEST_CHECKOUT_REMINDER',
+  'MAINTENANCE_QUOTE_RECEIVED',
+  'MAINTENANCE_COMPLETED',
+  'NEW_MESSAGE',
+]
+
+const addons = [
+  {
+    name: 'Early Check-In',
+    description: 'Check in as early as 1 PM (subject to availability)',
+    price: 50.0,
+  },
+  {
+    name: 'Late Checkout',
+    description: 'Extend your checkout to 1 PM',
+    price: 50.0,
+  },
+  {
+    name: 'Pet Fee',
+    description: 'Bring your furry friend (max 2 pets, dogs only)',
+    price: 75.0,
+  },
+  {
+    name: 'Hot Tub Heating',
+    description: 'Have the hot tub heated and ready for your arrival',
+    price: 35.0,
+  },
+  {
+    name: 'Firewood Bundle',
+    description: 'Bundle of seasoned firewood for the fireplace',
+    price: 25.0,
+  },
+]
+
+async function seedDatabase(prisma: PrismaClient): Promise<void> {
+  console.log('Seeding expense categories...')
+  for (const [index, category] of expenseCategories.entries()) {
+    await prisma.expenseCategory.upsert({
+      where: { name: category.name },
+      update: {},
+      create: {
+        ...category,
+        isTaxDeductible: category.isTaxDeductible ?? true,
+        sortOrder: index,
+      },
+    })
+  }
+  console.log(`Created ${expenseCategories.length} expense categories`)
+
+  console.log('Creating default pricing config...')
+  await prisma.pricingConfig.upsert({
+    where: { id: 'default' },
+    update: {},
+    create: {
+      id: 'default',
+      baseNightlyRate: 150.0,
+      weekendRate: 175.0,
+      cleaningFee: 75.0,
+      depositPercentage: 20,
+      minNights: 2,
+      maxNights: 14,
+      maxGuests: 8,
+    },
+  })
+  console.log('Created default pricing config')
+
+  console.log('Seeding addons...')
+  for (const [index, addon] of addons.entries()) {
+    await prisma.addon.upsert({
+      where: { name: addon.name },
+      update: {},
+      create: {
+        ...addon,
+        sortOrder: index,
+      },
+    })
+  }
+  console.log(`Created ${addons.length} addons`)
+
+  console.log('Creating notification preferences...')
+  for (const event of notificationEvents) {
+    await prisma.notificationPreference.upsert({
+      where: { event },
+      update: {},
+      create: {
+        event,
+        emailEnabled: true,
+        smsEnabled: false,
+      },
+    })
+  }
+  console.log(`Created ${notificationEvents.length} notification preferences`)
+
+  // Seed admin accounts
+  const adminEmails = process.env.ADMIN_EMAILS?.split(' ').filter(Boolean) ?? []
+  if (adminEmails.length > 0) {
+    console.log('Seeding admin accounts...')
+    for (const email of adminEmails) {
+      await prisma.user.upsert({
+        where: { email },
+        update: { role: 'OWNER' },
+        create: {
+          email,
+          role: 'OWNER',
+          emailVerified: new Date(),
+        },
+      })
+    }
+    console.log(`Created ${adminEmails.length} admin account(s)`)
+  }
+}
+
+const main = async () => {
+  if (!localConnectionString) {
+    throw new Error('DATABASE_URL not found in .env.development.local')
+  }
+
+  // Seed local database
+  console.log('\n========== SEEDING LOCAL DATABASE ==========')
+  const localPrisma = await createPrismaClient(localConnectionString)
+  try {
+    const isNeon = localConnectionString.includes('.neon.tech')
+    console.log(`Connecting to ${isNeon ? 'Neon' : 'local PostgreSQL'}...`)
+    await seedDatabase(localPrisma)
+    console.log('Local database seed completed!')
+  } finally {
+    await localPrisma.$disconnect()
+  }
+
+  // Seed production database if .env.local has a different DATABASE_URL
+  if (prodConnectionString && prodConnectionString !== localConnectionString) {
+    console.log('\n========== SEEDING PRODUCTION DATABASE ==========')
+    const prodPrisma = await createPrismaClient(prodConnectionString)
+    try {
+      const isNeon = prodConnectionString.includes('.neon.tech')
+      console.log(`Connecting to ${isNeon ? 'Neon' : 'PostgreSQL'}...`)
+      await seedDatabase(prodPrisma)
+      console.log('Production database seed completed!')
+    } finally {
+      await prodPrisma.$disconnect()
+    }
+  } else {
+    console.log('\nNo separate prod DATABASE_URL in .env.local, skipping production seed')
+  }
+
+  console.log('\n========== ALL SEEDS COMPLETED ==========')
+}
+
+main().catch((e: unknown) => {
+  console.error('Seed failed:', e)
+  process.exit(1)
+})
