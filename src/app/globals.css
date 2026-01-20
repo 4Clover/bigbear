@@ -1,26 +1,217 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
+/* Earthy Color Palette - CSS Custom Properties */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Forest (Green) - Primary actions, branding */
+  --forest-50: #f0f5f1;
+  --forest-100: #dce8de;
+  --forest-200: #bbd3c0;
+  --forest-300: #8eb898;
+  --forest-400: #5f996d;
+  --forest-500: #447a52;
+  --forest-600: #346241;
+  --forest-700: #2a4e35;
+  --forest-800: #233f2c;
+  --forest-900: #1d3425;
+  --forest-950: #0f1d14;
+
+  /* Wood (Brown) - Secondary elements, warmth */
+  --wood-50: #faf6f3;
+  --wood-100: #f3ebe3;
+  --wood-200: #e6d5c5;
+  --wood-300: #d5b99f;
+  --wood-400: #c19578;
+  --wood-500: #b37d58;
+  --wood-600: #a56a4d;
+  --wood-700: #895541;
+  --wood-800: #70463a;
+  --wood-900: #5c3b31;
+  --wood-950: #321d17;
+
+  /* Stone (Gray) - Backgrounds, neutrals */
+  --stone-50: #f9f8f7;
+  --stone-100: #f1efec;
+  --stone-200: #e2ddd7;
+  --stone-300: #cec6bc;
+  --stone-400: #b5a999;
+  --stone-500: #9f9183;
+  --stone-600: #8a7d70;
+  --stone-700: #73665a;
+  --stone-800: #61564c;
+  --stone-900: #524a42;
+  --stone-950: #2b2622;
+
+  /* Semantic colors - Light mode */
+  --background: var(--stone-50);
+  --foreground: var(--stone-950);
+  --card: #ffffff;
+  --card-foreground: var(--stone-900);
+  --muted: var(--stone-100);
+  --muted-foreground: var(--stone-600);
+  --border: var(--stone-200);
+  --ring: var(--forest-500);
+  --primary: var(--forest-500);
+  --primary-foreground: #ffffff;
+  --secondary: var(--wood-500);
+  --secondary-foreground: #ffffff;
+  --accent: var(--forest-100);
+  --accent-foreground: var(--forest-900);
+  --destructive: #dc2626;
+  --destructive-foreground: #ffffff;
+  --success: var(--forest-500);
+  --success-foreground: #ffffff;
+  --warning: #d97706;
+  --warning-foreground: #ffffff;
 }
 
+/* Dark mode colors */
+.dark {
+  --background: var(--stone-950);
+  --foreground: var(--stone-100);
+  --card: var(--stone-900);
+  --card-foreground: var(--stone-100);
+  --muted: var(--stone-800);
+  --muted-foreground: var(--stone-400);
+  --border: var(--stone-700);
+  --ring: var(--forest-400);
+  --primary: var(--forest-400);
+  --primary-foreground: var(--forest-950);
+  --secondary: var(--wood-400);
+  --secondary-foreground: var(--wood-950);
+  --accent: var(--forest-900);
+  --accent-foreground: var(--forest-100);
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  --success: var(--forest-400);
+  --success-foreground: var(--forest-950);
+  --warning: #f59e0b;
+  --warning-foreground: var(--stone-950);
+}
+
+/* Tailwind v4 theme integration */
 @theme inline {
+  /* Colors */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-ring: var(--ring);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+
+  /* Forest palette */
+  --color-forest-50: var(--forest-50);
+  --color-forest-100: var(--forest-100);
+  --color-forest-200: var(--forest-200);
+  --color-forest-300: var(--forest-300);
+  --color-forest-400: var(--forest-400);
+  --color-forest-500: var(--forest-500);
+  --color-forest-600: var(--forest-600);
+  --color-forest-700: var(--forest-700);
+  --color-forest-800: var(--forest-800);
+  --color-forest-900: var(--forest-900);
+  --color-forest-950: var(--forest-950);
+
+  /* Wood palette */
+  --color-wood-50: var(--wood-50);
+  --color-wood-100: var(--wood-100);
+  --color-wood-200: var(--wood-200);
+  --color-wood-300: var(--wood-300);
+  --color-wood-400: var(--wood-400);
+  --color-wood-500: var(--wood-500);
+  --color-wood-600: var(--wood-600);
+  --color-wood-700: var(--wood-700);
+  --color-wood-800: var(--wood-800);
+  --color-wood-900: var(--wood-900);
+  --color-wood-950: var(--wood-950);
+
+  /* Stone palette */
+  --color-stone-50: var(--stone-50);
+  --color-stone-100: var(--stone-100);
+  --color-stone-200: var(--stone-200);
+  --color-stone-300: var(--stone-300);
+  --color-stone-400: var(--stone-400);
+  --color-stone-500: var(--stone-500);
+  --color-stone-600: var(--stone-600);
+  --color-stone-700: var(--stone-700);
+  --color-stone-800: var(--stone-800);
+  --color-stone-900: var(--stone-900);
+  --color-stone-950: var(--stone-950);
+
+  /* Fonts */
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* Base styles */
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), system-ui, -apple-system, sans-serif;
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* Focus styles */
+*:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--muted);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--stone-400);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--stone-500);
+}
+
+.dark ::-webkit-scrollbar-track {
+  background: var(--stone-800);
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: var(--stone-600);
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: var(--stone-500);
+}
+
+/* Selection highlight */
+::selection {
+  background-color: var(--forest-200);
+  color: var(--forest-950);
+}
+
+.dark ::selection {
+  background-color: var(--forest-800);
+  color: var(--forest-100);
+}
+
+/* Smooth transitions for theme changes */
+html {
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
