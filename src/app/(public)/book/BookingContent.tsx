@@ -49,6 +49,7 @@ export const BookingContent = () => {
   const [blockedDates, setBlockedDates] = useState<Date[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [errors, setErrors] = useState<Partial<Record<keyof GuestInfo, string>>>({})
+  const [availabilityError, setAvailabilityError] = useState(false)
 
   useEffect(() => {
     const fetchData = async () => {
@@ -72,9 +73,13 @@ export const BookingContent = () => {
         if (blockedRes.ok) {
           const blockedData = (await blockedRes.json()) as string[]
           setBlockedDates(blockedData.map((d) => new Date(d)))
+          setAvailabilityError(false)
+        } else {
+          setAvailabilityError(true)
         }
       } catch (error) {
         console.error('Failed to fetch booking data:', error)
+        setAvailabilityError(true)
       }
     }
 
@@ -168,6 +173,16 @@ export const BookingContent = () => {
         </div>
       )}
 
+      {availabilityError && (
+        <div className="mb-8 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-red-800 dark:text-red-200">
+          <p className="font-semibold mb-1">Unable to Load Availability</p>
+          <p className="text-sm">
+            We couldn&apos;t load the current availability calendar. Please refresh the page to try
+            again.
+          </p>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-8">
           <Card>
@@ -223,7 +238,7 @@ export const BookingContent = () => {
             <Button
               onClick={() => void handleSubmit()}
               isLoading={isLoading}
-              disabled={!checkIn || !checkOut}
+              disabled={!checkIn || !checkOut || availabilityError}
               className="w-full"
               size="lg"
             >
