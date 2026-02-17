@@ -1,7 +1,11 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { sendCheckinReminder, sendCheckoutReminder } from '@/lib/notifications'
-import { addDays, startOfDay, endOfDay } from 'date-fns'
+import {
+  sendCheckinReminder,
+  sendCheckoutReminder,
+  sendGalleryUploadInvite,
+} from '@/lib/notifications'
+import { addDays, subDays, startOfDay, endOfDay } from 'date-fns'
 
 export const dynamic = 'force-dynamic'
 
@@ -67,6 +71,50 @@ export const GET = async (request: Request): Promise<NextResponse> => {
     }
   }
 
+  let galleryInvitesSent = 0
+  let galleryInvitesFound = 0
+  const galleryErrors: string[] = []
+
+  try {
+    const yesterday = subDays(new Date(), 1)
+    const yesterdayStart = startOfDay(yesterday)
+    const yesterdayEnd = endOfDay(yesterday)
+
+    const completedBookings = await prisma.booking.findMany({
+      where: {
+        status: { in: ['CONFIRMED', 'COMPLETED'] },
+        checkOut: { gte: yesterdayStart, lte: yesterdayEnd },
+      },
+    })
+    galleryInvitesFound = completedBookings.length
+
+    for (const booking of completedBookings) {
+      const alreadySent = await prisma.notificationLog.findFirst({
+        where: {
+          event: 'GALLERY_INVITE',
+          recipient: booking.guestEmail,
+        },
+      })
+      if (alreadySent) continue
+
+      try {
+        await sendGalleryUploadInvite(booking)
+        galleryInvitesSent++
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'Unknown error'
+        galleryErrors.push(`Gallery invite failed for ${booking.id}: ${message}`)
+        console.error(`Gallery invite failed for ${booking.id}:`, error)
+      }
+    }
+  } catch (error) {
+    console.error('Gallery invite cron failed:', error)
+    galleryErrors.push(
+      `Gallery invite batch failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+    )
+  }
+
+  const allErrors = [...errors, ...galleryErrors]
+
   return NextResponse.json({
     checkinReminders: {
       found: checkinBookings.length,
@@ -76,6 +124,10 @@ export const GET = async (request: Request): Promise<NextResponse> => {
       found: checkoutBookings.length,
       sent: checkoutSent,
     },
-    errors: errors.length > 0 ? errors : undefined,
+    galleryInvites: {
+      found: galleryInvitesFound,
+      sent: galleryInvitesSent,
+    },
+    errors: allErrors.length > 0 ? allErrors : undefined,
   })
 }

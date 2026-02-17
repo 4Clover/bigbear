@@ -2,6 +2,7 @@ import { Resend } from 'resend'
 import Twilio from 'twilio'
 import { prisma } from './prisma'
 import { escapeHtml } from './security'
+import { signGalleryUploadToken } from './gallery-token'
 import type { Booking, NotificationEvent } from '@prisma/client'
 import { format } from 'date-fns'
 
@@ -614,6 +615,68 @@ export const sendMaintenanceCompleted = async (
       'failed',
       error instanceof Error ? error.message : 'Unknown error'
     )
+  }
+}
+
+// ============================================================================
+// Guest Gallery Invite
+// ============================================================================
+
+export const sendGalleryUploadInvite = async (booking: {
+  id: string
+  guestName: string
+  guestEmail: string
+  checkOut: Date
+}) => {
+  const preference = await prisma.notificationPreference.findUnique({
+    where: { event: 'GALLERY_INVITE' },
+  })
+
+  if (!preference?.emailEnabled && !preference?.smsEnabled) return
+
+  const token = await signGalleryUploadToken({
+    bookingId: booking.id,
+    guestName: booking.guestName,
+    guestEmail: booking.guestEmail,
+  })
+
+  const safeGuestName = escapeHtml(booking.guestName)
+  const uploadUrl = `${process.env.AUTH_URL ?? 'http://localhost:3000'}/gallery/upload?token=${token}`
+
+  if (preference.emailEnabled) {
+    try {
+      await resend.emails.send({
+        from: fromEmail,
+        to: booking.guestEmail,
+        subject: 'Share Your Photos - Grizzly Getaway',
+        html: `
+          <h1>Share Your Stay Photos!</h1>
+          <p>Hello ${safeGuestName},</p>
+          <p>Thank you for staying with us at Grizzly Getaway! We hope you had a wonderful time.</p>
+          <p>We'd love to see your photos from your stay. You can upload up to 3 photos to our guest gallery:</p>
+          <p><a href="${uploadUrl}">Upload Your Photos</a></p>
+          <p>This link will expire in 30 days.</p>
+          <p>Thank you for being a wonderful guest!</p>
+        `,
+      })
+
+      await logNotification(
+        'GALLERY_INVITE',
+        booking.guestEmail,
+        'email',
+        'Gallery Upload Invite',
+        'sent'
+      )
+    } catch (error) {
+      await logNotification(
+        'GALLERY_INVITE',
+        booking.guestEmail,
+        'email',
+        'Gallery Upload Invite',
+        'failed',
+        error instanceof Error ? error.message : 'Unknown error'
+      )
+    }
   }
 }
 
