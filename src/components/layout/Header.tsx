@@ -1,11 +1,28 @@
 'use client'
 
-import { Menu, TreePine, X } from 'lucide-react'
+import { LayoutDashboard, LogOut, Menu, TreePine, X } from 'lucide-react'
 import Link from 'next/link'
 import { useState } from 'react'
-import { Button, ThemeToggle } from '@/components/ui'
+import { signOut } from 'next-auth/react'
+import type { Session } from 'next-auth'
+import { Button } from '@/components/ui'
 
-export const Header = () => {
+interface HeaderProps {
+  session?: Session | null
+}
+
+const getDashboardUrl = (role: string): string | null => {
+  switch (role) {
+    case 'OWNER':
+      return '/owner/dashboard'
+    case 'WORKER':
+      return '/worker/jobs'
+    default:
+      return null
+  }
+}
+
+export const Header = ({ session }: HeaderProps) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   const navLinks = [
@@ -14,6 +31,13 @@ export const Header = () => {
     { href: '/book', label: 'Book Now' },
     { href: '/contact', label: 'Contact' },
   ]
+
+  const user = session?.user
+  const dashboardUrl = user ? getDashboardUrl(user.role) : null
+
+  const handleSignOut = () => {
+    void signOut({ callbackUrl: '/' })
+  }
 
   return (
     <header className="bg-card border-b border-border sticky top-0 z-50">
@@ -37,17 +61,35 @@ export const Header = () => {
                 {link.label}
               </Link>
             ))}
-            <ThemeToggle />
-            <Link href="/login">
-              <Button variant="outline" size="sm">
-                Sign In
-              </Button>
-            </Link>
+            {user ? (
+              <div className="flex items-center gap-2">
+                {dashboardUrl && (
+                  <Link href={dashboardUrl}>
+                    <Button variant="outline" size="sm">
+                      <LayoutDashboard className="h-4 w-4 mr-1.5" />
+                      Dashboard
+                    </Button>
+                  </Link>
+                )}
+                <button
+                  onClick={handleSignOut}
+                  className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                  aria-label="Sign out"
+                >
+                  <LogOut className="h-4 w-4" />
+                </button>
+              </div>
+            ) : (
+              <Link href="/login">
+                <Button variant="outline" size="sm">
+                  Sign In
+                </Button>
+              </Link>
+            )}
           </div>
 
           {/* Mobile menu button */}
           <div className="md:hidden flex items-center gap-2">
-            <ThemeToggle />
             <button
               type="button"
               onClick={() => {
@@ -77,16 +119,44 @@ export const Header = () => {
                   {link.label}
                 </Link>
               ))}
-              <Link
-                href="/login"
-                onClick={() => {
-                  setMobileMenuOpen(false)
-                }}
-              >
-                <Button variant="outline" size="sm" className="w-full">
-                  Sign In
-                </Button>
-              </Link>
+              {user ? (
+                <>
+                  {dashboardUrl && (
+                    <Link
+                      href={dashboardUrl}
+                      onClick={() => {
+                        setMobileMenuOpen(false)
+                      }}
+                    >
+                      <Button variant="outline" size="sm" className="w-full">
+                        <LayoutDashboard className="h-4 w-4 mr-1.5" />
+                        Dashboard
+                      </Button>
+                    </Link>
+                  )}
+                  <button
+                    onClick={() => {
+                      setMobileMenuOpen(false)
+                      handleSignOut()
+                    }}
+                    className="flex items-center gap-2 text-muted-foreground hover:text-foreground font-medium transition-colors"
+                  >
+                    <LogOut className="h-4 w-4" />
+                    Sign Out
+                  </button>
+                </>
+              ) : (
+                <Link
+                  href="/login"
+                  onClick={() => {
+                    setMobileMenuOpen(false)
+                  }}
+                >
+                  <Button variant="outline" size="sm" className="w-full">
+                    Sign In
+                  </Button>
+                </Link>
+              )}
             </div>
           </div>
         )}
