@@ -38,12 +38,12 @@ export interface GalleryImageWithUploader {
   url: string
   alt: string | null
   caption: string | null
-  category: GalleryCategory
+  category: GalleryCategory | null
   sortOrder: number
   isFeatured: boolean
   isPublished: boolean
-  uploadedBy: 'OWNER' | 'GUEST'
-  bookingId: string | null
+  uploadedBy?: 'OWNER' | 'GUEST'
+  bookingId?: string | null
   createdAt: Date
   updatedAt: Date
 }
@@ -96,6 +96,8 @@ const SortableImageCard = ({
   }
 
   const isGuestPending = image.uploadedBy === 'GUEST' && !image.isPublished
+  const imageCategory = image.category ?? 'Uncategorized'
+  const uploadedBy = image.uploadedBy ?? 'OWNER'
 
   return (
     <div
@@ -135,13 +137,11 @@ const SortableImageCard = ({
           </p>
 
           <div className="flex flex-wrap gap-2">
-            <Badge variant="secondary">{image.category}</Badge>
+            <Badge variant="secondary">{imageCategory}</Badge>
             <Badge variant={image.isPublished ? 'success' : 'warning'}>
               {image.isPublished ? 'Published' : 'Unpublished'}
             </Badge>
-            <Badge variant={image.uploadedBy === 'GUEST' ? 'outline' : 'default'}>
-              {image.uploadedBy}
-            </Badge>
+            <Badge variant={uploadedBy === 'GUEST' ? 'outline' : 'default'}>{uploadedBy}</Badge>
             {image.isFeatured && <Badge variant="default">Featured</Badge>}
           </div>
         </div>
@@ -326,15 +326,19 @@ export const GalleryManager = ({ images }: GalleryManagerProps) => {
 
   const filteredImages = useMemo(() => {
     if (activeFilter === 'property') {
-      return localImages.filter((image) => image.uploadedBy === 'OWNER')
+      return localImages.filter((image) => (image.uploadedBy ?? 'OWNER') === 'OWNER')
     }
 
     if (activeFilter === 'guest-pending') {
-      return localImages.filter((image) => image.uploadedBy === 'GUEST' && !image.isPublished)
+      return localImages.filter(
+        (image) => (image.uploadedBy ?? 'OWNER') === 'GUEST' && !image.isPublished
+      )
     }
 
     if (activeFilter === 'guest-approved') {
-      return localImages.filter((image) => image.uploadedBy === 'GUEST' && image.isPublished)
+      return localImages.filter(
+        (image) => (image.uploadedBy ?? 'OWNER') === 'GUEST' && image.isPublished
+      )
     }
 
     return localImages
@@ -350,7 +354,7 @@ export const GalleryManager = ({ images }: GalleryManagerProps) => {
     setEditForm({
       alt: image.alt || '',
       caption: image.caption || '',
-      category: image.category,
+      category: image.category ?? GALLERY_CATEGORIES[0],
       isFeatured: image.isFeatured,
     })
   }

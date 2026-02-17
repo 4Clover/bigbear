@@ -6,7 +6,7 @@ import type { NotificationEvent, NotificationPreference } from '@prisma/client'
 
 interface NotificationPreferencesFormProps {
   preferences: NotificationPreference[]
-  eventLabels: Record<NotificationEvent, { label: string; description: string }>
+  eventLabels: Record<string, { label: string; description: string }>
 }
 
 const NotificationPreferencesForm = ({
@@ -52,7 +52,10 @@ const NotificationPreferencesForm = ({
       </div>
 
       {optimisticPrefs.map((pref) => {
-        const eventInfo = eventLabels[pref.event]
+        const eventInfo = eventLabels[pref.event] ?? {
+          label: pref.event,
+          description: 'Notification event',
+        }
         return (
           <div
             key={pref.event}
