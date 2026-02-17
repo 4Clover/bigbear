@@ -10,7 +10,7 @@
 | `auth.ts`           | NextAuth v5 config, Resend provider, Prisma adapter                             | **CRITICAL** (10 imports)               |
 | `auth/guards.ts`    | `assertOwner`, `assertWorker`, `assertOwnerOrAccountant`, `assertOwnerOrWorker` | **CRITICAL** (7 imports)                |
 | `format.ts`         | `formatCurrency`, `formatDate`, `formatPercentage`                              | HIGH (8 imports)                        |
-| `notifications.ts`  | Email (Resend) + SMS (Twilio) — 11 send functions                               | HIGH (4 imports)                        |
+| `notifications.ts`  | Email (Resend) + SMS (Twilio) — 639 lines, 11 send functions                    | HIGH (4 imports)                        |
 | `stripe.ts`         | Stripe client via lazy-load Proxy pattern                                       | HIGH (4 imports)                        |
 | `env.ts`            | Zod-validated env vars; singleton `env()` getter                                | MEDIUM (3 imports)                      |
 | `rate-limit.ts`     | Upstash Redis + in-memory fallback; predefined RATE_LIMITS                      | MEDIUM (3 imports)                      |
@@ -20,6 +20,8 @@
 | `utils/calendar.ts` | `isDateRangeAvailable`, `getUnavailableDates`, `formatICalDate`                 | MEDIUM (3 imports)                      |
 | `utils/refund.ts`   | `calculateRefund` with tiered refund policy                                     | LOW (1 import)                          |
 | `ui/status.ts`      | Status→Badge variant Record maps (8 maps)                                       | LOW (2 imports)                         |
+
+> **Underutilized modules**: `errors.ts` (never thrown), `ui/status.ts` (components duplicate color maps inline), `utils/calendar.ts` (availability logic embedded in API routes instead)
 
 ## WHERE TO LOOK
 

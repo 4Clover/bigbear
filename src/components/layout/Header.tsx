@@ -22,7 +22,7 @@ export const Header = () => {
           <div className="flex items-center">
             <Link href="/" className="flex items-center gap-2">
               <TreePine className="h-8 w-8 text-forest-500" />
-              <span className="text-xl font-bold text-foreground">Big Bear Cabin</span>
+              <span className="text-xl font-bold text-foreground">Grizzly Getaway</span>
             </Link>
           </div>
 

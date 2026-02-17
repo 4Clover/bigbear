@@ -1,6 +1,8 @@
 # TEST SUITE
 
-32 test files. Vitest + happy-dom + vitest-mock-extended. Globals enabled (no imports needed for describe/it/expect).
+32 test files (~5,900 lines). Vitest + happy-dom + vitest-mock-extended. Globals enabled (no imports needed for describe/it/expect).
+
+**Three-layer testing strategy**: unit (function-level) → data-paths (workflow-level) → patterns (schema-level).
 
 ## STRUCTURE
 
@@ -19,8 +21,8 @@ tests/
 ├── unit/
 │   ├── lib/               # Tests for src/lib/ modules (10 files)
 │   └── actions/           # Tests for src/actions/ (4 files)
-├── data-paths/            # Integration-style workflow tests (14 files)
-└── patterns/              # Database pattern tests (4 files)
+├── data-paths/            # Integration-style workflow tests (14 files) — test complete data flows
+└── patterns/              # Database pattern tests (4 files) — state machines, cascades, constraints
 ```
 
 ## WHERE TO LOOK

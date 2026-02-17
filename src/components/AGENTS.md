@@ -41,6 +41,16 @@
 - **Theme**: `dark:` prefix for dark mode; `next-themes` for toggle
 - **Uploads**: Direct Vercel Blob upload from client; pass URL to server action
 
+## DESIGN SYSTEM
+
+- **Color palettes**: forest (green), wood (brown), stone (gray) — 11 shades each (50-950) in `globals.css`
+- **Semantic tokens**: background, foreground, card, muted, border, primary, secondary, destructive, success, warning
+- **Button variants**: primary (forest), secondary (wood), outline, ghost, destructive — sizes: sm/md/lg
+- **Badge variants**: default, success, warning, destructive, secondary, outline
+- **Focus ring**: forest-500 (light) / forest-400 (dark)
+- **Radius**: rounded-lg (8px), rounded-xl (12px)
+- **Client/server split**: ~78% client (forms, tables, modals, charts) / ~22% server (cards, stats, PDF)
+
 ## ANTI-PATTERNS
 
 - **NEVER** use `<img>` — use `<Image>` from next/image (1 exception: ReceiptGallery)

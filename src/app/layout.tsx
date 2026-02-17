@@ -15,20 +15,20 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: 'Big Bear Cabin | Mountain Retreat',
-    template: '%s | Big Bear Cabin',
+    default: 'Grizzly Getaway | Mountain Retreat',
+    template: '%s | Grizzly Getaway',
   },
   description:
     'Escape to our cozy mountain cabin in Big Bear. Perfect for families, couples, and groups seeking a peaceful retreat in nature.',
   keywords: ['Big Bear', 'cabin rental', 'mountain retreat', 'vacation rental', 'Big Bear Lake'],
-  authors: [{ name: 'Big Bear Cabin' }],
+  authors: [{ name: 'Grizzly Getaway' }],
   openGraph: {
-    title: 'Big Bear Cabin | Mountain Retreat',
+    title: 'Grizzly Getaway | Mountain Retreat',
     description:
       'Escape to our cozy mountain cabin in Big Bear. Perfect for families, couples, and groups seeking a peaceful retreat in nature.',
     type: 'website',
     locale: 'en_US',
-    siteName: 'Big Bear Cabin',
+    siteName: 'Grizzly Getaway',
   },
 }
 

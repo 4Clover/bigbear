@@ -1,7 +1,7 @@
 # PROJECT KNOWLEDGE BASE
 
-**Generated:** 2026-02-11
-**Commit:** 67a52db
+**Generated:** 2026-02-16
+**Commit:** e53f706
 **Branch:** dev
 
 ## OVERVIEW
@@ -19,7 +19,7 @@ grizzly/
 │   ├── lib/              # Infrastructure layer (14 modules) → see lib/AGENTS.md
 │   └── types/            # Shared types (pagination, next-auth extensions)
 ├── tests/                # Vitest test suite (32 files) → see tests/AGENTS.md
-├── prisma/               # Schema (426 lines) + migrations + seed
+├── prisma/               # Schema (425 lines) + migrations + seed → see prisma/AGENTS.md
 └── src/proxy.ts          # Global route protection (Next.js 16 proxy pattern)
 ```
 

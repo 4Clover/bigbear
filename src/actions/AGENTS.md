@@ -45,3 +45,5 @@ Domain-driven server actions. Each file = one business domain. All use `'use ser
 - `errors.ts` custom classes exist but actions throw generic `Error('message')` instead
 - Guards return session object — use it for user context (e.g., `session.user.id`)
 - `getWorkerProfile()` in maintenance.ts uses `auth()` directly (inconsistent with other guards)
+- **Zod violation**: 5 calls to `z.treeifyError()` remain in `calendar.ts`, `finance.ts`, `maintenance.ts` — should be `error.flatten().fieldErrors`
+- `reports.ts` returns typed interfaces (not mutations) — no `revalidatePath` needed

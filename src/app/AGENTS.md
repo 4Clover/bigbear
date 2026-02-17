@@ -68,6 +68,9 @@ app/
 - **Dynamic routes**: Only `/worker/complete/[jobId]` uses dynamic segments
 - **Cron routes**: `export const dynamic = 'force-dynamic'`; validate `Authorization: Bearer ${CRON_SECRET}`
 - **PDF route**: Uses `.tsx` extension for `@react-pdf/renderer` component rendering
+- **Hub-and-spoke**: `finance/` and `settings/` are hub pages linking to sub-routes (expenses/, reports/, notifications/)
+- **Query param filtering**: Dashboard links to bookings with `?status=PENDING`; bookings page reads `searchParams`
+- **force-dynamic pages**: `booking/success` (Stripe session) and `settings/notifications` (real-time logs)
 
 ## ANTI-PATTERNS
 
