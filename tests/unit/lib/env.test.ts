@@ -102,6 +102,44 @@ describe('Environment Variable Validation', () => {
       const { validateEnv } = await import('@/lib/env')
       expect(() => validateEnv()).toThrow('Invalid environment configuration')
     })
+
+    it('should pass when both Google vars are set', async () => {
+      process.env.AUTH_GOOGLE_ID = 'google-client-id'
+      process.env.AUTH_GOOGLE_SECRET = 'google-secret'
+
+      const { validateEnv } = await import('@/lib/env')
+      expect(() => validateEnv()).not.toThrow()
+    })
+
+    it('should pass when both Google vars are absent (optional)', async () => {
+      delete process.env.AUTH_GOOGLE_ID
+      delete process.env.AUTH_GOOGLE_SECRET
+
+      const { validateEnv } = await import('@/lib/env')
+      expect(() => validateEnv()).not.toThrow()
+    })
+
+    it('should throw when only AUTH_GOOGLE_ID is set without AUTH_GOOGLE_SECRET', async () => {
+      process.env.AUTH_GOOGLE_ID = 'google-client-id'
+      delete process.env.AUTH_GOOGLE_SECRET
+
+      const { validateEnv } = await import('@/lib/env')
+      expect(() => validateEnv()).toThrow('Invalid environment configuration')
+    })
+
+    it('should pass when AUTHORIZED_ADMIN_EMAILS is set', async () => {
+      process.env.AUTHORIZED_ADMIN_EMAILS = 'admin@example.com,admin2@example.com'
+
+      const { validateEnv } = await import('@/lib/env')
+      expect(() => validateEnv()).not.toThrow()
+    })
+
+    it('should pass when AUTHORIZED_ADMIN_EMAILS is absent (optional)', async () => {
+      delete process.env.AUTHORIZED_ADMIN_EMAILS
+
+      const { validateEnv } = await import('@/lib/env')
+      expect(() => validateEnv()).not.toThrow()
+    })
   })
 
   describe('env() singleton', () => {
