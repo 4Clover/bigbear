@@ -5,7 +5,7 @@ export const metadata: Metadata = {
   description: 'Privacy policy for Grizzly Getaway cabin rental.',
 }
 
-export default async function PrivacyPage() {
+export default function PrivacyPage() {
   return (
     <div className="min-h-screen py-16 px-4">
       <div className="max-w-4xl mx-auto">

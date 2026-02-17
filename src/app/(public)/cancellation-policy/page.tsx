@@ -5,7 +5,7 @@ export const metadata: Metadata = {
   description: 'Cancellation and refund policy for Grizzly Getaway.',
 }
 
-export default async function CancellationPolicyPage() {
+export default function CancellationPolicyPage() {
   return (
     <div className="min-h-screen py-16 px-4">
       <div className="max-w-4xl mx-auto">
@@ -126,8 +126,8 @@ export default async function CancellationPolicyPage() {
             <h2 className="text-2xl font-bold mt-8 mb-4 text-foreground">Questions?</h2>
             <p className="text-muted-foreground">
               If you have any questions about our cancellation policy or need to discuss your
-              specific situation, please reach out to us at questions@grizzlygetaway.co. We're here
-              to help.
+              specific situation, please reach out to us at questions@grizzlygetaway.co. We&apos;re
+              here to help.
             </p>
           </section>
         </div>

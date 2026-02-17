@@ -5,7 +5,7 @@ export const metadata: Metadata = {
   description: 'Terms of service for Grizzly Getaway cabin rental.',
 }
 
-export default async function TermsPage() {
+export default function TermsPage() {
   return (
     <div className="min-h-screen py-16 px-4">
       <div className="max-w-4xl mx-auto">
