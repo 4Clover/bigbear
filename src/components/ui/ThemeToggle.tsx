@@ -1,17 +1,33 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import dynamic from 'next/dynamic'
 import { Moon, Sun } from 'lucide-react'
 import { useTheme } from 'next-themes'
 
-interface ThemeToggleProps {
-  className?: string
-}
-
 // Inner component that uses theme - only rendered on client
-function ThemeToggleInner({ className = '' }: ThemeToggleProps) {
+function ThemeToggleInner() {
   const { setTheme, resolvedTheme } = useTheme()
   const isDark = resolvedTheme === 'dark'
+  const [isScrolling, setIsScrolling] = useState(false)
+
+  useEffect(() => {
+    let scrollTimeout: ReturnType<typeof setTimeout>
+
+    const handleScroll = () => {
+      setIsScrolling(true)
+      clearTimeout(scrollTimeout)
+      scrollTimeout = setTimeout(() => {
+        setIsScrolling(false)
+      }, 150)
+    }
+
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => {
+      window.removeEventListener('scroll', handleScroll)
+      clearTimeout(scrollTimeout)
+    }
+  }, [])
 
   return (
     <button
@@ -19,10 +35,12 @@ function ThemeToggleInner({ className = '' }: ThemeToggleProps) {
         setTheme(isDark ? 'light' : 'dark')
       }}
       className={`
-        p-2 rounded-lg transition-colors duration-200
-        bg-muted hover:bg-stone-200 dark:hover:bg-stone-700
+        fixed bottom-4 right-4 z-50
+        p-2.5 rounded-xl transition-all duration-500 ease-in-out
+        bg-card hover:bg-stone-200 dark:hover:bg-stone-700
         text-muted-foreground hover:text-foreground
-        ${className}
+        shadow-lg border border-border
+        ${isScrolling ? 'opacity-10' : 'opacity-100'}
       `}
       aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
       title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
@@ -33,11 +51,11 @@ function ThemeToggleInner({ className = '' }: ThemeToggleProps) {
 }
 
 // Placeholder shown during SSR/loading
-function ThemeToggleSkeleton({ className = '' }: ThemeToggleProps) {
+function ThemeToggleSkeleton() {
   return (
     <button
       disabled
-      className={`p-2 rounded-lg bg-muted text-muted-foreground opacity-50 cursor-not-allowed ${className}`}
+      className="fixed bottom-4 right-4 z-50 p-2.5 rounded-xl bg-card text-muted-foreground opacity-50 cursor-not-allowed shadow-lg border border-border"
       aria-label="Loading theme toggle"
     >
       <Sun className="h-5 w-5" />
