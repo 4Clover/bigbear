@@ -56,6 +56,11 @@ enum UserRole {
   ACCOUNTANT
 }
 
+enum ImageUploader {
+  OWNER
+  GUEST
+}
+
 model User {
   id            String    @id @default(cuid())
   name          String?
@@ -126,10 +131,11 @@ model Booking {
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
 
-  guest        User           @relation(fields: [guestId], references: [id])
-  addons       BookingAddon[]
-  transactions Transaction[]
-  messages     Message[]
+  guest         User           @relation(fields: [guestId], references: [id])
+  addons        BookingAddon[]
+  transactions  Transaction[]
+  messages      Message[]
+  galleryImages GalleryImage[]
 }
 
 model Addon {
@@ -377,6 +383,7 @@ enum NotificationEvent {
   MAINTENANCE_QUOTE_RECEIVED
   MAINTENANCE_COMPLETED
   NEW_MESSAGE
+  GALLERY_INVITE
 }
 
 model NotificationPreference {
@@ -409,17 +416,22 @@ model NotificationLog {
 // ============================================================================
 
 model GalleryImage {
-  id          String   @id @default(cuid())
+  id          String        @id @default(cuid())
   url         String
   alt         String?
   caption     String?
   category    String?
-  sortOrder   Int      @default(0)
-  isFeatured  Boolean  @default(false)
-  isPublished Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  sortOrder   Int           @default(0)
+  isFeatured  Boolean       @default(false)
+  isPublished Boolean       @default(true)
+  uploadedBy  ImageUploader @default(OWNER)
+  bookingId   String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  booking Booking? @relation(fields: [bookingId], references: [id])
 
   @@index([category])
   @@index([sortOrder])
+  @@index([bookingId])
 }
