@@ -1,11 +1,10 @@
 'use client'
 
-import { Briefcase, Calendar, FileText, LogOut, Wrench } from 'lucide-react'
+import { ArrowLeft, Briefcase, Calendar, FileText, LogOut, Wrench } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { signOut } from 'next-auth/react'
 import type { LucideIcon } from 'lucide-react'
-import { ThemeToggle } from '@/components/ui'
 
 interface WorkerNavProps {
   user: {
@@ -84,11 +83,17 @@ const WorkerNav = ({ user }: WorkerNavProps) => {
               <p className="text-xs text-muted-foreground truncate">{user.email}</p>
             </div>
           </div>
-          <ThemeToggle />
         </div>
+        <Link
+          href="/"
+          className="w-full mt-2 flex items-center gap-3 px-4 py-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors"
+        >
+          <ArrowLeft className="w-5 h-5" />
+          <span className="text-sm font-medium">Homepage</span>
+        </Link>
         <button
           onClick={handleSignOut}
-          className="w-full mt-2 flex items-center gap-3 px-4 py-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors"
+          className="w-full mt-1 flex items-center gap-3 px-4 py-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors"
         >
           <LogOut className="w-5 h-5" />
           <span className="text-sm font-medium">Sign Out</span>
