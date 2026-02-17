@@ -132,7 +132,7 @@ export default function ContactPage() {
               </div>
               <div>
                 <h3 className="font-semibold mb-1 text-foreground">Location</h3>
-                <p className="text-muted-foreground">Big Bear Lake, California</p>
+                <p className="text-muted-foreground">1394 La Crescenta Dr, Big Bear, CA 92314</p>
               </div>
             </div>
 
@@ -143,10 +143,10 @@ export default function ContactPage() {
               <div>
                 <h3 className="font-semibold mb-1 text-foreground">Email</h3>
                 <a
-                  href="mailto:hello@bigbearcabin.com"
+                  href="mailto:questions@grizzlygetaway.co"
                   className="text-forest-600 dark:text-forest-400 hover:underline"
                 >
-                  hello@bigbearcabin.com
+                  questions@grizzlygetaway.co
                 </a>
               </div>
             </div>

@@ -162,8 +162,8 @@ export const BookingContent = () => {
       <div className="text-center mb-12">
         <h1 className="text-4xl font-bold mb-4 text-foreground">Book Your Stay</h1>
         <p className="text-muted-foreground max-w-2xl mx-auto">
-          Select your dates, provide your information, and complete your booking. We can&apos;t wait
-          to host you!
+          Select your dates, input your info, provide the deposit, and you&apos;ll receive a
+          text/email confirming your booking! We are excited to host you!
         </p>
       </div>
 

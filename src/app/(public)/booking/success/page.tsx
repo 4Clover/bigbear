@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic'
 
 export const metadata = {
   title: 'Booking Confirmed',
-  description: 'Your Big Bear Cabin reservation has been confirmed.',
+  description: 'Your Grizzly Getaway reservation has been confirmed.',
 }
 
 interface PageProps {
@@ -21,7 +21,9 @@ export default async function BookingSuccessPage({ searchParams }: PageProps) {
     return (
       <div className="max-w-2xl mx-auto px-4 py-16 text-center">
         <h1 className="text-2xl font-bold mb-4 text-foreground">Invalid Session</h1>
-        <p className="text-muted-foreground mb-8">No booking session found. Please try booking again.</p>
+        <p className="text-muted-foreground mb-8">
+          No booking session found. Please try booking again.
+        </p>
         <Link href="/book">
           <Button>Book Now</Button>
         </Link>

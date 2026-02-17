@@ -6,7 +6,7 @@ export const dynamic = 'force-dynamic'
 
 export const metadata = {
   title: 'Gallery',
-  description: 'Browse photos of our beautiful mountain cabin in Big Bear.',
+  description: 'Browse photos of our beautiful mountain retreat at Grizzly Getaway.',
 }
 
 export default async function GalleryPage() {
@@ -22,8 +22,8 @@ export default async function GalleryPage() {
       <div className="text-center mb-12">
         <h1 className="text-4xl font-bold mb-4 text-foreground">Photo Gallery</h1>
         <p className="text-muted-foreground max-w-2xl mx-auto">
-          Take a virtual tour of our cozy mountain cabin. From stunning views to comfortable
-          interiors, see what awaits you at Big Bear.
+          Take a virtual tour of our cozy mountain retreat. From stunning views to comfortable
+          interiors, see what awaits you at Grizzly Getaway.
         </p>
       </div>
 
@@ -31,7 +31,9 @@ export default async function GalleryPage() {
         <div className="text-center py-16 bg-muted rounded-xl">
           <ImageIcon className="mx-auto h-16 w-16 text-muted-foreground mb-4" />
           <h3 className="text-lg font-medium text-foreground mb-2">No photos yet</h3>
-          <p className="text-muted-foreground">Check back soon for photos of our beautiful cabin.</p>
+          <p className="text-muted-foreground">
+            Check back soon for photos of our beautiful cabin.
+          </p>
         </div>
       ) : (
         <>
