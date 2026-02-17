@@ -73,7 +73,7 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
     await resend.emails.send({
       from: env().RESEND_FROM_EMAIL,
       to: email,
-      subject: 'We received your message - Big Bear Cabin',
+      subject: 'We received your message - Grizzly Getaway',
       html: `
         <h2>Thank you for reaching out!</h2>
         <p>Hello ${safeName},</p>
@@ -82,7 +82,7 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
         <blockquote style="border-left: 3px solid #10b981; padding-left: 16px; margin-left: 0;">
           ${safeMessage}
         </blockquote>
-        <p>Best regards,<br>Big Bear Cabin Team</p>
+        <p>Best regards,<br>Grizzly Getaway Team</p>
       `,
     })
 

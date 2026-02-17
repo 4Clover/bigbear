@@ -113,7 +113,7 @@ describe('Notification Service', () => {
       expect(mockSend).toHaveBeenCalledWith(
         expect.objectContaining({
           to: booking.guestEmail,
-          subject: 'Booking Confirmed - Big Bear Cabin',
+          subject: 'Booking Confirmed - Grizzly Getaway',
         })
       )
     })
@@ -238,7 +238,7 @@ describe('Notification Service', () => {
       expect(mockSend).toHaveBeenCalledWith(
         expect.objectContaining({
           to: booking.guestEmail,
-          subject: 'Booking Cancelled - Big Bear Cabin',
+          subject: 'Booking Cancelled - Grizzly Getaway',
         })
       )
     })
