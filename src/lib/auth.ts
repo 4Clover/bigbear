@@ -29,7 +29,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       // This callback just enables the proxy integration
       return !!auth
     },
-    async signIn({ account, profile }) {
+    signIn({ account, profile }) {
       if (account?.provider === 'google') {
         return profile?.email_verified === true
       }
