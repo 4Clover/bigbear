@@ -109,7 +109,7 @@ const SortableImageCard = ({
         <div className="relative mb-3 overflow-hidden rounded-lg bg-muted">
           <Image
             src={image.url}
-            alt={image.alt || image.caption || 'Gallery image'}
+            alt={image.alt ?? image.caption ?? 'Gallery image'}
             width={640}
             height={360}
             className="h-48 w-full object-cover"
@@ -130,10 +130,10 @@ const SortableImageCard = ({
 
         <div className="space-y-2">
           <p className="truncate text-sm font-medium text-foreground">
-            {image.alt || 'Untitled image'}
+            {image.alt ?? 'Untitled image'}
           </p>
           <p className="line-clamp-2 min-h-10 text-sm text-muted-foreground">
-            {image.caption || 'No caption'}
+            {image.caption ?? 'No caption'}
           </p>
 
           <div className="flex flex-wrap gap-2">
@@ -352,8 +352,8 @@ export const GalleryManager = ({ images }: GalleryManagerProps) => {
 
     setEditingId(image.id)
     setEditForm({
-      alt: image.alt || '',
-      caption: image.caption || '',
+      alt: image.alt ?? '',
+      caption: image.caption ?? '',
       category: image.category ?? GALLERY_CATEGORIES[0],
       isFeatured: image.isFeatured,
     })
@@ -398,7 +398,7 @@ export const GalleryManager = ({ images }: GalleryManagerProps) => {
 
       if (!result.success) {
         setLocalImages(previousImages)
-        setStatusMessage({ type: 'error', message: result.error || 'Failed to reorder images' })
+        setStatusMessage({ type: 'error', message: result.error ?? 'Failed to reorder images' })
         return
       }
 
@@ -413,7 +413,7 @@ export const GalleryManager = ({ images }: GalleryManagerProps) => {
       const result = await approveGalleryImage(id)
 
       if (!result.success) {
-        setStatusMessage({ type: 'error', message: result.error || 'Failed to approve image' })
+        setStatusMessage({ type: 'error', message: result.error ?? 'Failed to approve image' })
         return
       }
 
@@ -431,7 +431,7 @@ export const GalleryManager = ({ images }: GalleryManagerProps) => {
       const result = await rejectGalleryImage(id)
 
       if (!result.success) {
-        setStatusMessage({ type: 'error', message: result.error || 'Failed to reject image' })
+        setStatusMessage({ type: 'error', message: result.error ?? 'Failed to reject image' })
         return
       }
 
@@ -454,7 +454,7 @@ export const GalleryManager = ({ images }: GalleryManagerProps) => {
       const result = await deleteGalleryImage(id)
 
       if (!result.success) {
-        setStatusMessage({ type: 'error', message: result.error || 'Failed to delete image' })
+        setStatusMessage({ type: 'error', message: result.error ?? 'Failed to delete image' })
         return
       }
 
@@ -479,7 +479,8 @@ export const GalleryManager = ({ images }: GalleryManagerProps) => {
       })
 
       if (!result.success) {
-        setStatusMessage({ type: 'error', message: result.error || 'Failed to update image' })
+        setStatusMessage({ type: 'error', message: result.error ?? 'Failed to update image' })
+
         return
       }
 

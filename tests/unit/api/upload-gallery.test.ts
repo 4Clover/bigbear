@@ -1,3 +1,5 @@
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import type { HandleUploadOptions } from '@vercel/blob/client'
 import type { GalleryUploadTokenPayload } from '@/lib/gallery-token'
 
 // Mock modules
@@ -53,14 +55,16 @@ describe('Gallery Upload API Route', () => {
       vi.mocked(auth).mockResolvedValue({
         user: { id: 'owner-1', role: 'OWNER', email: 'owner@test.com' },
         expires: new Date(Date.now() + 86400000).toISOString(),
-      })
+      } as any)
 
       let capturedTokenPayload: string | undefined
-      vi.mocked(handleUpload).mockImplementation(async ({ onBeforeGenerateToken }) => {
-        const result = await onBeforeGenerateToken!('test.jpg', null)
-        capturedTokenPayload = result.tokenPayload as string
-        return { type: 'blob.generate-client-token' as const, clientToken: 'mock-token' }
-      })
+      vi.mocked(handleUpload).mockImplementation(
+        async ({ onBeforeGenerateToken }: HandleUploadOptions) => {
+          const result = await onBeforeGenerateToken('test.jpg', null, false)
+          capturedTokenPayload = result.tokenPayload!
+          return { type: 'blob.generate-client-token' as const, clientToken: 'mock-token' }
+        }
+      )
 
       const response = await POST(createUploadRequest())
       const json = await response.json()
@@ -78,7 +82,7 @@ describe('Gallery Upload API Route', () => {
 
   describe('guest auth (JWT-based)', () => {
     it('should allow upload with valid guest JWT in clientPayload', async () => {
-      vi.mocked(auth).mockResolvedValue(null)
+      vi.mocked(auth).mockResolvedValue(null as any)
 
       const mockPayload: GalleryUploadTokenPayload = {
         bookingId: 'booking-123',
@@ -88,11 +92,13 @@ describe('Gallery Upload API Route', () => {
       vi.mocked(verifyGalleryUploadToken).mockResolvedValue(mockPayload)
 
       let capturedTokenPayload: string | undefined
-      vi.mocked(handleUpload).mockImplementation(async ({ onBeforeGenerateToken }) => {
-        const result = await onBeforeGenerateToken!('test.jpg', 'valid-jwt-token')
-        capturedTokenPayload = result.tokenPayload as string
-        return { type: 'blob.generate-client-token' as const, clientToken: 'mock-token' }
-      })
+      vi.mocked(handleUpload).mockImplementation(
+        async ({ onBeforeGenerateToken }: HandleUploadOptions) => {
+          const result = await onBeforeGenerateToken('test.jpg', 'valid-jwt-token', false)
+          capturedTokenPayload = result.tokenPayload!
+          return { type: 'blob.generate-client-token' as const, clientToken: 'mock-token' }
+        }
+      )
 
       const response = await POST(createUploadRequest('valid-jwt-token'))
       const json = await response.json()
@@ -109,11 +115,13 @@ describe('Gallery Upload API Route', () => {
 
   describe('unauthorized access', () => {
     it('should return 400 when no session and no clientPayload', async () => {
-      vi.mocked(auth).mockResolvedValue(null)
-      vi.mocked(handleUpload).mockImplementation(async ({ onBeforeGenerateToken }) => {
-        await onBeforeGenerateToken!('test.jpg', null)
-        return { type: 'blob.generate-client-token' as const, clientToken: 'mock-token' }
-      })
+      vi.mocked(auth).mockResolvedValue(null as any)
+      vi.mocked(handleUpload).mockImplementation(
+        async ({ onBeforeGenerateToken }: HandleUploadOptions) => {
+          await onBeforeGenerateToken('test.jpg', null, false)
+          return { type: 'blob.generate-client-token' as const, clientToken: 'mock-token' }
+        }
+      )
 
       const response = await POST(createUploadRequest())
       const json = await response.json()
@@ -123,12 +131,14 @@ describe('Gallery Upload API Route', () => {
     })
 
     it('should return 400 when clientPayload JWT is invalid', async () => {
-      vi.mocked(auth).mockResolvedValue(null)
+      vi.mocked(auth).mockResolvedValue(null as any)
       vi.mocked(verifyGalleryUploadToken).mockRejectedValue(new Error('Invalid token'))
-      vi.mocked(handleUpload).mockImplementation(async ({ onBeforeGenerateToken }) => {
-        await onBeforeGenerateToken!('test.jpg', 'invalid-jwt')
-        return { type: 'blob.generate-client-token' as const, clientToken: 'mock-token' }
-      })
+      vi.mocked(handleUpload).mockImplementation(
+        async ({ onBeforeGenerateToken }: HandleUploadOptions) => {
+          await onBeforeGenerateToken('test.jpg', 'invalid-jwt', false)
+          return { type: 'blob.generate-client-token' as const, clientToken: 'mock-token' }
+        }
+      )
 
       const response = await POST(createUploadRequest('invalid-jwt'))
       const json = await response.json()
@@ -141,11 +151,13 @@ describe('Gallery Upload API Route', () => {
       vi.mocked(auth).mockResolvedValue({
         user: { id: 'guest-1', role: 'GUEST', email: 'guest@test.com' },
         expires: new Date(Date.now() + 86400000).toISOString(),
-      })
-      vi.mocked(handleUpload).mockImplementation(async ({ onBeforeGenerateToken }) => {
-        await onBeforeGenerateToken!('test.jpg', null)
-        return { type: 'blob.generate-client-token' as const, clientToken: 'mock-token' }
-      })
+      } as any)
+      vi.mocked(handleUpload).mockImplementation(
+        async ({ onBeforeGenerateToken }: HandleUploadOptions) => {
+          await onBeforeGenerateToken('test.jpg', null, false)
+          return { type: 'blob.generate-client-token' as const, clientToken: 'mock-token' }
+        }
+      )
 
       const response = await POST(createUploadRequest())
       const json = await response.json()
@@ -160,14 +172,16 @@ describe('Gallery Upload API Route', () => {
       vi.mocked(auth).mockResolvedValue({
         user: { id: 'owner-1', role: 'OWNER', email: 'owner@test.com' },
         expires: new Date(Date.now() + 86400000).toISOString(),
-      })
+      } as any)
 
       let tokenPayloadResult: string | undefined
-      vi.mocked(handleUpload).mockImplementation(async ({ onBeforeGenerateToken }) => {
-        const result = await onBeforeGenerateToken!('test.jpg', null)
-        tokenPayloadResult = result.tokenPayload as string
-        return { type: 'blob.generate-client-token' as const, clientToken: 'mock-token' }
-      })
+      vi.mocked(handleUpload).mockImplementation(
+        async ({ onBeforeGenerateToken }: HandleUploadOptions) => {
+          const result = await onBeforeGenerateToken('test.jpg', null, false)
+          tokenPayloadResult = result.tokenPayload!
+          return { type: 'blob.generate-client-token' as const, clientToken: 'mock-token' }
+        }
+      )
 
       await POST(createUploadRequest())
 
@@ -179,7 +193,7 @@ describe('Gallery Upload API Route', () => {
     })
 
     it('should set tokenPayload with GUEST uploadedBy and bookingId for guest', async () => {
-      vi.mocked(auth).mockResolvedValue(null)
+      vi.mocked(auth).mockResolvedValue(null as any)
       vi.mocked(verifyGalleryUploadToken).mockResolvedValue({
         bookingId: 'booking-456',
         guestName: 'Jane Doe',
@@ -187,11 +201,13 @@ describe('Gallery Upload API Route', () => {
       })
 
       let tokenPayloadResult: string | undefined
-      vi.mocked(handleUpload).mockImplementation(async ({ onBeforeGenerateToken }) => {
-        const result = await onBeforeGenerateToken!('test.jpg', 'valid-jwt')
-        tokenPayloadResult = result.tokenPayload as string
-        return { type: 'blob.generate-client-token' as const, clientToken: 'mock-token' }
-      })
+      vi.mocked(handleUpload).mockImplementation(
+        async ({ onBeforeGenerateToken }: HandleUploadOptions) => {
+          const result = await onBeforeGenerateToken('test.jpg', 'valid-jwt', false)
+          tokenPayloadResult = result.tokenPayload!
+          return { type: 'blob.generate-client-token' as const, clientToken: 'mock-token' }
+        }
+      )
 
       await POST(createUploadRequest('valid-jwt'))
 
@@ -208,13 +224,18 @@ describe('Gallery Upload API Route', () => {
       vi.mocked(auth).mockResolvedValue({
         user: { id: 'owner-1', role: 'OWNER', email: 'owner@test.com' },
         expires: new Date(Date.now() + 86400000).toISOString(),
-      })
+      } as any)
 
       let capturedResult: Record<string, unknown> | undefined
-      vi.mocked(handleUpload).mockImplementation(async ({ onBeforeGenerateToken }) => {
-        capturedResult = (await onBeforeGenerateToken!('test.jpg', null)) as Record<string, unknown>
-        return { type: 'blob.generate-client-token' as const, clientToken: 'mock-token' }
-      })
+      vi.mocked(handleUpload).mockImplementation(
+        async ({ onBeforeGenerateToken }: HandleUploadOptions) => {
+          capturedResult = (await onBeforeGenerateToken('test.jpg', null, false)) as Record<
+            string,
+            unknown
+          >
+          return { type: 'blob.generate-client-token' as const, clientToken: 'mock-token' }
+        }
+      )
 
       await POST(createUploadRequest())
 

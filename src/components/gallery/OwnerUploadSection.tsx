@@ -44,7 +44,7 @@ const OwnerUploadSection = () => {
       })
 
       if (!result.success) {
-        setError(result.error || 'Failed to create gallery image')
+        setError(result.error ?? 'Failed to create gallery image')
         return
       }
 

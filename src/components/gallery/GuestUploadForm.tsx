@@ -10,7 +10,7 @@ import GalleryUploader from './GalleryUploader'
 const MAX_UPLOADS = 3
 const MAX_CAPTION_LENGTH = 200
 
-type GuestUploadFormProps = {
+interface GuestUploadFormProps {
   token: string
   guestName: string
   remainingUploads: number
@@ -66,7 +66,7 @@ const GuestUploadForm = ({ token, guestName, remainingUploads }: GuestUploadForm
         }
 
         setSuccessMessage('Photo received. Keep sharing your favorite cabin moments.')
-      })().catch((_error) => {
+      })().catch(() => {
         setError('Upload saved to storage, but we could not finish processing. Please retry.')
       })
     })

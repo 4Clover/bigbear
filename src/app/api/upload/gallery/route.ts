@@ -16,7 +16,7 @@ export const POST = async (request: Request): Promise<NextResponse> => {
         let isOwner = false
         let guestPayload: GalleryUploadTokenPayload | null = null
 
-        if (session?.user?.role === 'OWNER') {
+        if (session?.user.role === 'OWNER') {
           isOwner = true
         } else if (clientPayload) {
           try {

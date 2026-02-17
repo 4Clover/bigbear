@@ -6,7 +6,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react'
 import useEmblaCarousel from 'embla-carousel-react'
 import Autoplay from 'embla-carousel-autoplay'
 
-type PhotoCarouselImage = {
+interface PhotoCarouselImage {
   url: string
   caption?: string | null
   guestName?: string | null
@@ -16,7 +16,7 @@ interface PhotoCarouselProps {
   images: PhotoCarouselImage[]
 }
 
-type AutoplayControls = {
+interface AutoplayControls {
   stop: () => void
   play: () => void
 }
@@ -30,7 +30,7 @@ const PhotoCarousel = ({ images }: PhotoCarouselProps) => {
   ])
 
   const getAutoplay = useCallback(() => {
-    return (emblaApi?.plugins() as { autoplay?: AutoplayControls })?.autoplay
+    return (emblaApi?.plugins() as { autoplay?: AutoplayControls } | undefined)?.autoplay
   }, [emblaApi])
 
   const handleUserInteraction = useCallback(() => {
@@ -103,14 +103,14 @@ const PhotoCarousel = ({ images }: PhotoCarouselProps) => {
               <div className="relative aspect-video">
                 <Image
                   src={image.url}
-                  alt={image.caption || `Guest photo ${index + 1}`}
+                  alt={image.caption ?? `Guest photo ${index + 1}`}
                   fill
                   sizes="100vw"
                   className="object-cover"
                 />
               </div>
 
-              {(image.caption || image.guestName) && (
+              {(image.caption ?? image.guestName) && (
                 <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/75 via-black/30 to-transparent p-4 sm:p-5">
                   {image.caption && (
                     <p className="text-sm font-medium text-white sm:text-base">{image.caption}</p>
