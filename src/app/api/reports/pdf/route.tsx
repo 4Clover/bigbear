@@ -34,6 +34,10 @@ export const GET = async (request: NextRequest): Promise<NextResponse> => {
       return NextResponse.json({ error: 'Invalid report type' }, { status: 400 })
     }
 
+    if (type === 'monthly' && (isNaN(month) || month < 1 || month > 12)) {
+      return NextResponse.json({ error: 'Invalid month' }, { status: 400 })
+    }
+
     let pdfStream: NodeJS.ReadableStream
 
     if (type === 'monthly') {

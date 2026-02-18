@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { addDays, eachDayOfInterval, startOfDay } from 'date-fns'
+import { addDays, eachDayOfInterval, startOfDay, subDays } from 'date-fns'
 import { checkRateLimit, getClientIdentifier, RATE_LIMITS } from '@/lib/rate-limit'
 
 export const GET = async (request: NextRequest): Promise<NextResponse> => {
@@ -53,11 +53,11 @@ export const GET = async (request: NextRequest): Promise<NextResponse> => {
     // Collect all blocked dates
     const allBlockedDates: Date[] = []
 
-    // Add booking dates
+    // Add booking dates (exclude checkout day — guests depart, next guest can check in)
     for (const booking of bookings) {
       const days = eachDayOfInterval({
         start: new Date(booking.checkIn),
-        end: new Date(booking.checkOut),
+        end: subDays(new Date(booking.checkOut), 1),
       })
       allBlockedDates.push(...days)
     }
