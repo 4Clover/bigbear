@@ -7,7 +7,7 @@ import { sendBookingConfirmation, sendBookingCancellation } from '@/lib/notifica
 import { revalidatePath } from 'next/cache'
 import { assertOwner } from '@/lib/auth/guards'
 
-export const cancelBooking = async (bookingId: string, initiatedBy: 'guest' | 'owner') => {
+export const cancelBooking = async (bookingId: string, initiatedBy: 'owner' = 'owner') => {
   await assertOwner()
 
   const booking = await prisma.booking.findUnique({
