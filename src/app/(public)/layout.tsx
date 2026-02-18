@@ -5,7 +5,7 @@ export default async function PublicLayout({ children }: { children: React.React
   const session = await auth()
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
+    <div className="min-h-screen flex flex-col bg-overlay">
       <Header session={session} />
       <main className="flex-1">{children}</main>
       <Footer />
