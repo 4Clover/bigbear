@@ -1,7 +1,7 @@
 # PROJECT KNOWLEDGE BASE
 
-**Generated:** 2026-02-16
-**Commit:** e53f706
+**Generated:** 2026-02-18
+**Commit:** 1f6f38e
 **Branch:** dev
 
 ## OVERVIEW
@@ -13,13 +13,13 @@ Short-term rental property management (Big Bear cabin). Next.js 16 + TypeScript 
 ```
 grizzly/
 ├── src/
-│   ├── actions/          # Server actions by domain (6 files) → see actions/AGENTS.md
+│   ├── actions/          # Server actions by domain (7 files) → see actions/AGENTS.md
 │   ├── app/              # App Router routes (4 route groups) → see app/AGENTS.md
-│   ├── components/       # Domain-organized components (56 files) → see components/AGENTS.md
-│   ├── lib/              # Infrastructure layer (14 modules) → see lib/AGENTS.md
+│   ├── components/       # Domain-organized components (62 files) → see components/AGENTS.md
+│   ├── lib/              # Infrastructure layer (15 modules) → see lib/AGENTS.md
 │   └── types/            # Shared types (pagination, next-auth extensions)
-├── tests/                # Vitest test suite (32 files) → see tests/AGENTS.md
-├── prisma/               # Schema (425 lines) + migrations + seed → see prisma/AGENTS.md
+├── tests/                # Vitest test suite (35 files) → see tests/AGENTS.md
+├── prisma/               # Schema (437 lines) + migrations + seed → see prisma/AGENTS.md
 └── src/proxy.ts          # Global route protection (Next.js 16 proxy pattern)
 ```
 
@@ -33,6 +33,7 @@ grizzly/
 | Add API endpoint    | `src/app/api/{feature}/route.ts`      | Rate limit public endpoints, Bearer for cron   |
 | Add Prisma model    | `prisma/schema.prisma`                | Run `pnpm db:migrate` after                    |
 | Change env vars     | `src/lib/env.ts`                      | Zod-validated; fails fast at startup           |
+| Add gallery feature | `src/actions/gallery.ts`              | Token-gated guest uploads; owner CRUD          |
 | Mock for tests      | `tests/__mocks__/`                    | Prisma, auth, resend, twilio, upstash          |
 | Add test fixtures   | `tests/fixtures/`                     | Factory pattern with counter-based IDs         |
 
@@ -55,6 +56,20 @@ grizzly/
 - **NEVER** use `<img>` — use Next.js `<Image>` (1 exception: ReceiptGallery)
 - **NEVER** suppress floating promises — await, void, or .catch()
 - **NEVER** use non-null assertions (`!`) — proper null checks required
+
+## LINTER PITFALLS
+
+`strictTypeChecked` + `stylisticTypeChecked` active. Common traps:
+
+- **Floating promises**: `saveData()` → `await saveData()` or `void saveData()` or `.catch()`
+- **Async onClick**: `onClick={async () => ...}` → `onClick={() => { void save() }}`
+- **Template literals**: Only strings/numbers in templates (no objects/arrays)
+- **Type imports**: `import { User }` → `import type { User }` for type-only
+- **Non-null assertions**: `user!.name` → null check first, then access
+- **Indexed access**: `items[0]` returns `T | undefined` (`noUncheckedIndexedAccess`) — must guard
+- **Switch exhaustiveness**: Handle all enum values, no default fallback
+- **Unused vars**: Prefix with `_` (`_error`, `_req`)
+- **Scaffolding**: Mark planned/unused features with `%%% XYZ SCAFFOLDING %%%` comment block
 
 ## COMMANDS
 
@@ -82,3 +97,4 @@ pnpm db:up                # Docker PostgreSQL
 - **errors.ts defined but unused**: Custom error classes exist but actions throw generic Error
 - **Vercel Cron**: calendar-sync (6h), reminders (daily 10am UTC) — need CRON_SECRET
 - **PDF reports**: `@react-pdf/renderer` for AnnualReport, MonthlyReport, ScheduleE
+- **Gallery tokens**: `gallery-token.ts` generates HMAC tokens for guest photo uploads (time-limited)

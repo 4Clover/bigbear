@@ -1,6 +1,6 @@
 # TEST SUITE
 
-32 test files (~5,900 lines). Vitest + happy-dom + vitest-mock-extended. Globals enabled (no imports needed for describe/it/expect).
+35 test files (~12,800 lines). Vitest + happy-dom + vitest-mock-extended. Globals enabled (no imports needed for describe/it/expect).
 
 **Three-layer testing strategy**: unit (function-level) → data-paths (workflow-level) → patterns (schema-level).
 
@@ -19,8 +19,9 @@ tests/
 │   ├── booking.factory.ts # createBookingFixture, createConfirmedBookingFixture, Decimal export
 │   └── maintenance.factory.ts # createMaintenanceJobFixture
 ├── unit/
-│   ├── lib/               # Tests for src/lib/ modules (10 files)
-│   └── actions/           # Tests for src/actions/ (4 files)
+│   ├── lib/               # Tests for src/lib/ modules (11 files)
+│   ├── actions/           # Tests for src/actions/ (5 files)
+│   └── api/               # Tests for API routes (1 file)
 ├── data-paths/            # Integration-style workflow tests (14 files) — test complete data flows
 └── patterns/              # Database pattern tests (4 files) — state machines, cascades, constraints
 ```
@@ -31,6 +32,7 @@ tests/
 | --------------------- | ------------------------------- | ---------------------------------------------- |
 | Add unit test for lib | `unit/lib/{module}.test.ts`     | Mock Prisma + external services                |
 | Add action test       | `unit/actions/{domain}.test.ts` | Mock auth guards + Prisma                      |
+| Add API route test    | `unit/api/{route}.test.ts`      | Mock auth + request/response                   |
 | Add workflow test     | `data-paths/{flow}.test.ts`     | Test end-to-end data transformations           |
 | Add pattern test      | `patterns/{pattern}.test.ts`    | Validate state machines, cascades, constraints |
 | Add mock              | `__mocks__/{service}.ts`        | Export mock + reset function                   |

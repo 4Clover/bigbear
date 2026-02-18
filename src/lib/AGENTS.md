@@ -1,6 +1,6 @@
 # INFRASTRUCTURE LAYER
 
-14 modules providing core infrastructure. No barrel files — import each module directly.
+15 modules providing core infrastructure. No barrel files — import each module directly.
 
 ## STRUCTURE
 
@@ -10,9 +10,10 @@
 | `auth.ts`           | NextAuth v5 config, Resend provider, Prisma adapter                             | **CRITICAL** (10 imports)               |
 | `auth/guards.ts`    | `assertOwner`, `assertWorker`, `assertOwnerOrAccountant`, `assertOwnerOrWorker` | **CRITICAL** (7 imports)                |
 | `format.ts`         | `formatCurrency`, `formatDate`, `formatPercentage`                              | HIGH (8 imports)                        |
-| `notifications.ts`  | Email (Resend) + SMS (Twilio) — 639 lines, 11 send functions                    | HIGH (4 imports)                        |
+| `notifications.ts`  | Email (Resend) + SMS (Twilio) — 703 lines, 11 send functions                    | HIGH (4 imports)                        |
 | `stripe.ts`         | Stripe client via lazy-load Proxy pattern                                       | HIGH (4 imports)                        |
 | `env.ts`            | Zod-validated env vars; singleton `env()` getter                                | MEDIUM (3 imports)                      |
+| `gallery-token.ts`  | HMAC token generation/verification for guest gallery uploads                    | LOW (2 imports)                         |
 | `rate-limit.ts`     | Upstash Redis + in-memory fallback; predefined RATE_LIMITS                      | MEDIUM (3 imports)                      |
 | `security.ts`       | `validateExternalUrl` (SSRF), `escapeHtml` (XSS)                                | MEDIUM (3 imports)                      |
 | `errors.ts`         | AppError hierarchy (6 classes + isAppError guard)                               | **UNUSED** — defined but never imported |

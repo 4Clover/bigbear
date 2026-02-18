@@ -1,6 +1,6 @@
 # COMPONENTS
 
-56 components organized by domain. Custom design system (NOT shadcn). Tailwind CSS v4 with forest/wood/stone color tokens.
+62 components organized by domain. Custom design system (NOT shadcn). Tailwind CSS v4 with forest/wood/stone color tokens.
 
 ## STRUCTURE
 
@@ -9,10 +9,11 @@
 | `booking/`     | 4     | Guest booking flow (calendar, guest form, pricing, addon selector)                |
 | `charts/`      | 3     | Recharts visualizations (revenue, trends, category breakdown)                     |
 | `finance/`     | 7     | Expense management (forms, tables, receipt upload/gallery, filters)               |
+| `gallery/`     | 5     | Gallery management (manager, uploader, guest upload, owner section, carousel)     |
 | `layout/`      | 2     | Header (client, mobile menu) + Footer (server)                                    |
 | `maintenance/` | 6     | Owner-side job management (forms, lists, quote/completion review)                 |
 | `owner/`       | 9     | Owner dashboard (booking table, calendar, block dates, nav, notifications)        |
-| `pdf/`         | 3     | `@react-pdf/renderer` documents (annual, monthly, Schedule E)                     |
+| `pdf/`         | 4     | `@react-pdf/renderer` documents + shared styles (annual, monthly, Schedule E)     |
 | `reports/`     | 6     | Report display + export buttons (monthly, annual, Schedule E, CSV, PDF)           |
 | `ui/`          | 9     | Primitives: Button, Card, Input, Select, Textarea, Badge, Pagination, ThemeToggle |
 | `worker/`      | 7     | Worker portal (job cards, quote/completion forms, timeslot picker, photo upload)  |
@@ -40,6 +41,12 @@
 - **Icons**: `lucide-react` throughout (not heroicons, not radix icons)
 - **Theme**: `dark:` prefix for dark mode; `next-themes` for toggle
 - **Uploads**: Direct Vercel Blob upload from client; pass URL to server action
+
+## REACT 19 PATTERNS
+
+- **Form state**: `const [state, formAction, pending] = useActionState(serverAction, initialState)`
+- **Optimistic UI**: `const [optimistic, addOptimistic] = useOptimistic(items, reducerFn)`
+- **DTOs**: Never return full Prisma objects to client — filter to needed fields only
 
 ## DESIGN SYSTEM
 

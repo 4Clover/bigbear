@@ -1,6 +1,6 @@
 # DATA MODEL
 
-20 Prisma models, 5 enums, 425 lines. Single-cabin rental with booking, finance, and maintenance domains.
+20 Prisma models, 5 enums, 437 lines. Single-cabin rental with booking, finance, maintenance, and gallery domains.
 
 ## STRUCTURE
 

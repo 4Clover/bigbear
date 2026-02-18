@@ -4,14 +4,15 @@ Domain-driven server actions. Each file = one business domain. All use `'use ser
 
 ## STRUCTURE
 
-| File               | Domain            | Auth Guard                | Actions                                 | Key Models                            |
-| ------------------ | ----------------- | ------------------------- | --------------------------------------- | ------------------------------------- |
-| `bookings.ts`      | Booking lifecycle | `assertOwner`             | approve, reject, cancel                 | Booking, Stripe                       |
-| `calendar.ts`      | Availability      | `assertOwner`             | block/unblock dates, sync management    | BlockedDate, CalendarSync             |
-| `finance.ts`       | Accounting        | `assertOwnerOrAccountant` | CRUD expenses/receipts, summaries       | Transaction, Receipt, ExpenseCategory |
-| `maintenance.ts`   | Job management    | Mixed (owner+worker)      | 15 actions for full job lifecycle       | MaintenanceJob, Quote, WorkCompletion |
-| `notifications.ts` | Preferences       | `assertOwner`             | update/get notification prefs           | NotificationPreference                |
-| `reports.ts`       | Financial reports | `assertOwnerOrAccountant` | monthly, annual, Schedule E, CSV export | Transaction, ExpenseCategory          |
+| File               | Domain            | Auth Guard                | Actions                                  | Key Models                            |
+| ------------------ | ----------------- | ------------------------- | ---------------------------------------- | ------------------------------------- |
+| `bookings.ts`      | Booking lifecycle | `assertOwner`             | approve, reject, cancel                  | Booking, Stripe                       |
+| `calendar.ts`      | Availability      | `assertOwner`             | block/unblock dates, sync management     | BlockedDate, CalendarSync             |
+| `finance.ts`       | Accounting        | `assertOwnerOrAccountant` | CRUD expenses/receipts, summaries        | Transaction, Receipt, ExpenseCategory |
+| `gallery.ts`       | Gallery           | `assertOwner`             | create, update, delete, reorder, uploads | GalleryImage                          |
+| `maintenance.ts`   | Job management    | Mixed (owner+worker)      | 15 actions for full job lifecycle        | MaintenanceJob, Quote, WorkCompletion |
+| `notifications.ts` | Preferences       | `assertOwner`             | update/get notification prefs            | NotificationPreference                |
+| `reports.ts`       | Financial reports | `assertOwnerOrAccountant` | monthly, annual, Schedule E, CSV export  | Transaction, ExpenseCategory          |
 
 ## WHERE TO LOOK
 
@@ -20,6 +21,7 @@ Domain-driven server actions. Each file = one business domain. All use `'use ser
 | Add booking mutation  | `bookings.ts`    | Only OWNER can approve/reject/cancel                   |
 | Add financial feature | `finance.ts`     | OWNER or ACCOUNTANT; validate with Zod                 |
 | Add worker action     | `maintenance.ts` | Use `assertWorker()`; fetch WorkerProfile from session |
+| Add gallery action    | `gallery.ts`     | Token-gated guest uploads; owner CRUD via assertOwner  |
 | Add owner-only action | Any              | Start with `await assertOwner()`                       |
 | Add report type       | `reports.ts`     | Return typed interface, no revalidate needed           |
 

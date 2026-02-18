@@ -17,13 +17,18 @@ app/
 │   ├── book/                    # Booking flow + BookingContent client component
 │   ├── booking/success/         # Post-payment confirmation
 │   ├── gallery/                 # Property photos
-│   └── contact/                 # Contact form
+│   ├── gallery/upload/          # Token-gated guest photo uploads
+│   ├── contact/                 # Contact form
+│   ├── privacy/                 # Privacy policy (static)
+│   ├── terms/                   # Terms of service (static)
+│   └── cancellation-policy/     # Cancellation policy (static)
 ├── owner/                        # OWNER dashboard (protected)
 │   ├── layout.tsx               # Auth check + OwnerNav sidebar
 │   ├── dashboard/               # Stats overview
 │   ├── bookings/                # Booking management (?status= filter)
 │   ├── calendar/                # CalendarPageClient + block dates
 │   ├── finance/                 # Hub → expenses/, reports/ sub-routes
+│   ├── gallery/                 # Gallery management (owner CRUD, upload)
 │   ├── maintenance/             # Job management
 │   └── settings/                # Prefs → notifications/ sub-route
 ├── worker/                       # WORKER portal (protected)
@@ -40,6 +45,7 @@ app/
     ├── cron/reminders/          # Booking reminders (daily, Bearer auth)
     ├── upload/receipts/         # Expense receipt uploads
     ├── upload/maintenance/      # Job photo uploads
+    ├── upload/gallery/          # Gallery image uploads (Vercel Blob)
     ├── calendar/ical/           # iCal feed export
     ├── availability/            # Rate-limited availability check
     ├── pricing/                 # Dynamic pricing
