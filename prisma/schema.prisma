@@ -125,7 +125,7 @@ model Booking {
   addonsTotal     Decimal       @default(0) @db.Decimal(10, 2)
   depositAmount   Decimal       @db.Decimal(10, 2)
   totalAmount     Decimal       @db.Decimal(10, 2)
-  paymentIntentId String?
+  paymentIntentId String?       @unique
   status          BookingStatus @default(PENDING)
   notes           String?
   createdAt       DateTime      @default(now())
@@ -136,6 +136,14 @@ model Booking {
   transactions  Transaction[]
   messages      Message[]
   galleryImages GalleryImage[]
+}
+
+model StripeEvent {
+  id          String   @id // Stripe evt_xxx ID (natural PK)
+  type        String   // e.g. checkout.session.completed
+  status      String   @default("pending") // pending | processing | processed
+  createdAt   DateTime @default(now())
+  processedAt DateTime?
 }
 
 model Addon {
