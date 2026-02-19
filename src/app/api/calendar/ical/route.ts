@@ -11,7 +11,11 @@ const formatICalTimestamp = (date: Date): string => {
 }
 
 export const GET = async (request: Request): Promise<NextResponse> => {
-  // Authenticate via bearer token or query param (for calendar app compatibility)
+  // NOTE: Query param token kept for iCal client compatibility.
+  // Apple Calendar, Google Calendar, and other iCal clients don't support
+  // custom Authorization headers. The token is a long random secret that
+  // provides adequate security for read-only calendar data.
+  // Security trade-off: token visible in server logs and browser history.
   const url = new URL(request.url)
   const tokenParam = url.searchParams.get('token')
   const authHeader = request.headers.get('authorization')
@@ -70,7 +74,8 @@ END:VEVENT
       const uid = `blocked-${blocked.id}@cabin`
       const dtstart = formatICalDate(blocked.startDate)
       const dtend = formatICalDate(blocked.endDate)
-      const summary = blocked.reason ? `Blocked - ${blocked.reason}` : 'Blocked'
+      // Never expose internal reason in public iCal feed — generic label only
+      const summary = 'Blocked'
 
       ical += `BEGIN:VEVENT
 UID:${uid}
