@@ -55,6 +55,14 @@ describe('Finance Workflow Data Paths', () => {
         user: { id: '1', email: 'owner@test.com', name: 'Owner', role: 'OWNER' },
       })
     )
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
+    ;(prismaMock.$transaction as any).mockImplementation(async (fnOrArray: unknown) => {
+      if (typeof fnOrArray === 'function') {
+        return (fnOrArray as (tx: typeof prismaMock) => Promise<unknown>)(prismaMock)
+      }
+      return Promise.all(fnOrArray as Promise<unknown>[])
+    })
+    prismaMock.receipt.deleteMany.mockResolvedValue({ count: 0 })
   })
 
   // =============================================================================
