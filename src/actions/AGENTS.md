@@ -32,14 +32,14 @@ Domain-driven server actions. Each file = one business domain. All use `'use ser
 - **Notifications**: Fire after mutations with `.catch(() => {})` — never block on send
 - **Pagination**: `finance.ts` and `maintenance.ts` use `{ data, total, page, pageSize, totalPages }`
 - **State machine** (maintenance): OPEN → QUOTED → ASSIGNED → SCHEDULED → IN_PROGRESS → COMPLETED → APPROVED → PAID
-- **Zod errors**: Use `error.flatten().fieldErrors` (NOT `z.treeifyError()`)
+- **Zod errors**: Use `z.treeifyError(error).properties` (NOT `error.flatten()`)
 
 ## ANTI-PATTERNS
 
 - **NEVER** skip auth guard — server actions create public HTTP endpoints
 - **NEVER** return raw Prisma Decimal — convert with `Number()`
 - **NEVER** block on notification sends — always `.catch(() => {})`
-- **NEVER** use `z.treeifyError()` — use `error.flatten()` (Zod 4)
+- **NEVER** use `error.flatten()` — use `z.treeifyError(error).properties` (Zod 4)
 
 ## NOTES
 
@@ -47,5 +47,5 @@ Domain-driven server actions. Each file = one business domain. All use `'use ser
 - `errors.ts` custom classes exist but actions throw generic `Error('message')` instead
 - Guards return session object — use it for user context (e.g., `session.user.id`)
 - `getWorkerProfile()` in maintenance.ts uses `auth()` directly (inconsistent with other guards)
-- **Zod violation**: 5 calls to `z.treeifyError()` remain in `calendar.ts`, `finance.ts`, `maintenance.ts` — should be `error.flatten().fieldErrors`
+- **Zod v4 API**: `z.treeifyError()` is the correct Zod v4 API for error handling (replaces deprecated `error.flatten()`)
 - `reports.ts` returns typed interfaces (not mutations) — no `revalidatePath` needed

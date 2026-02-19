@@ -46,8 +46,15 @@ const getValidationErrorMessage = (fieldErrors: Record<string, string[] | undefi
 }
 
 const getFieldErrors = (error: z.ZodError) => {
-  // eslint-disable-next-line @typescript-eslint/no-deprecated
-  return error.flatten().fieldErrors
+  const treeified = z.treeifyError(error)
+  const properties =
+    (treeified as { properties?: Record<string, { errors: string[] } | undefined> }).properties ??
+    {}
+  const fieldErrors: Record<string, string[] | undefined> = {}
+  for (const [key, value] of Object.entries(properties)) {
+    fieldErrors[key] = value?.errors
+  }
+  return fieldErrors
 }
 
 const revalidateGalleryPaths = () => {

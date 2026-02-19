@@ -50,7 +50,7 @@ grizzly/
 ## ANTI-PATTERNS (THIS PROJECT)
 
 - **NEVER** use `as any`, `@ts-ignore`, `@ts-expect-error` in production code (tests OK with `as any`)
-- **NEVER** use `z.treeifyError()` — use `error.flatten().fieldErrors` (Zod 4)
+- **NEVER** use `error.flatten()` — use `z.treeifyError(error).properties` (Zod 4)
 - **NEVER** pass raw Prisma Decimal to client components
 - **NEVER** skip auth guards in server actions (they create public HTTP endpoints)
 - **NEVER** use `<img>` — use Next.js `<Image>` (1 exception: ReceiptGallery)
