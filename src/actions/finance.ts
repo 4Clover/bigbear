@@ -33,28 +33,32 @@ export const createExpense = async (data: {
     return { errors: z.treeifyError(validated.error).properties }
   }
 
-  const transaction = await prisma.transaction.create({
-    data: {
-      type: 'EXPENSE',
-      categoryId: validated.data.categoryId,
-      amount: validated.data.amount,
-      date: validated.data.date,
-      description: validated.data.description,
-      vendor: validated.data.vendor,
-    },
-  })
+  const transaction = await prisma.$transaction(async (tx) => {
+    const newTransaction = await tx.transaction.create({
+      data: {
+        type: 'EXPENSE',
+        categoryId: validated.data.categoryId,
+        amount: validated.data.amount,
+        date: validated.data.date,
+        description: validated.data.description,
+        vendor: validated.data.vendor,
+      },
+    })
 
-  if (validated.data.receiptUrls && validated.data.receiptUrls.length > 0) {
-    for (const url of validated.data.receiptUrls) {
-      await prisma.receipt.create({
-        data: {
-          transactionId: transaction.id,
-          fileUrl: url,
-          fileName: url.split('/').pop() ?? 'receipt',
-        },
-      })
+    if (validated.data.receiptUrls && validated.data.receiptUrls.length > 0) {
+      for (const url of validated.data.receiptUrls) {
+        await tx.receipt.create({
+          data: {
+            transactionId: newTransaction.id,
+            fileUrl: url,
+            fileName: url.split('/').pop() ?? 'receipt',
+          },
+        })
+      }
     }
-  }
+
+    return newTransaction
+  })
 
   revalidatePath('/owner/finance')
   return { success: true, transaction: { ...transaction, amount: Number(transaction.amount) } }
@@ -89,16 +93,15 @@ export const deleteTransaction = async (transactionId: string) => {
   })
 
   for (const receipt of receipts) {
-    try {
-      await deleteBlob(receipt.fileUrl)
-    } catch (error) {
+    await deleteBlob(receipt.fileUrl).catch((error: unknown) => {
       console.error('Failed to delete blob:', receipt.fileUrl, error)
-    }
+    })
   }
 
-  await prisma.transaction.delete({
-    where: { id: transactionId },
-  })
+  await prisma.$transaction([
+    prisma.receipt.deleteMany({ where: { transactionId } }),
+    prisma.transaction.delete({ where: { id: transactionId } }),
+  ])
 
   revalidatePath('/owner/finance')
   return { success: true }

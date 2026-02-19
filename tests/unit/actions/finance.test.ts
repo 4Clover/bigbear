@@ -42,6 +42,13 @@ import {
 describe('Finance Actions', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
+    ;(prismaMock.$transaction as any).mockImplementation(async (fnOrArray: unknown) => {
+      if (typeof fnOrArray === 'function') {
+        return (fnOrArray as (tx: typeof prismaMock) => Promise<unknown>)(prismaMock)
+      }
+      return Promise.all(fnOrArray as Promise<unknown>[])
+    })
   })
 
   // =============================================================================
@@ -380,6 +387,38 @@ describe('Finance Actions', () => {
 
       expect(mockRevalidatePath).toHaveBeenCalledWith('/owner/finance')
     })
+
+    it('should rollback transaction creation if receipt creation fails', async () => {
+      const mockTransaction = {
+        id: 'tx-1',
+        type: 'EXPENSE' as const,
+        categoryId: 'cat-1',
+        amount: mockDecimal(100),
+        date: new Date(),
+        description: 'Rollback test',
+        vendor: 'Test Vendor',
+        bookingId: null,
+        notes: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      }
+
+      prismaMock.transaction.create.mockResolvedValueOnce(mockTransaction)
+      prismaMock.receipt.create.mockRejectedValueOnce(new Error('DB error'))
+
+      await expect(
+        createExpense({
+          categoryId: 'cat-1',
+          amount: 100,
+          date: new Date(),
+          description: 'Rollback test',
+          vendor: 'Test Vendor',
+          receiptUrls: ['https://blob.test/receipt.pdf'],
+        })
+      ).rejects.toThrow('DB error')
+
+      expect(mockRevalidatePath).not.toHaveBeenCalled()
+    })
   })
 
   // =============================================================================
@@ -493,6 +532,7 @@ describe('Finance Actions', () => {
           user: { id: '1', email: 'owner@test.com', name: 'Owner', role: 'OWNER' },
         })
       )
+      prismaMock.receipt.deleteMany.mockResolvedValue({ count: 0 })
     })
 
     it('should delete transaction with associated receipts', async () => {
@@ -619,6 +659,15 @@ describe('Finance Actions', () => {
       await deleteTransaction('tx-1')
 
       expect(mockRevalidatePath).toHaveBeenCalledWith('/owner/finance')
+    })
+
+    it('should rollback if transaction deletion fails in $transaction', async () => {
+      prismaMock.receipt.findMany.mockResolvedValueOnce([])
+      prismaMock.receipt.deleteMany.mockResolvedValueOnce({ count: 0 })
+      prismaMock.transaction.delete.mockRejectedValueOnce(new Error('FK constraint'))
+
+      await expect(deleteTransaction('tx-1')).rejects.toThrow('FK constraint')
+      expect(mockRevalidatePath).not.toHaveBeenCalled()
     })
   })
 
