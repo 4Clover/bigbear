@@ -103,6 +103,7 @@ const setupCheckoutTransactionMocks = () => {
     refundedAt: null,
     cleaningStatus: 'NOT_REQUIRED',
   } as never)
+  prismaMock.addon.findMany.mockResolvedValue([])
   prismaMock.expenseCategory.findFirst.mockResolvedValue({ id: 'income-cat-1' } as never)
   prismaMock.transaction.create.mockResolvedValue({
     id: 'txn-1',
@@ -202,8 +203,7 @@ describe('webhook baseline behavior', () => {
     expect(prismaMock.booking.create).not.toHaveBeenCalled()
   })
 
-  it('logs amount mismatch but still creates booking', async () => {
-    // CURRENT BEHAVIOR: will change in T10 - mismatch is logged but not rejected.
+  it('refunds and skips booking creation on amount mismatch', async () => {
     setupCheckoutTransactionMocks()
     mockConstructEvent.mockReturnValue(
       createCheckoutEvent({
@@ -212,25 +212,19 @@ describe('webhook baseline behavior', () => {
         amountTotalCents: 50000,
       })
     )
-    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const response = await POST(createWebhookRequest())
+    const json = await response.json()
 
-    await POST(createWebhookRequest())
-
-    expect(consoleErrorSpy).toHaveBeenCalledWith(
-      'Price mismatch detected',
-      expect.objectContaining({
-        storedTotal: 625,
-        paidAmount: 500,
-      })
-    )
-    expect(prismaMock.booking.create).toHaveBeenCalledOnce()
+    expect(response.status).toBe(200)
+    expect(json).toEqual({ received: true, refunded: true })
+    expect(mockRefundCreate).toHaveBeenCalledWith({ payment_intent: 'pi_test_1' })
+    expect(prismaMock.booking.create).not.toHaveBeenCalled()
   })
 
-  it('processes addons with per-addon lookup pattern', async () => {
-    // CURRENT BEHAVIOR: N+1 will be fixed in T10.
+  it('processes addons with batched lookup and fallback metadata price', async () => {
     setupCheckoutTransactionMocks()
-    prismaMock.addon.findUnique
-      .mockResolvedValueOnce({
+    prismaMock.addon.findMany.mockResolvedValue([
+      {
         id: 'addon-1',
         name: 'Firewood',
         description: null,
@@ -239,17 +233,8 @@ describe('webhook baseline behavior', () => {
         sortOrder: 1,
         createdAt: new Date(),
         updatedAt: new Date(),
-      } as never)
-      .mockResolvedValueOnce({
-        id: 'addon-2',
-        name: 'Late checkout',
-        description: null,
-        price: 10 as never,
-        isActive: true,
-        sortOrder: 2,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      } as never)
+      },
+    ] as never)
     prismaMock.bookingAddon.create.mockResolvedValue({
       id: 'booking-addon-1',
       bookingId: 'booking-1',
@@ -261,15 +246,25 @@ describe('webhook baseline behavior', () => {
     mockConstructEvent.mockReturnValue(
       createCheckoutEvent({
         addonsJson: JSON.stringify([
-          { id: 'addon-1', quantity: 1 },
-          { id: 'addon-2', quantity: 2 },
+          { id: 'addon-1', quantity: 1, price: 15 },
+          { id: 'addon-2', quantity: 2, price: 10 },
         ]),
       })
     )
 
     await POST(createWebhookRequest())
 
-    expect(prismaMock.addon.findUnique).toHaveBeenCalledTimes(2)
+    expect(prismaMock.addon.findMany).toHaveBeenCalledWith({
+      where: { id: { in: ['addon-1', 'addon-2'] } },
+    })
     expect(prismaMock.bookingAddon.create).toHaveBeenCalledTimes(2)
+    expect(prismaMock.bookingAddon.create).toHaveBeenNthCalledWith(2, {
+      data: {
+        bookingId: 'booking-1',
+        addonId: 'addon-2',
+        quantity: 2,
+        price: 10,
+      },
+    })
   })
 })

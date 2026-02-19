@@ -17,6 +17,7 @@ const OWNER_EMAIL = env().OWNER_EMAIL
 interface AddonMetadata {
   id: string
   quantity: number
+  price?: number
 }
 
 export const POST = async (request: NextRequest): Promise<NextResponse> => {
@@ -41,7 +42,7 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
     return NextResponse.json({ error: 'Webhook signature verification failed' }, { status: 400 })
   }
 
-  console.log('[HARDENING-AUDIT]', {
+  console.log('[WEBHOOK]', {
     event: 'webhook_received',
     eventId: event.id,
     eventType: event.type,
@@ -111,30 +112,34 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
       const storedTotal = parseFloat(totalAmount) + parseFloat(depositAmount)
       const paidAmount = (session.amount_total ?? 0) / 100
       const priceDifference = Math.abs(storedTotal - paidAmount)
+      const paymentIntentId =
+        typeof session.payment_intent === 'string' ? session.payment_intent : null
 
       if (priceDifference > 0.01) {
-        console.error('Price mismatch detected', {
+        console.log('[WEBHOOK]', {
+          event: 'amount_mismatch',
           storedTotal,
           paidAmount,
           difference: priceDifference,
           sessionId: session.id,
         })
-        console.log('[HARDENING-AUDIT]', {
-          event: 'price_mismatch_detected',
-          storedTotal,
-          paidAmount,
-          difference: priceDifference,
-          sessionId: session.id,
-        })
-        // Log but don't reject - the payment already succeeded, so we honor the paid amount
-        // This provides visibility into any pricing race conditions
+
+        if (paymentIntentId) {
+          await stripe.refunds.create({ payment_intent: paymentIntentId })
+        } else {
+          console.log('[WEBHOOK]', {
+            event: 'refund_skipped_missing_payment_intent',
+            sessionId: session.id,
+          })
+        }
+
+        await markEventProcessed()
+        return NextResponse.json({ received: true, refunded: Boolean(paymentIntentId) })
       }
 
       const checkInDate = new Date(checkIn)
       const checkOutDate = new Date(checkOut)
-      const paymentIntentId = session.payment_intent as string
-
-      console.log('[HARDENING-AUDIT]', {
+      console.log('[WEBHOOK]', {
         event: 'booking_creation_initiated',
         guestEmail,
         checkIn,
@@ -143,8 +148,17 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
         addonsTotal: parseFloat(addonsTotal),
         depositAmount: parseFloat(depositAmount),
         totalAmount: parseFloat(totalAmount),
-        paymentIntentId,
+        paymentIntentId: paymentIntentId ?? 'missing',
       })
+
+      if (!paymentIntentId) {
+        console.log('[WEBHOOK]', {
+          event: 'missing_payment_intent',
+          sessionId: session.id,
+        })
+        await markEventProcessed()
+        return NextResponse.json({ received: true, skipped: true })
+      }
 
       // Use transaction for atomic availability check and booking creation
       try {
@@ -205,8 +219,13 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
 
           // Create booking addons
           const addons = JSON.parse(addonsJson ?? '[]') as AddonMetadata[]
+          const addonIds = addons.map((addon) => addon.id)
+          const addonDataList = await tx.addon.findMany({ where: { id: { in: addonIds } } })
+          const addonMap = new Map(addonDataList.map((addon) => [addon.id, addon]))
+
           for (const addon of addons) {
-            const addonData = await tx.addon.findUnique({ where: { id: addon.id } })
+            const addonData = addonMap.get(addon.id)
+
             if (addonData) {
               await tx.bookingAddon.create({
                 data: {
@@ -216,7 +235,19 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
                   price: addonData.price,
                 },
               })
+              continue
             }
+
+            console.log('[WEBHOOK]', { event: 'addon_not_found', addonId: addon.id })
+
+            await tx.bookingAddon.create({
+              data: {
+                bookingId: newBooking.id,
+                addonId: addon.id,
+                quantity: addon.quantity,
+                price: Number(addon.price ?? 0),
+              },
+            })
           }
 
           // Log income transaction
@@ -248,7 +279,7 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
         const booking = transactionResult.booking
 
         // Send notifications (guest confirmation + owner notification)
-        await sendBookingConfirmation(booking)
+        void sendBookingConfirmation(booking).catch(() => {})
         sendPaymentReceived(booking, OWNER_EMAIL).catch(() => {
           // Owner notification failure should not affect webhook response
         })
@@ -256,7 +287,7 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
         if (error instanceof Error && error.message === 'DATES_UNAVAILABLE') {
           // Dates are no longer available - issue refund
           console.error('Double-booking prevented: dates no longer available, issuing refund')
-          console.log('[HARDENING-AUDIT]', {
+          console.log('[WEBHOOK]', {
             event: 'availability_conflict_detected',
             guestEmail,
             checkIn,
