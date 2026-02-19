@@ -136,6 +136,10 @@ model Booking {
   transactions  Transaction[]
   messages      Message[]
   galleryImages GalleryImage[]
+
+  @@index([checkIn, checkOut])
+  @@index([status])
+  @@index([guestId])
 }
 
 model StripeEvent {
@@ -260,6 +264,8 @@ model Transaction {
 
   @@index([date])
   @@index([type])
+  @@index([bookingId])
+  @@index([categoryId])
 }
 
 model Receipt {
@@ -316,6 +322,9 @@ model MaintenanceJob {
   assignedWorker  WorkerProfile?   @relation("AssignedJobs", fields: [assignedWorkerId], references: [id])
   quotes          Quote[]
   workCompletions WorkCompletion[]
+
+  @@index([status])
+  @@index([assignedWorkerId])
 }
 
 model Quote {
