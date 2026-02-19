@@ -109,22 +109,23 @@ export const submitQuote = async (data: {
     throw new Error('You have already submitted a quote for this job')
   }
 
-  const quote = await prisma.quote.create({
-    data: {
-      jobId: validated.data.jobId,
-      workerId: workerProfile.id,
-      amount: validated.data.amount,
-      description: validated.data.description,
-      estimatedDays: validated.data.estimatedDays,
-    },
-  })
+  const [quote] = await prisma.$transaction([
+    prisma.quote.create({
+      data: {
+        jobId: validated.data.jobId,
+        workerId: workerProfile.id,
+        amount: validated.data.amount,
+        description: validated.data.description,
+        estimatedDays: validated.data.estimatedDays,
+      },
+    }),
+    prisma.maintenanceJob.update({
+      where: { id: validated.data.jobId },
+      data: { status: 'QUOTED' },
+    }),
+  ])
 
-  await prisma.maintenanceJob.update({
-    where: { id: validated.data.jobId },
-    data: { status: 'QUOTED' },
-  })
-
-  // Send owner notification (non-blocking)
+  // Send owner notification AFTER transaction commit (non-blocking)
   sendQuoteReceived(job, { ...validated.data, id: quote.id }, OWNER_EMAIL).catch(() => {
     // Notification failure should not affect quote submission
   })
@@ -236,28 +237,29 @@ export const submitWorkCompletion = async (data: {
     throw new Error('Job is not in a state that can be completed')
   }
 
-  const completion = await prisma.workCompletion.create({
-    data: {
-      jobId: validated.data.jobId,
-      workerId: workerProfile.id,
-      description: validated.data.description,
-      images: validated.data.images,
-      hoursWorked: validated.data.hoursWorked,
-      materialsUsed: validated.data.materialsUsed,
-      unexpectedIssues: validated.data.unexpectedIssues,
-      finalAmount: validated.data.finalAmount,
-    },
-  })
+  const [completion] = await prisma.$transaction([
+    prisma.workCompletion.create({
+      data: {
+        jobId: validated.data.jobId,
+        workerId: workerProfile.id,
+        description: validated.data.description,
+        images: validated.data.images,
+        hoursWorked: validated.data.hoursWorked,
+        materialsUsed: validated.data.materialsUsed,
+        unexpectedIssues: validated.data.unexpectedIssues,
+        finalAmount: validated.data.finalAmount,
+      },
+    }),
+    prisma.maintenanceJob.update({
+      where: { id: validated.data.jobId },
+      data: {
+        status: 'COMPLETED',
+        completedAt: new Date(),
+      },
+    }),
+  ])
 
-  await prisma.maintenanceJob.update({
-    where: { id: validated.data.jobId },
-    data: {
-      status: 'COMPLETED',
-      completedAt: new Date(),
-    },
-  })
-
-  // Send owner notification (non-blocking)
+  // Send owner notification AFTER transaction commit (non-blocking)
   sendMaintenanceCompleted(
     job,
     {
