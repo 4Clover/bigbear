@@ -86,11 +86,49 @@ describe('Report Generation Data Paths', () => {
       })
 
       const transactions = [
-        createMockTransaction('tx-1', 'INCOME', 1500, new Date('2024-06-01'), rentalCategory, 'June rental'),
-        createMockTransaction('tx-2', 'INCOME', 1500, new Date('2024-06-15'), rentalCategory, 'Mid-month rental'),
-        createMockTransaction('tx-3', 'EXPENSE', 200, new Date('2024-06-05'), utilitiesCategory, 'Electric', 'Power Co'),
-        createMockTransaction('tx-4', 'EXPENSE', 150, new Date('2024-06-10'), utilitiesCategory, 'Water', 'Water Dept'),
-        createMockTransaction('tx-5', 'EXPENSE', 500, new Date('2024-06-20'), repairsCategory, 'Plumbing repair', 'Local Plumber'),
+        createMockTransaction(
+          'tx-1',
+          'INCOME',
+          1500,
+          new Date('2024-06-01'),
+          rentalCategory,
+          'June rental'
+        ),
+        createMockTransaction(
+          'tx-2',
+          'INCOME',
+          1500,
+          new Date('2024-06-15'),
+          rentalCategory,
+          'Mid-month rental'
+        ),
+        createMockTransaction(
+          'tx-3',
+          'EXPENSE',
+          200,
+          new Date('2024-06-05'),
+          utilitiesCategory,
+          'Electric',
+          'Power Co'
+        ),
+        createMockTransaction(
+          'tx-4',
+          'EXPENSE',
+          150,
+          new Date('2024-06-10'),
+          utilitiesCategory,
+          'Water',
+          'Water Dept'
+        ),
+        createMockTransaction(
+          'tx-5',
+          'EXPENSE',
+          500,
+          new Date('2024-06-20'),
+          repairsCategory,
+          'Plumbing repair',
+          'Local Plumber'
+        ),
       ]
 
       prismaMock.transaction.findMany.mockResolvedValueOnce(transactions as never)
@@ -132,8 +170,17 @@ describe('Report Generation Data Paths', () => {
   describe('Annual Report with Schedule E Integration', () => {
     it('should correctly group expenses by IRS Schedule E lines', async () => {
       const categories = {
-        rental: createMockCategory({ id: 'rental', name: 'Rental Income', scheduleELine: 'Line 3', isTaxDeductible: false }),
-        advertising: createMockCategory({ id: 'adv', name: 'Advertising', scheduleELine: 'Line 5' }),
+        rental: createMockCategory({
+          id: 'rental',
+          name: 'Rental Income',
+          scheduleELine: 'Line 3',
+          isTaxDeductible: false,
+        }),
+        advertising: createMockCategory({
+          id: 'adv',
+          name: 'Advertising',
+          scheduleELine: 'Line 5',
+        }),
         cleaning: createMockCategory({ id: 'clean', name: 'Cleaning', scheduleELine: 'Line 7' }),
         insurance: createMockCategory({ id: 'ins', name: 'Insurance', scheduleELine: 'Line 9' }),
         utilities: createMockCategory({ id: 'util', name: 'Utilities', scheduleELine: 'Line 17' }),
@@ -142,47 +189,84 @@ describe('Report Generation Data Paths', () => {
 
       const transactions = [
         createMockTransaction('tx-1', 'INCOME', 24000, new Date('2024-01-01'), categories.rental),
-        createMockTransaction('tx-2', 'EXPENSE', 500, new Date('2024-03-01'), categories.advertising),
+        createMockTransaction(
+          'tx-2',
+          'EXPENSE',
+          500,
+          new Date('2024-03-01'),
+          categories.advertising
+        ),
         createMockTransaction('tx-3', 'EXPENSE', 1200, new Date('2024-02-01'), categories.cleaning),
-        createMockTransaction('tx-4', 'EXPENSE', 2400, new Date('2024-01-15'), categories.insurance),
-        createMockTransaction('tx-5', 'EXPENSE', 3600, new Date('2024-06-01'), categories.utilities),
+        createMockTransaction(
+          'tx-4',
+          'EXPENSE',
+          2400,
+          new Date('2024-01-15'),
+          categories.insurance
+        ),
+        createMockTransaction(
+          'tx-5',
+          'EXPENSE',
+          3600,
+          new Date('2024-06-01'),
+          categories.utilities
+        ),
         createMockTransaction('tx-6', 'EXPENSE', 600, new Date('2024-04-01'), categories.hoa),
       ]
 
-      // Main annual query
-      prismaMock.transaction.findMany.mockResolvedValueOnce(transactions as never)
-      // Monthly breakdown queries
-      for (let i = 0; i < 12; i++) {
-        prismaMock.transaction.findMany.mockResolvedValueOnce([])
-      }
+      // generateAnnualReport: aggregate(income) + aggregate(expense) + findMany(deductible) in Promise.all, then findMany(monthly)
+      const deductibleExpenses = transactions.filter(
+        (t) => t.type === 'EXPENSE' && t.category.isTaxDeductible
+      )
+      const totalIncome = transactions
+        .filter((t) => t.type === 'INCOME')
+        .reduce((sum, t) => sum + Number(t.amount), 0)
+      const totalExpense = transactions
+        .filter((t) => t.type === 'EXPENSE')
+        .reduce((sum, t) => sum + Number(t.amount), 0)
+
+      prismaMock.transaction.aggregate
+        .mockResolvedValueOnce({ _sum: { amount: mockDecimal(totalIncome) } } as never)
+        .mockResolvedValueOnce({ _sum: { amount: mockDecimal(totalExpense) } } as never)
+      prismaMock.transaction.findMany
+        .mockResolvedValueOnce(deductibleExpenses as never)
+        .mockResolvedValueOnce([] as never)
 
       const report = await generateAnnualReport(2024)
 
-      // Verify Schedule E groupings
       expect(report.scheduleE['Line 5']?.amount).toBe(500)
       expect(report.scheduleE['Line 7']?.amount).toBe(1200)
       expect(report.scheduleE['Line 9']?.amount).toBe(2400)
       expect(report.scheduleE['Line 17']?.amount).toBe(3600)
       expect(report.scheduleE['Line 19']?.amount).toBe(600)
 
-      // Rental income should NOT be in scheduleE (not tax deductible expense)
       expect(report.scheduleE['Line 3']).toBeUndefined()
     })
 
     it('should provide accurate 12-month breakdown', async () => {
-      const category = createMockCategory({ id: 'rental', name: 'Rental Income', scheduleELine: 'Line 3', isTaxDeductible: false })
+      const category = createMockCategory({
+        id: 'rental',
+        name: 'Rental Income',
+        scheduleELine: 'Line 3',
+        isTaxDeductible: false,
+      })
 
       // Monthly incomes - simulate varying income across months
-      const monthlyIncomes = [1000, 1200, 1500, 1800, 2000, 2500, 2500, 2000, 1800, 1500, 1200, 1000]
+      const monthlyIncomes = [
+        1000, 1200, 1500, 1800, 2000, 2500, 2500, 2000, 1800, 1500, 1200, 1000,
+      ]
 
-      // Main query returns all transactions (empty for categories/receipts)
-      prismaMock.transaction.findMany.mockResolvedValueOnce([])
-
-      // Single query for monthly breakdown returns all year's transactions
+      const totalIncome = monthlyIncomes.reduce((sum, v) => sum + v, 0)
       const allTransactions = monthlyIncomes.map((income, month) =>
         createMockTransaction(`tx-${month}`, 'INCOME', income, new Date(2024, month, 15), category)
       )
-      prismaMock.transaction.findMany.mockResolvedValueOnce(allTransactions as never)
+
+      prismaMock.transaction.aggregate
+        .mockResolvedValueOnce({ _sum: { amount: mockDecimal(totalIncome) } } as never)
+        .mockResolvedValueOnce({ _sum: { amount: mockDecimal(0) } } as never)
+      prismaMock.transaction.findMany
+        .mockResolvedValueOnce([] as never)
+        .mockResolvedValueOnce(allTransactions as never)
 
       const report = await generateAnnualReport(2024)
 
@@ -202,13 +286,29 @@ describe('Report Generation Data Paths', () => {
         utilities: createMockCategory({ id: 'util', name: 'Utilities', scheduleELine: 'Line 17' }),
         repairs: createMockCategory({ id: 'repair', name: 'Repairs', scheduleELine: 'Line 14' }),
         insurance: createMockCategory({ id: 'ins', name: 'Insurance', scheduleELine: 'Line 9' }),
-        cleaning: createMockCategory({ id: 'clean', name: 'Cleaning & Maintenance', scheduleELine: 'Line 7' }),
+        cleaning: createMockCategory({
+          id: 'clean',
+          name: 'Cleaning & Maintenance',
+          scheduleELine: 'Line 7',
+        }),
       }
 
       const transactions = [
-        createMockTransaction('tx-1', 'EXPENSE', 1000, new Date('2024-01-01'), categories.utilities),
+        createMockTransaction(
+          'tx-1',
+          'EXPENSE',
+          1000,
+          new Date('2024-01-01'),
+          categories.utilities
+        ),
         createMockTransaction('tx-2', 'EXPENSE', 500, new Date('2024-02-01'), categories.repairs),
-        createMockTransaction('tx-3', 'EXPENSE', 1200, new Date('2024-03-01'), categories.insurance),
+        createMockTransaction(
+          'tx-3',
+          'EXPENSE',
+          1200,
+          new Date('2024-03-01'),
+          categories.insurance
+        ),
         createMockTransaction('tx-4', 'EXPENSE', 800, new Date('2024-04-01'), categories.cleaning),
       ]
 
@@ -260,11 +360,31 @@ describe('Report Generation Data Paths', () => {
 
   describe('CSV Export Data Integrity', () => {
     it('should export all required fields in correct format', async () => {
-      const category = createMockCategory({ id: 'util', name: 'Utilities', scheduleELine: 'Line 17' })
+      const category = createMockCategory({
+        id: 'util',
+        name: 'Utilities',
+        scheduleELine: 'Line 17',
+      })
 
       const transactions = [
-        createMockTransaction('tx-1', 'EXPENSE', 150.75, new Date('2024-06-15'), category, 'Electric bill payment', 'City Power'),
-        createMockTransaction('tx-2', 'INCOME', 2000.00, new Date('2024-06-01'), { ...category, name: 'Rental Income' }, 'June rent', 'Guest'),
+        createMockTransaction(
+          'tx-1',
+          'EXPENSE',
+          150.75,
+          new Date('2024-06-15'),
+          category,
+          'Electric bill payment',
+          'City Power'
+        ),
+        createMockTransaction(
+          'tx-2',
+          'INCOME',
+          2000.0,
+          new Date('2024-06-01'),
+          { ...category, name: 'Rental Income' },
+          'June rent',
+          'Guest'
+        ),
       ]
 
       prismaMock.transaction.findMany.mockResolvedValueOnce(transactions as never)
@@ -287,10 +407,22 @@ describe('Report Generation Data Paths', () => {
     })
 
     it('should properly escape CSV special characters', async () => {
-      const category = createMockCategory({ id: 'cat', name: 'Category, With Comma', scheduleELine: 'Line 17' })
+      const category = createMockCategory({
+        id: 'cat',
+        name: 'Category, With Comma',
+        scheduleELine: 'Line 17',
+      })
 
       const transactions = [
-        createMockTransaction('tx-1', 'EXPENSE', 100, new Date('2024-06-15'), category, 'Description with "quotes"', 'Vendor'),
+        createMockTransaction(
+          'tx-1',
+          'EXPENSE',
+          100,
+          new Date('2024-06-15'),
+          category,
+          'Description with "quotes"',
+          'Vendor'
+        ),
       ]
 
       prismaMock.transaction.findMany.mockResolvedValueOnce(transactions as never)
@@ -312,7 +444,9 @@ describe('Report Generation Data Paths', () => {
       )
 
       prismaMock.transaction.findMany.mockResolvedValue([])
-      prismaMock.transaction.aggregate.mockResolvedValue({ _sum: { amount: mockDecimal(0) } } as never)
+      prismaMock.transaction.aggregate.mockResolvedValue({
+        _sum: { amount: mockDecimal(0) },
+      } as never)
 
       await expect(generateMonthlyReport(2024, 1)).resolves.toBeDefined()
       await expect(generateAnnualReport(2024)).resolves.toBeDefined()
@@ -328,7 +462,9 @@ describe('Report Generation Data Paths', () => {
       )
 
       prismaMock.transaction.findMany.mockResolvedValue([])
-      prismaMock.transaction.aggregate.mockResolvedValue({ _sum: { amount: mockDecimal(0) } } as never)
+      prismaMock.transaction.aggregate.mockResolvedValue({
+        _sum: { amount: mockDecimal(0) },
+      } as never)
 
       await expect(generateMonthlyReport(2024, 1)).resolves.toBeDefined()
       await expect(generateAnnualReport(2024)).resolves.toBeDefined()

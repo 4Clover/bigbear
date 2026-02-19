@@ -16,17 +16,19 @@ import {
 // Prisma client extension now converts Decimals to plain numbers
 const mockDecimal = (value: number) => value
 
-const createMockTransaction = (overrides: Partial<{
-  id: string
-  type: 'INCOME' | 'EXPENSE'
-  amount: number
-  date: Date
-  description: string
-  vendor: string
-  categoryId: string
-  category: { id: string; name: string; scheduleELine: string | null; isTaxDeductible: boolean }
-  receipts: unknown[]
-}> = {}) => ({
+const createMockTransaction = (
+  overrides: Partial<{
+    id: string
+    type: 'INCOME' | 'EXPENSE'
+    amount: number
+    date: Date
+    description: string
+    vendor: string
+    categoryId: string
+    category: { id: string; name: string; scheduleELine: string | null; isTaxDeductible: boolean }
+    receipts: unknown[]
+  }> = {}
+) => ({
   id: overrides.id ?? 'tx-1',
   type: overrides.type ?? 'EXPENSE',
   amount: mockDecimal(overrides.amount ?? 100),
@@ -68,19 +70,34 @@ describe('Report Actions', () => {
           id: 'tx-1',
           type: 'INCOME',
           amount: 1000,
-          category: { id: 'cat-rent', name: 'Rental Income', scheduleELine: 'Line 3', isTaxDeductible: false },
+          category: {
+            id: 'cat-rent',
+            name: 'Rental Income',
+            scheduleELine: 'Line 3',
+            isTaxDeductible: false,
+          },
         }),
         createMockTransaction({
           id: 'tx-2',
           type: 'EXPENSE',
           amount: 200,
-          category: { id: 'cat-util', name: 'Utilities', scheduleELine: 'Line 17', isTaxDeductible: true },
+          category: {
+            id: 'cat-util',
+            name: 'Utilities',
+            scheduleELine: 'Line 17',
+            isTaxDeductible: true,
+          },
         }),
         createMockTransaction({
           id: 'tx-3',
           type: 'EXPENSE',
           amount: 150,
-          category: { id: 'cat-util', name: 'Utilities', scheduleELine: 'Line 17', isTaxDeductible: true },
+          category: {
+            id: 'cat-util',
+            name: 'Utilities',
+            scheduleELine: 'Line 17',
+            isTaxDeductible: true,
+          },
         }),
       ]
 
@@ -123,30 +140,45 @@ describe('Report Actions', () => {
 
   describe('generateAnnualReport', () => {
     it('should generate annual report with monthly breakdown', async () => {
-      const transactions = [
-        createMockTransaction({
-          type: 'INCOME',
-          amount: 2000,
-          date: new Date('2024-01-15'),
-          category: { id: 'cat-rent', name: 'Rental Income', scheduleELine: 'Line 3', isTaxDeductible: false },
-        }),
-        createMockTransaction({
-          type: 'EXPENSE',
-          amount: 500,
-          date: new Date('2024-01-20'),
-          category: { id: 'cat-util', name: 'Utilities', scheduleELine: 'Line 17', isTaxDeductible: true },
-        }),
-      ]
+      const incomeTransaction = createMockTransaction({
+        type: 'INCOME',
+        amount: 2000,
+        date: new Date('2024-01-15'),
+        category: {
+          id: 'cat-rent',
+          name: 'Rental Income',
+          scheduleELine: 'Line 3',
+          isTaxDeductible: false,
+        },
+      })
+      const expenseTransaction = createMockTransaction({
+        type: 'EXPENSE',
+        amount: 500,
+        date: new Date('2024-01-20'),
+        category: {
+          id: 'cat-util',
+          name: 'Utilities',
+          scheduleELine: 'Line 17',
+          isTaxDeductible: true,
+        },
+      })
 
-      // Main annual query
-      prismaMock.transaction.findMany.mockResolvedValueOnce(transactions as never)
+      // Aggregate: income sum, expense sum
+      prismaMock.transaction.aggregate.mockResolvedValueOnce({
+        _sum: { amount: mockDecimal(2000) },
+      } as never)
+      prismaMock.transaction.aggregate.mockResolvedValueOnce({
+        _sum: { amount: mockDecimal(500) },
+      } as never)
 
-      // Monthly breakdown queries (12 months)
-      for (let i = 0; i < 12; i++) {
-        prismaMock.transaction.findMany.mockResolvedValueOnce(
-          i === 0 ? transactions as never : []
-        )
-      }
+      // Deductible expenses for scheduleE (only the deductible expense)
+      prismaMock.transaction.findMany.mockResolvedValueOnce([expenseTransaction] as never)
+
+      // Monthly breakdown (all transactions for the year)
+      prismaMock.transaction.findMany.mockResolvedValueOnce([
+        incomeTransaction,
+        expenseTransaction,
+      ] as never)
 
       const result = await generateAnnualReport(2024)
 
@@ -163,19 +195,38 @@ describe('Report Actions', () => {
         createMockTransaction({
           type: 'EXPENSE',
           amount: 300,
-          category: { id: 'cat-util', name: 'Utilities', scheduleELine: 'Line 17', isTaxDeductible: true },
+          category: {
+            id: 'cat-util',
+            name: 'Utilities',
+            scheduleELine: 'Line 17',
+            isTaxDeductible: true,
+          },
         }),
         createMockTransaction({
           type: 'EXPENSE',
           amount: 200,
-          category: { id: 'cat-repairs', name: 'Repairs', scheduleELine: 'Line 14', isTaxDeductible: true },
+          category: {
+            id: 'cat-repairs',
+            name: 'Repairs',
+            scheduleELine: 'Line 14',
+            isTaxDeductible: true,
+          },
         }),
       ]
 
+      // Aggregate: income sum (none), expense sum
+      prismaMock.transaction.aggregate.mockResolvedValueOnce({
+        _sum: { amount: null },
+      } as never)
+      prismaMock.transaction.aggregate.mockResolvedValueOnce({
+        _sum: { amount: mockDecimal(500) },
+      } as never)
+
+      // Deductible expenses (all are deductible)
       prismaMock.transaction.findMany.mockResolvedValueOnce(transactions as never)
-      for (let i = 0; i < 12; i++) {
-        prismaMock.transaction.findMany.mockResolvedValueOnce([])
-      }
+
+      // Monthly breakdown
+      prismaMock.transaction.findMany.mockResolvedValueOnce(transactions as never)
 
       const result = await generateAnnualReport(2024)
 
@@ -190,17 +241,32 @@ describe('Report Actions', () => {
         createMockTransaction({
           type: 'EXPENSE',
           amount: 400,
-          category: { id: 'cat-util', name: 'Utilities', scheduleELine: 'Line 17', isTaxDeductible: true },
+          category: {
+            id: 'cat-util',
+            name: 'Utilities',
+            scheduleELine: 'Line 17',
+            isTaxDeductible: true,
+          },
         }),
         createMockTransaction({
           type: 'EXPENSE',
           amount: 300,
-          category: { id: 'cat-repairs', name: 'Repairs', scheduleELine: 'Line 14', isTaxDeductible: true },
+          category: {
+            id: 'cat-repairs',
+            name: 'Repairs',
+            scheduleELine: 'Line 14',
+            isTaxDeductible: true,
+          },
         }),
         createMockTransaction({
           type: 'EXPENSE',
           amount: 100,
-          category: { id: 'cat-hoa', name: 'HOA Fees', scheduleELine: 'Line 19', isTaxDeductible: true },
+          category: {
+            id: 'cat-hoa',
+            name: 'HOA Fees',
+            scheduleELine: 'Line 19',
+            isTaxDeductible: true,
+          },
         }),
       ]
 
@@ -227,10 +293,20 @@ describe('Report Actions', () => {
           category: { id: 'cat-1', name: 'HOA', scheduleELine: 'Line 19', isTaxDeductible: true },
         }),
         createMockTransaction({
-          category: { id: 'cat-2', name: 'Advertising', scheduleELine: 'Line 5', isTaxDeductible: true },
+          category: {
+            id: 'cat-2',
+            name: 'Advertising',
+            scheduleELine: 'Line 5',
+            isTaxDeductible: true,
+          },
         }),
         createMockTransaction({
-          category: { id: 'cat-3', name: 'Repairs', scheduleELine: 'Line 14', isTaxDeductible: true },
+          category: {
+            id: 'cat-3',
+            name: 'Repairs',
+            scheduleELine: 'Line 14',
+            isTaxDeductible: true,
+          },
         }),
       ]
 
@@ -256,7 +332,12 @@ describe('Report Actions', () => {
           amount: 100,
           description: 'Electric bill',
           vendor: 'Power Company',
-          category: { id: 'cat-util', name: 'Utilities', scheduleELine: 'Line 17', isTaxDeductible: true },
+          category: {
+            id: 'cat-util',
+            name: 'Utilities',
+            scheduleELine: 'Line 17',
+            isTaxDeductible: true,
+          },
         }),
       ]
 

@@ -556,7 +556,21 @@ describe('Finance Workflow Data Paths', () => {
         },
       ]
 
-      prismaMock.transaction.findMany.mockResolvedValueOnce(transactions as never)
+      // getFinanceSummary now uses aggregate + groupBy + count + expenseCategory.findMany
+      prismaMock.transaction.aggregate
+        .mockResolvedValueOnce({ _sum: { amount: mockDecimal(2600) } } as never) // income
+        .mockResolvedValueOnce({ _sum: { amount: mockDecimal(500) } } as never) // expense
+      ;(prismaMock.transaction.groupBy as any).mockResolvedValueOnce([
+        { categoryId: 'cat-rental', type: 'INCOME', _sum: { amount: mockDecimal(2600) } },
+        { categoryId: 'cat-utilities', type: 'EXPENSE', _sum: { amount: mockDecimal(200) } },
+        { categoryId: 'cat-repairs', type: 'EXPENSE', _sum: { amount: mockDecimal(300) } },
+      ] as never)
+      prismaMock.transaction.count.mockResolvedValueOnce(6 as never)
+      prismaMock.expenseCategory.findMany.mockResolvedValueOnce([
+        rentalCategory,
+        utilitiesCategory,
+        repairsCategory,
+      ] as never)
 
       const summary = await getFinanceSummary(2024, 6)
 
@@ -638,7 +652,18 @@ describe('Finance Workflow Data Paths', () => {
         },
       ]
 
-      prismaMock.transaction.findMany.mockResolvedValueOnce(transactions as never)
+      prismaMock.transaction.aggregate
+        .mockResolvedValueOnce({ _sum: { amount: mockDecimal(500) } } as never)
+        .mockResolvedValueOnce({ _sum: { amount: mockDecimal(2500) } } as never)
+      ;(prismaMock.transaction.groupBy as any).mockResolvedValueOnce([
+        { categoryId: 'cat-rental', type: 'INCOME', _sum: { amount: mockDecimal(500) } },
+        { categoryId: 'cat-repairs', type: 'EXPENSE', _sum: { amount: mockDecimal(2500) } },
+      ] as never)
+      prismaMock.transaction.count.mockResolvedValueOnce(2 as never)
+      prismaMock.expenseCategory.findMany.mockResolvedValueOnce([
+        rentalCategory,
+        repairsCategory,
+      ] as never)
 
       const summary = await getFinanceSummary(2024, 2)
 

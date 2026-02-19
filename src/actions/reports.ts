@@ -18,7 +18,10 @@ export interface MonthlyReportData {
   income: number
   expenses: number
   netIncome: number
-  byCategory: Record<string, { income: number; expenses: number; transactions: TransactionWithCategory[] }>
+  byCategory: Record<
+    string,
+    { income: number; expenses: number; transactions: TransactionWithCategory[] }
+  >
   transactions: TransactionWithCategory[]
 }
 
@@ -49,7 +52,10 @@ export interface ScheduleEReportData {
 // Report Generation Functions
 // ============================================================================
 
-export const generateMonthlyReport = async (year: number, month: number): Promise<MonthlyReportData> => {
+export const generateMonthlyReport = async (
+  year: number,
+  month: number
+): Promise<MonthlyReportData> => {
   await assertOwnerOrAccountant()
 
   const start = startOfMonth(new Date(year, month - 1))
@@ -61,6 +67,7 @@ export const generateMonthlyReport = async (year: number, month: number): Promis
     },
     include: { category: true, receipts: true },
     orderBy: { date: 'asc' },
+    take: 1000,
   })
 
   const income = transactions
@@ -100,30 +107,40 @@ export const generateAnnualReport = async (year: number): Promise<AnnualReportDa
   const start = startOfYear(new Date(year, 0))
   const end = endOfYear(new Date(year, 0))
 
-  const transactions = await prisma.transaction.findMany({
-    where: {
-      date: { gte: start, lte: end },
-    },
-    include: { category: true },
-  })
+  const dateFilter = { gte: start, lte: end }
 
-  // Group by Schedule E line items
-  const scheduleE = transactions
-    .filter((t) => t.type === 'EXPENSE' && t.category.isTaxDeductible)
-    .reduce<Record<string, { label: string; amount: number }>>((acc, t) => {
+  const [incomeAgg, expenseAgg, deductibleExpenses] = await Promise.all([
+    prisma.transaction.aggregate({
+      where: { date: dateFilter, type: 'INCOME' },
+      _sum: { amount: true },
+    }),
+    prisma.transaction.aggregate({
+      where: { date: dateFilter, type: 'EXPENSE' },
+      _sum: { amount: true },
+    }),
+    prisma.transaction.findMany({
+      where: {
+        date: dateFilter,
+        type: 'EXPENSE',
+        category: { isTaxDeductible: true },
+      },
+      include: { category: true },
+      take: 5000,
+    }),
+  ])
+
+  const totalIncome = Number(incomeAgg._sum.amount) || 0
+  const totalExpenses = Number(expenseAgg._sum.amount) || 0
+
+  const scheduleE = deductibleExpenses.reduce<Record<string, { label: string; amount: number }>>(
+    (acc, t) => {
       const line = t.category.scheduleELine ?? 'Other'
       acc[line] ??= { label: t.category.name, amount: 0 }
       acc[line].amount += Number(t.amount)
       return acc
-    }, {})
-
-  const totalIncome = transactions
-    .filter((t) => t.type === 'INCOME')
-    .reduce((sum, t) => sum + Number(t.amount), 0)
-
-  const totalExpenses = transactions
-    .filter((t) => t.type === 'EXPENSE')
-    .reduce((sum, t) => sum + Number(t.amount), 0)
+    },
+    {}
+  )
 
   const monthlyBreakdown = await getMonthlyBreakdown(year)
 
@@ -145,6 +162,7 @@ const getMonthlyBreakdown = async (
 
   const transactions = await prisma.transaction.findMany({
     where: { date: { gte: start, lte: end } },
+    take: 5000,
   })
 
   const months = Array.from({ length: 12 }, (_, i) => {
@@ -184,6 +202,7 @@ export const generateScheduleEReport = async (year: number): Promise<ScheduleERe
       type: 'EXPENSE',
     },
     include: { category: true, receipts: true },
+    take: 5000,
   })
 
   // Group by Schedule E line
@@ -240,6 +259,7 @@ export const exportReportToCsv = async (year: number, month?: number): Promise<s
     },
     include: { category: true },
     orderBy: { date: 'asc' },
+    take: 10000,
   })
 
   const headers = ['Date', 'Type', 'Category', 'Description', 'Vendor', 'Amount']

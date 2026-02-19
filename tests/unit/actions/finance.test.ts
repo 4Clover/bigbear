@@ -978,47 +978,32 @@ describe('Finance Actions', () => {
   // getFinanceSummary TESTS
   // =============================================================================
   describe('getFinanceSummary', () => {
-    it('should calculate income, expenses, and net income for full year', async () => {
-      const mockCategory = {
-        id: 'cat-1',
-        name: 'Utilities',
-        description: null,
-        scheduleELine: null,
-        isTaxDeductible: true,
-        sortOrder: 0,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      }
+    // Prisma groupBy has deeply nested conditional types that vitest-mock-extended cannot resolve
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
+    const groupByMock = (prismaMock.transaction as any).groupBy as ReturnType<typeof vi.fn>
 
-      prismaMock.transaction.findMany.mockResolvedValueOnce([
-        {
-          id: 'tx-1',
-          type: 'INCOME' as const,
-          categoryId: 'cat-1',
-          amount: mockDecimal(1000),
-          date: new Date('2024-06-15'),
-          description: null,
-          vendor: null,
-          bookingId: null,
-          notes: null,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          category: mockCategory,
-        },
-        {
-          id: 'tx-2',
-          type: 'EXPENSE' as const,
-          categoryId: 'cat-1',
-          amount: mockDecimal(300),
-          date: new Date('2024-06-20'),
-          description: null,
-          vendor: null,
-          bookingId: null,
-          notes: null,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          category: mockCategory,
-        },
+    const mockSummaryAggregates = (
+      income: number | null,
+      expense: number | null,
+      count: number
+    ) => {
+      prismaMock.transaction.aggregate.mockResolvedValueOnce({
+        _sum: { amount: income },
+      } as never)
+      prismaMock.transaction.aggregate.mockResolvedValueOnce({
+        _sum: { amount: expense },
+      } as never)
+      prismaMock.transaction.count.mockResolvedValueOnce(count)
+    }
+
+    it('should calculate income, expenses, and net income for full year', async () => {
+      mockSummaryAggregates(1000, 300, 2)
+      groupByMock.mockResolvedValueOnce([
+        { categoryId: 'cat-1', type: 'INCOME', _sum: { amount: 1000 } },
+        { categoryId: 'cat-1', type: 'EXPENSE', _sum: { amount: 300 } },
+      ])
+      prismaMock.expenseCategory.findMany.mockResolvedValueOnce([
+        { id: 'cat-1', name: 'Utilities' },
       ] as never)
 
       const result = await getFinanceSummary(2024)
@@ -1030,32 +1015,12 @@ describe('Finance Actions', () => {
     })
 
     it('should calculate summary for specific month', async () => {
-      const mockCategory = {
-        id: 'cat-1',
-        name: 'Rental Income',
-        description: null,
-        scheduleELine: null,
-        isTaxDeductible: false,
-        sortOrder: 0,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      }
-
-      prismaMock.transaction.findMany.mockResolvedValueOnce([
-        {
-          id: 'tx-1',
-          type: 'INCOME' as const,
-          categoryId: 'cat-1',
-          amount: mockDecimal(500),
-          date: new Date('2024-06-15'),
-          description: null,
-          vendor: null,
-          bookingId: null,
-          notes: null,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          category: mockCategory,
-        },
+      mockSummaryAggregates(500, null, 1)
+      groupByMock.mockResolvedValueOnce([
+        { categoryId: 'cat-1', type: 'INCOME', _sum: { amount: 500 } },
+      ])
+      prismaMock.expenseCategory.findMany.mockResolvedValueOnce([
+        { id: 'cat-1', name: 'Rental Income' },
       ] as never)
 
       const result = await getFinanceSummary(2024, 6)
@@ -1067,71 +1032,14 @@ describe('Finance Actions', () => {
     })
 
     it('should calculate byCategory breakdown', async () => {
-      const utilitiesCategory = {
-        id: 'cat-1',
-        name: 'Utilities',
-        description: null,
-        scheduleELine: '16',
-        isTaxDeductible: true,
-        sortOrder: 1,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      }
-
-      const rentalCategory = {
-        id: 'cat-2',
-        name: 'Rental Income',
-        description: null,
-        scheduleELine: '3',
-        isTaxDeductible: false,
-        sortOrder: 0,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      }
-
-      prismaMock.transaction.findMany.mockResolvedValueOnce([
-        {
-          id: 'tx-1',
-          type: 'INCOME' as const,
-          categoryId: 'cat-2',
-          amount: mockDecimal(2000),
-          date: new Date('2024-06-01'),
-          description: null,
-          vendor: null,
-          bookingId: null,
-          notes: null,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          category: rentalCategory,
-        },
-        {
-          id: 'tx-2',
-          type: 'EXPENSE' as const,
-          categoryId: 'cat-1',
-          amount: mockDecimal(150),
-          date: new Date('2024-06-15'),
-          description: 'Electric bill',
-          vendor: 'Power Co',
-          bookingId: null,
-          notes: null,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          category: utilitiesCategory,
-        },
-        {
-          id: 'tx-3',
-          type: 'EXPENSE' as const,
-          categoryId: 'cat-1',
-          amount: mockDecimal(50),
-          date: new Date('2024-06-20'),
-          description: 'Water bill',
-          vendor: 'Water Co',
-          bookingId: null,
-          notes: null,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          category: utilitiesCategory,
-        },
+      mockSummaryAggregates(2000, 200, 3)
+      groupByMock.mockResolvedValueOnce([
+        { categoryId: 'cat-2', type: 'INCOME', _sum: { amount: 2000 } },
+        { categoryId: 'cat-1', type: 'EXPENSE', _sum: { amount: 200 } },
+      ])
+      prismaMock.expenseCategory.findMany.mockResolvedValueOnce([
+        { id: 'cat-1', name: 'Utilities' },
+        { id: 'cat-2', name: 'Rental Income' },
       ] as never)
 
       const result = await getFinanceSummary(2024)
@@ -1146,7 +1054,8 @@ describe('Finance Actions', () => {
     })
 
     it('should handle empty transactions', async () => {
-      prismaMock.transaction.findMany.mockResolvedValueOnce([])
+      mockSummaryAggregates(null, null, 0)
+      groupByMock.mockResolvedValueOnce([])
 
       const result = await getFinanceSummary(2024)
 
@@ -1158,34 +1067,44 @@ describe('Finance Actions', () => {
     })
 
     it('should use correct date range for yearly query', async () => {
-      prismaMock.transaction.findMany.mockResolvedValueOnce([])
+      mockSummaryAggregates(null, null, 0)
+      groupByMock.mockResolvedValueOnce([])
 
       await getFinanceSummary(2024)
 
-      expect(prismaMock.transaction.findMany).toHaveBeenCalledWith({
-        where: {
-          date: {
-            gte: new Date(2024, 0, 1),
-            lte: new Date(2024, 11, 31),
-          },
-        },
-        include: { category: true },
+      const expectedDateFilter = {
+        gte: new Date(2024, 0, 1),
+        lte: new Date(2024, 11, 31),
+      }
+
+      expect(prismaMock.transaction.aggregate).toHaveBeenCalledWith({
+        where: { date: expectedDateFilter, type: 'INCOME' },
+        _sum: { amount: true },
+      })
+      expect(prismaMock.transaction.aggregate).toHaveBeenCalledWith({
+        where: { date: expectedDateFilter, type: 'EXPENSE' },
+        _sum: { amount: true },
       })
     })
 
     it('should use correct date range for monthly query', async () => {
-      prismaMock.transaction.findMany.mockResolvedValueOnce([])
+      mockSummaryAggregates(null, null, 0)
+      groupByMock.mockResolvedValueOnce([])
 
       await getFinanceSummary(2024, 6)
 
-      expect(prismaMock.transaction.findMany).toHaveBeenCalledWith({
-        where: {
-          date: {
-            gte: new Date(2024, 5, 1), // June 1st (0-indexed)
-            lte: new Date(2024, 6, 0), // Last day of June
-          },
-        },
-        include: { category: true },
+      const expectedDateFilter = {
+        gte: new Date(2024, 5, 1),
+        lte: new Date(2024, 6, 0),
+      }
+
+      expect(prismaMock.transaction.aggregate).toHaveBeenCalledWith({
+        where: { date: expectedDateFilter, type: 'INCOME' },
+        _sum: { amount: true },
+      })
+      expect(prismaMock.transaction.aggregate).toHaveBeenCalledWith({
+        where: { date: expectedDateFilter, type: 'EXPENSE' },
+        _sum: { amount: true },
       })
     })
   })
@@ -1225,6 +1144,7 @@ describe('Finance Actions', () => {
       expect(result).toHaveLength(2)
       expect(prismaMock.expenseCategory.findMany).toHaveBeenCalledWith({
         orderBy: { sortOrder: 'asc' },
+        take: 100,
       })
     })
 
