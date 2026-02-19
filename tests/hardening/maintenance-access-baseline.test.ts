@@ -127,8 +127,8 @@ describe('maintenance access baseline behavior', () => {
     expect(result.data).toHaveLength(2)
   })
 
-  it('lets worker submit quote for any OPEN job', async () => {
-    // BUG: no ownership check, will be fixed in T5.
+  it('rejects worker quote for job assigned to another worker', async () => {
+    // FIXED (T5): ownership check now blocks quoting jobs assigned to other workers
     mockAssertWorker.mockResolvedValue(
       createMockSession({
         user: {
@@ -150,38 +150,14 @@ describe('maintenance access baseline behavior', () => {
       status: 'OPEN',
       assignedWorkerId: 'worker-profile-2',
     } as never)
-    prismaMock.quote.findFirst.mockResolvedValue(null)
-    prismaMock.quote.create.mockResolvedValue({
-      id: 'quote-1',
-      jobId: 'job-owned-by-other-worker',
-      workerId: 'worker-profile-1',
-      amount: 750 as never,
-      description: 'Can do this job',
-      estimatedDays: 2,
-      isApproved: false,
-      submittedAt: new Date(),
-      expiresAt: null,
-    })
-    prismaMock.maintenanceJob.update.mockResolvedValue({
-      id: 'job-owned-by-other-worker',
-      status: 'QUOTED',
-    } as never)
 
-    const result = await submitQuote({
-      jobId: 'job-owned-by-other-worker',
-      amount: 750,
-      description: 'Can do this job',
-      estimatedDays: 2,
-    })
-
-    expect(result.success).toBe(true)
-    expect(prismaMock.quote.create).toHaveBeenCalledWith(
-      expect.objectContaining({
-        data: expect.objectContaining({
-          jobId: 'job-owned-by-other-worker',
-          workerId: 'worker-profile-1',
-        }),
+    await expect(
+      submitQuote({
+        jobId: 'job-owned-by-other-worker',
+        amount: 750,
+        description: 'Can do this job',
+        estimatedDays: 2,
       })
-    )
+    ).rejects.toThrow('Job already assigned to another worker')
   })
 })
