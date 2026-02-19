@@ -256,7 +256,11 @@ export const submitWorkCompletion = async (data: {
   // Send owner notification (non-blocking)
   sendMaintenanceCompleted(
     job,
-    { id: completion.id, finalAmount: validated.data.finalAmount, description: validated.data.description },
+    {
+      id: completion.id,
+      finalAmount: validated.data.finalAmount,
+      description: validated.data.description,
+    },
     OWNER_EMAIL
   ).catch(() => {
     // Notification failure should not affect work completion
@@ -339,7 +343,15 @@ export const getMaintenanceJobs = async (
   },
   pagination: PaginationParams = {}
 ) => {
-  await assertOwnerOrWorker()
+  const session = await assertOwnerOrWorker()
+
+  console.log('[HARDENING-AUDIT]', {
+    event: 'get_maintenance_jobs',
+    userId: session.user.id,
+    userRole: session.user.role,
+    filters,
+    pagination,
+  })
 
   const { page = 1, pageSize = DEFAULT_PAGE_SIZE } = pagination
   const where: Record<string, unknown> = {}
@@ -384,7 +396,14 @@ export const getMaintenanceJobs = async (
 }
 
 export const getMaintenanceJob = async (jobId: string) => {
-  await assertOwnerOrWorker()
+  const session = await assertOwnerOrWorker()
+
+  console.log('[HARDENING-AUDIT]', {
+    event: 'get_maintenance_job',
+    jobId,
+    userId: session.user.id,
+    userRole: session.user.role,
+  })
 
   return prisma.maintenanceJob.findUnique({
     where: { id: jobId },

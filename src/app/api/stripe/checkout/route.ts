@@ -12,12 +12,8 @@ const AddonSchema = z.object({
 })
 
 const CheckoutRequestSchema = z.object({
-  checkIn: z
-    .string()
-    .refine((date) => !isNaN(Date.parse(date)), 'Invalid check-in date format'),
-  checkOut: z
-    .string()
-    .refine((date) => !isNaN(Date.parse(date)), 'Invalid check-out date format'),
+  checkIn: z.string().refine((date) => !isNaN(Date.parse(date)), 'Invalid check-in date format'),
+  checkOut: z.string().refine((date) => !isNaN(Date.parse(date)), 'Invalid check-out date format'),
   guestName: z.string().min(1, 'Guest name is required').max(100, 'Guest name too long'),
   guestEmail: z.email('Invalid email address'),
   guestPhone: z
@@ -117,10 +113,7 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
     ])
 
     if (!isDateRangeAvailable(checkInDate, checkOutDate, existingBookings, blockedDates)) {
-      return NextResponse.json(
-        { error: 'Selected dates are no longer available' },
-        { status: 409 }
-      )
+      return NextResponse.json({ error: 'Selected dates are no longer available' }, { status: 409 })
     }
 
     const basePrice = Number(pricing.baseNightlyRate) * nights + Number(pricing.cleaningFee)
@@ -139,6 +132,18 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
 
     const totalAmount = basePrice + addonsTotal
     const depositAmount = totalAmount * (pricing.depositPercentage / 100)
+
+    console.log('[HARDENING-AUDIT]', {
+      event: 'checkout_session_creation',
+      guestEmail,
+      nights,
+      basePrice,
+      addonsTotal,
+      depositAmount,
+      totalAmount,
+      finalAmount: totalAmount + depositAmount,
+      addonCount: addons.length,
+    })
 
     // Create Stripe Checkout Session
     const session = await stripe.checkout.sessions.create({

@@ -41,6 +41,13 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
     return NextResponse.json({ error: 'Webhook signature verification failed' }, { status: 400 })
   }
 
+  console.log('[HARDENING-AUDIT]', {
+    event: 'webhook_received',
+    eventId: event.id,
+    eventType: event.type,
+    timestamp: new Date().toISOString(),
+  })
+
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object
     const metadata = session.metadata
@@ -91,6 +98,13 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
         difference: priceDifference,
         sessionId: session.id,
       })
+      console.log('[HARDENING-AUDIT]', {
+        event: 'price_mismatch_detected',
+        storedTotal,
+        paidAmount,
+        difference: priceDifference,
+        sessionId: session.id,
+      })
       // Log but don't reject - the payment already succeeded, so we honor the paid amount
       // This provides visibility into any pricing race conditions
     }
@@ -98,6 +112,18 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
     const checkInDate = new Date(checkIn)
     const checkOutDate = new Date(checkOut)
     const paymentIntentId = session.payment_intent as string
+
+    console.log('[HARDENING-AUDIT]', {
+      event: 'booking_creation_initiated',
+      guestEmail,
+      checkIn,
+      checkOut,
+      basePrice: parseFloat(basePrice),
+      addonsTotal: parseFloat(addonsTotal),
+      depositAmount: parseFloat(depositAmount),
+      totalAmount: parseFloat(totalAmount),
+      paymentIntentId,
+    })
 
     // Use transaction for atomic availability check and booking creation
     try {
@@ -195,6 +221,14 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
       if (error instanceof Error && error.message === 'DATES_UNAVAILABLE') {
         // Dates are no longer available - issue refund
         console.error('Double-booking prevented: dates no longer available, issuing refund')
+        console.log('[HARDENING-AUDIT]', {
+          event: 'availability_conflict_detected',
+          guestEmail,
+          checkIn,
+          checkOut,
+          paymentIntentId,
+          action: 'refund_issued',
+        })
 
         await stripe.refunds.create({ payment_intent: paymentIntentId })
 
