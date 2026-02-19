@@ -27,37 +27,47 @@ export const GET = async (request: Request): Promise<NextResponse> => {
 
       const events = await ical.async.fromURL(sync.icalUrl)
 
-      let eventsProcessed = 0
+      const eventsToSync: {
+        startDate: Date
+        endDate: Date
+        reason: string
+        source: string
+        externalId: string
+      }[] = []
 
-      // Process events and create blocked dates for external bookings
       for (const [key, event] of Object.entries(events)) {
         if (event.type !== 'VEVENT') continue
 
         const startDate = new Date(event.start)
         const endDate = new Date(event.end)
 
-        // Skip invalid dates
         if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) continue
 
-        // Create or update blocked date using externalId for tracking
-        const externalId = `sync-${sync.id}-${key}`
-
-        await prisma.blockedDate.upsert({
-          where: { externalId },
-          update: {
-            startDate,
-            endDate,
-          },
-          create: {
-            startDate,
-            endDate,
-            reason: `Imported from ${sync.name}`,
-            source: sync.name,
-            externalId,
-          },
+        eventsToSync.push({
+          startDate,
+          endDate,
+          reason: `Imported from ${sync.name}`,
+          source: sync.name,
+          externalId: `sync-${sync.id}-${key}`,
         })
+      }
 
-        eventsProcessed++
+      // Batch create new events (skips existing by externalId unique constraint)
+      await prisma.blockedDate.createMany({
+        data: eventsToSync,
+        skipDuplicates: true,
+      })
+
+      // Batch update existing events in a single transaction
+      if (eventsToSync.length > 0) {
+        await prisma.$transaction(
+          eventsToSync.map((evt) =>
+            prisma.blockedDate.updateMany({
+              where: { externalId: evt.externalId },
+              data: { startDate: evt.startDate, endDate: evt.endDate },
+            })
+          )
+        )
       }
 
       await prisma.calendarSync.update({
@@ -72,7 +82,7 @@ export const GET = async (request: Request): Promise<NextResponse> => {
       results.push({
         id: sync.id,
         name: sync.name,
-        status: `success - ${eventsProcessed} events`,
+        status: `success - ${eventsToSync.length} events`,
       })
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error)

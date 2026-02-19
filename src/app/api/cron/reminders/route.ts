@@ -44,12 +44,33 @@ export const GET = async (request: Request): Promise<NextResponse> => {
     },
   })
 
+  // Batch dedup: fetch all previously sent reminders in 3 queries instead of N per booking
+  const [sentCheckinRecipients, sentCheckoutRecipients, sentGalleryRecipients] = await Promise.all([
+    prisma.notificationLog.findMany({
+      where: { event: 'GUEST_CHECKIN_REMINDER' },
+      select: { recipient: true },
+    }),
+    prisma.notificationLog.findMany({
+      where: { event: 'GUEST_CHECKOUT_REMINDER' },
+      select: { recipient: true },
+    }),
+    prisma.notificationLog.findMany({
+      where: { event: 'GALLERY_INVITE' },
+      select: { recipient: true },
+    }),
+  ])
+
+  const sentCheckinReminders = new Set(sentCheckinRecipients.map((log) => log.recipient))
+  const sentCheckoutReminders = new Set(sentCheckoutRecipients.map((log) => log.recipient))
+  const sentGalleryInvites = new Set(sentGalleryRecipients.map((log) => log.recipient))
+
   let checkinSent = 0
   let checkoutSent = 0
   const errors: string[] = []
 
-  // Send check-in reminders
+  // Send check-in reminders (dedup by recipient)
   for (const booking of checkinBookings) {
+    if (sentCheckinReminders.has(booking.guestEmail)) continue
     try {
       await sendCheckinReminder(booking)
       checkinSent++
@@ -60,8 +81,9 @@ export const GET = async (request: Request): Promise<NextResponse> => {
     }
   }
 
-  // Send check-out reminders
+  // Send check-out reminders (dedup by recipient)
   for (const booking of checkoutBookings) {
+    if (sentCheckoutReminders.has(booking.guestEmail)) continue
     try {
       await sendCheckoutReminder(booking)
       checkoutSent++
@@ -90,13 +112,7 @@ export const GET = async (request: Request): Promise<NextResponse> => {
     galleryInvitesFound = completedBookings.length
 
     for (const booking of completedBookings) {
-      const alreadySent = await prisma.notificationLog.findFirst({
-        where: {
-          event: 'GALLERY_INVITE',
-          recipient: booking.guestEmail,
-        },
-      })
-      if (alreadySent) continue
+      if (sentGalleryInvites.has(booking.guestEmail)) continue
 
       try {
         await sendGalleryUploadInvite(booking)
