@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from 'next/server'
 import { headers } from 'next/headers'
+import { Prisma } from '@prisma/client'
 import { stripe } from '@/lib/stripe'
 import { prisma } from '@/lib/prisma'
 import { env } from '@/lib/env'
@@ -284,6 +285,24 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
           // Owner notification failure should not affect webhook response
         })
       } catch (error) {
+        if (
+          error instanceof Prisma.PrismaClientKnownRequestError &&
+          error.code === 'P2010' &&
+          error.message.includes('booking_no_date_overlap')
+        ) {
+          console.log('[WEBHOOK]', {
+            event: 'booking_overlap_rejected',
+            sessionId: session.id,
+            paymentIntentId,
+          })
+
+          await markEventProcessed()
+          return NextResponse.json(
+            { received: true, error: 'Booking dates overlap' },
+            { status: 200 }
+          )
+        }
+
         if (error instanceof Error && error.message === 'DATES_UNAVAILABLE') {
           // Dates are no longer available - issue refund
           console.error('Double-booking prevented: dates no longer available, issuing refund')
