@@ -45,8 +45,8 @@ describe('maintenance access baseline behavior', () => {
     mockSendQuoteReceived.mockResolvedValue(undefined)
   })
 
-  it('returns all jobs for WORKER in getMaintenanceJobs', async () => {
-    // BUG: worker sees all jobs, will be fixed in T4.
+  it('returns only assigned jobs for WORKER in getMaintenanceJobs', async () => {
+    // FIXED (T4): worker now sees only jobs assigned to them.
     mockAssertOwnerOrWorker.mockResolvedValue(
       createMockSession({
         user: {
@@ -58,25 +58,29 @@ describe('maintenance access baseline behavior', () => {
       })
     )
 
+    prismaMock.workerProfile.findUnique.mockResolvedValue({
+      id: 'worker-profile-1',
+      userId: 'worker-user-1',
+    } as never)
+
     prismaMock.maintenanceJob.findMany.mockResolvedValue([
       { id: 'job-1', title: 'Worker-owned', assignedWorkerId: 'worker-profile-1' },
-      { id: 'job-2', title: 'Someone else job', assignedWorkerId: 'worker-profile-2' },
     ] as never)
-    prismaMock.maintenanceJob.count.mockResolvedValue(2)
+    prismaMock.maintenanceJob.count.mockResolvedValue(1)
 
     const result = await getMaintenanceJobs()
 
-    expect(result.data).toHaveLength(2)
-    expect(result.data.map((job) => job.id)).toEqual(['job-1', 'job-2'])
+    expect(result.data).toHaveLength(1)
+    expect(result.data.map((job) => job.id)).toEqual(['job-1'])
     expect(prismaMock.maintenanceJob.findMany).toHaveBeenCalledWith(
       expect.objectContaining({
-        where: {},
+        where: { assignedWorkerId: 'worker-profile-1' },
       })
     )
   })
 
-  it('returns job by id for WORKER without ownership checks in getMaintenanceJob', async () => {
-    // BUG: unfiltered worker access in getMaintenanceJob.
+  it('throws for WORKER accessing unassigned job in getMaintenanceJob', async () => {
+    // FIXED (T4): worker now throws when accessing jobs not assigned to them.
     mockAssertOwnerOrWorker.mockResolvedValue(
       createMockSession({
         user: {
@@ -87,6 +91,11 @@ describe('maintenance access baseline behavior', () => {
         },
       })
     )
+
+    prismaMock.workerProfile.findUnique.mockResolvedValue({
+      id: 'worker-profile-1',
+      userId: 'worker-user-1',
+    } as never)
 
     prismaMock.maintenanceJob.findUnique.mockResolvedValue({
       id: 'job-foreign',
@@ -94,12 +103,7 @@ describe('maintenance access baseline behavior', () => {
       assignedWorkerId: 'worker-profile-2',
     } as never)
 
-    const result = await getMaintenanceJob('job-foreign')
-
-    expect(result?.id).toBe('job-foreign')
-    expect(prismaMock.maintenanceJob.findUnique).toHaveBeenCalledWith(
-      expect.objectContaining({ where: { id: 'job-foreign' } })
-    )
+    await expect(getMaintenanceJob('job-foreign')).rejects.toThrow('Unauthorized')
   })
 
   it('keeps owner full visibility for maintenance jobs', async () => {
