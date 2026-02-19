@@ -6,7 +6,7 @@ import { deleteBlob } from '@/lib/blob'
 import { revalidatePath } from 'next/cache'
 import { assertOwner } from '@/lib/auth/guards'
 import { GALLERY_CATEGORIES, verifyGalleryUploadToken } from '@/lib/gallery-token'
-import type { Prisma } from '@prisma/client'
+import { ImageUploader } from '@prisma/client'
 
 const createGalleryImageSchema = z.object({
   url: z.url(),
@@ -75,15 +75,15 @@ export const getPublicGalleryImages = async () => {
     prisma.galleryImage.findMany({
       where: {
         isPublished: true,
-        uploadedBy: 'GUEST',
-      } as unknown as Prisma.GalleryImageWhereInput,
+        uploadedBy: ImageUploader.GUEST,
+      },
       orderBy: [{ createdAt: 'desc' }],
     }),
     prisma.galleryImage.findMany({
       where: {
         isPublished: true,
-        uploadedBy: 'OWNER',
-      } as unknown as Prisma.GalleryImageWhereInput,
+        uploadedBy: ImageUploader.OWNER,
+      },
       orderBy: [{ sortOrder: 'asc' }, { createdAt: 'desc' }],
     }),
   ])
@@ -109,9 +109,9 @@ export const createGalleryImage = async (data: {
   await prisma.galleryImage.create({
     data: {
       ...validated.data,
-      uploadedBy: 'OWNER',
+      uploadedBy: ImageUploader.OWNER,
       isPublished: true,
-    } as unknown as Prisma.GalleryImageCreateInput,
+    },
   })
 
   revalidateGalleryPaths()
@@ -138,7 +138,7 @@ export const createGuestGalleryImage = async (data: {
   }
 
   const existingPhotoCount = await prisma.galleryImage.count({
-    where: { bookingId: tokenPayload.bookingId } as unknown as Prisma.GalleryImageWhereInput,
+    where: { bookingId: tokenPayload.bookingId },
   })
 
   if (existingPhotoCount >= 3) {
@@ -149,10 +149,10 @@ export const createGuestGalleryImage = async (data: {
     data: {
       url: validated.data.url,
       caption: validated.data.caption,
-      uploadedBy: 'GUEST',
+      uploadedBy: ImageUploader.GUEST,
       isPublished: false,
       bookingId: tokenPayload.bookingId,
-    } as unknown as Prisma.GalleryImageCreateInput,
+    },
   })
 
   revalidatePath('/owner/gallery')

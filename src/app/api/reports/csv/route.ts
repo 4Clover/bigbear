@@ -2,11 +2,12 @@ import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { exportReportToCsv } from '@/actions/reports'
+import { apiUnauthorized } from '@/lib/api-response'
 
 export const GET = async (request: NextRequest): Promise<NextResponse> => {
   const session = await auth()
   if (!session?.user || !['OWNER', 'ACCOUNTANT'].includes(session.user.role)) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    return apiUnauthorized()
   }
 
   try {
