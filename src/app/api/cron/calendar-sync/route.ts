@@ -25,7 +25,23 @@ export const GET = async (request: Request): Promise<NextResponse> => {
       // Validate URL to prevent SSRF attacks
       validateExternalUrl(sync.icalUrl)
 
-      const events = await ical.async.fromURL(sync.icalUrl)
+      // Fetch with 30-second timeout
+      const controller = new AbortController()
+      const fetchTimeout = setTimeout(() => controller.abort(), 30_000)
+      let icalText: string
+      try {
+        const response = await fetch(sync.icalUrl, { signal: controller.signal })
+        icalText = await response.text()
+      } catch (err) {
+        if (err instanceof Error && err.name === 'AbortError') {
+          console.log('[CALENDAR-SYNC]', { event: 'fetch_timeout', url: sync.icalUrl })
+        }
+        throw err
+      } finally {
+        clearTimeout(fetchTimeout)
+      }
+
+      const events = await ical.async.parseICS(icalText)
 
       const eventsToSync: {
         startDate: Date
