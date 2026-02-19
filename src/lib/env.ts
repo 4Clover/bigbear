@@ -11,6 +11,7 @@ const envSchema = z
 
     // Auth
     AUTH_SECRET: z.string().min(1, 'AUTH_SECRET is required'),
+    AUTH_URL: z.string().url().optional(),
     AUTH_RESEND_KEY: z.string().min(1, 'AUTH_RESEND_KEY is required'),
     RESEND_FROM_EMAIL: z.email({ message: 'RESEND_FROM_EMAIL must be a valid email' }),
 

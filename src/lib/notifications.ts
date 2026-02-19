@@ -5,10 +5,11 @@ import { escapeHtml } from './security'
 import { signGalleryUploadToken } from './gallery-token'
 import type { Booking, NotificationEvent } from '@prisma/client'
 import { format } from 'date-fns'
+import { env } from './env'
 
-const resend = new Resend(process.env.AUTH_RESEND_KEY)
+const resend = new Resend(env().AUTH_RESEND_KEY)
 
-const fromEmail = process.env.RESEND_FROM_EMAIL ?? 'noreply@example.com'
+const fromEmail = env().RESEND_FROM_EMAIL ?? 'noreply@example.com'
 
 // Lazy-loaded Twilio client
 let twilioClient: ReturnType<typeof Twilio> | null = null
@@ -16,8 +17,8 @@ let twilioClient: ReturnType<typeof Twilio> | null = null
 const getTwilioClient = () => {
   if (twilioClient) return twilioClient
 
-  const accountSid = process.env.TWILIO_ACCOUNT_SID
-  const authToken = process.env.TWILIO_AUTH_TOKEN
+  const accountSid = env().TWILIO_ACCOUNT_SID
+  const authToken = env().TWILIO_AUTH_TOKEN
 
   if (!accountSid || !authToken) return null
 
@@ -31,7 +32,7 @@ export const sendSms = async (to: string, body: string): Promise<boolean> => {
   const client = getTwilioClient()
   if (!client) return false
 
-  const fromPhone = process.env.TWILIO_PHONE_NUMBER
+  const fromPhone = env().TWILIO_PHONE_NUMBER
   if (!fromPhone) return false
 
   try {
@@ -417,7 +418,7 @@ export const sendBookingRequest = async (booking: Booking, ownerEmail: string) =
           <li><strong>Guests:</strong> ${booking.numberOfGuests}</li>
           <li><strong>Amount:</strong> $${Number(booking.totalAmount).toFixed(2)}</li>
         </ul>
-        <p><a href="${process.env.AUTH_URL ?? 'http://localhost:3000'}/owner/bookings/${booking.id}">Review Booking</a></p>
+        <p><a href="${env().AUTH_URL ?? 'http://localhost:3000'}/owner/bookings/${booking.id}">Review Booking</a></p>
       `,
     })
 
@@ -543,7 +544,7 @@ export const sendQuoteReceived = async (job: JobInfo, quote: QuoteInfo, ownerEma
           <li><strong>Estimated Time:</strong> ${quote.estimatedDays ?? 'Not specified'} days</li>
           <li><strong>Description:</strong> ${safeDescription}</li>
         </ul>
-        <p><a href="${process.env.AUTH_URL ?? 'http://localhost:3000'}/owner/maintenance/${job.id}">Review Quote</a></p>
+        <p><a href="${env().AUTH_URL ?? 'http://localhost:3000'}/owner/maintenance/${job.id}">Review Quote</a></p>
       `,
     })
 
@@ -595,7 +596,7 @@ export const sendMaintenanceCompleted = async (
           <li><strong>Final Amount:</strong> $${completion.finalAmount ? completion.finalAmount.toFixed(2) : 'Not specified'}</li>
           <li><strong>Completion Notes:</strong> ${safeDescription}</li>
         </ul>
-        <p><a href="${process.env.AUTH_URL ?? 'http://localhost:3000'}/owner/maintenance/${job.id}">View Details</a></p>
+        <p><a href="${env().AUTH_URL ?? 'http://localhost:3000'}/owner/maintenance/${job.id}">View Details</a></p>
       `,
     })
 
@@ -641,7 +642,7 @@ export const sendGalleryUploadInvite = async (booking: {
   })
 
   const safeGuestName = escapeHtml(booking.guestName)
-  const uploadUrl = `${process.env.AUTH_URL ?? 'http://localhost:3000'}/gallery/upload?token=${token}`
+  const uploadUrl = `${env().AUTH_URL ?? 'http://localhost:3000'}/gallery/upload?token=${token}`
 
   if (preference.emailEnabled) {
     try {

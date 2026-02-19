@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma'
 import { checkRateLimit, getClientIdentifier, RATE_LIMITS } from '@/lib/rate-limit'
 import { isDateRangeAvailable } from '@/lib/utils/calendar'
 import { z } from 'zod'
+import { env } from '@/lib/env'
 
 // Zod schema for checkout request validation
 const AddonSchema = z.object({
@@ -176,8 +177,8 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
         pricingTimestamp: Date.now().toString(),
       },
       customer_email: guestEmail,
-      success_url: `${process.env.NEXT_PUBLIC_APP_URL ?? ''}/booking/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL ?? ''}/book?cancelled=true`,
+      success_url: `${env().NEXT_PUBLIC_APP_URL ?? ''}/booking/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${env().NEXT_PUBLIC_APP_URL ?? ''}/book?cancelled=true`,
     })
 
     return NextResponse.json({ url: session.url })

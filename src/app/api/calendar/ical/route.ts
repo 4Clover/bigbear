@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { formatICalDate } from '@/lib/utils/calendar'
+import { env } from '@/lib/env'
 
 export const dynamic = 'force-dynamic'
 
@@ -16,7 +17,7 @@ export const GET = async (request: Request): Promise<NextResponse> => {
   const authHeader = request.headers.get('authorization')
   const bearerToken = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null
 
-  const icalSecret = process.env.ICAL_SECRET
+  const icalSecret = env().ICAL_SECRET
   if (!icalSecret) {
     console.error('ICAL_SECRET is not configured')
     return NextResponse.json({ error: 'Calendar export not configured' }, { status: 500 })

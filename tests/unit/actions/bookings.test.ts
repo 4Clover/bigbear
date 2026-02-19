@@ -7,6 +7,7 @@ import type { NotificationPreference } from '@prisma/client'
 
 // Mock modules
 vi.mock('@/lib/prisma', () => import('../../__mocks__/prisma'))
+vi.mock('@/lib/env', () => import('../../__mocks__/env'))
 vi.mock('@/lib/auth/guards', () => ({
   assertOwner: vi.fn().mockResolvedValue(undefined),
 }))

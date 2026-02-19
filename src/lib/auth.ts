@@ -4,6 +4,7 @@ import Resend from 'next-auth/providers/resend'
 import { PrismaAdapter } from '@auth/prisma-adapter'
 import type { Adapter } from 'next-auth/adapters'
 import { prisma } from './prisma'
+import { env } from './env'
 import type { UserRole } from '@prisma/client'
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
@@ -13,8 +14,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       allowDangerousEmailAccountLinking: true,
     }),
     Resend({
-      apiKey: process.env.AUTH_RESEND_KEY,
-      from: process.env.RESEND_FROM_EMAIL,
+      apiKey: env().AUTH_RESEND_KEY,
+      from: env().RESEND_FROM_EMAIL,
     }),
   ],
   pages: {
@@ -44,7 +45,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   events: {
     async createUser({ user }) {
       const adminEmails =
-        process.env.AUTHORIZED_ADMIN_EMAILS?.split(',')
+        env()
+          .AUTHORIZED_ADMIN_EMAILS?.split(',')
           .map((email) => email.trim().toLowerCase())
           .filter(Boolean) ?? []
 

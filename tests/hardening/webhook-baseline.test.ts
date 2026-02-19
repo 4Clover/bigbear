@@ -8,6 +8,7 @@ vi.mock('@/lib/prisma', () => ({
 vi.mock('@/lib/env', () => ({
   env: () => ({
     OWNER_EMAIL: 'owner@test.com',
+    STRIPE_WEBHOOK_SECRET: 'whsec_test_123',
   }),
 }))
 

@@ -2,13 +2,14 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { validateExternalUrl } from '@/lib/security'
 import ical from 'node-ical'
+import { env } from '@/lib/env'
 
 export const dynamic = 'force-dynamic'
 
 export const GET = async (request: Request): Promise<NextResponse> => {
   // Verify cron secret for security
   const authHeader = request.headers.get('authorization')
-  const cronSecret = process.env.CRON_SECRET
+  const cronSecret = env().CRON_SECRET
   if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }

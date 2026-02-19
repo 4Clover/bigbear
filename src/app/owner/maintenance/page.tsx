@@ -60,7 +60,7 @@ const OwnerMaintenancePage = () => {
   const loadJobs = useCallback(async (page = 1) => {
     try {
       const data = await getMaintenanceJobs(undefined, { page })
-      setPaginatedJobs(data)
+      setPaginatedJobs(data as PaginatedJobs)
     } catch (error) {
       console.error('Failed to load jobs:', error)
     }
@@ -119,7 +119,9 @@ const OwnerMaintenancePage = () => {
         <div className="flex gap-2">
           {activeTab === 'jobs' && (
             <button
-              onClick={() => { setActiveModal({ type: 'createJob' }); }}
+              onClick={() => {
+                setActiveModal({ type: 'createJob' })
+              }}
               className="flex items-center gap-2 px-4 py-2 bg-forest-600 text-white font-medium rounded-lg hover:bg-forest-700 transition-colors"
             >
               <Plus className="w-5 h-5" />
@@ -128,7 +130,9 @@ const OwnerMaintenancePage = () => {
           )}
           {activeTab === 'workers' && (
             <button
-              onClick={() => { setActiveModal({ type: 'inviteWorker' }); }}
+              onClick={() => {
+                setActiveModal({ type: 'inviteWorker' })
+              }}
               className="flex items-center gap-2 px-4 py-2 bg-forest-600 text-white font-medium rounded-lg hover:bg-forest-700 transition-colors"
             >
               <UserPlus className="w-5 h-5" />
@@ -141,7 +145,9 @@ const OwnerMaintenancePage = () => {
       {/* Tabs */}
       <div className="flex gap-4 mb-6 border-b border-border">
         <button
-          onClick={() => { setActiveTab('jobs'); }}
+          onClick={() => {
+            setActiveTab('jobs')
+          }}
           className={`pb-3 px-1 text-sm font-medium border-b-2 transition-colors ${
             activeTab === 'jobs'
               ? 'border-forest-600 text-forest-600 dark:text-forest-400'
@@ -151,7 +157,9 @@ const OwnerMaintenancePage = () => {
           Jobs ({paginatedJobs.total})
         </button>
         <button
-          onClick={() => { setActiveTab('workers'); }}
+          onClick={() => {
+            setActiveTab('workers')
+          }}
           className={`pb-3 px-1 text-sm font-medium border-b-2 transition-colors ${
             activeTab === 'workers'
               ? 'border-forest-600 text-forest-600 dark:text-forest-400'
@@ -171,14 +179,25 @@ const OwnerMaintenancePage = () => {
           total={paginatedJobs.total}
           pageSize={paginatedJobs.pageSize}
           onPageChange={handlePageChange}
-          onViewQuotes={(job) => { setActiveModal({ type: 'quotes', job }); }}
-          onViewCompletion={(job) => { setActiveModal({ type: 'completion', job }); }}
-          onCancel={(jobId) => { void handleCancelJob(jobId); }}
+          onViewQuotes={(job) => {
+            setActiveModal({ type: 'quotes', job })
+          }}
+          onViewCompletion={(job) => {
+            setActiveModal({ type: 'completion', job })
+          }}
+          onCancel={(jobId) => {
+            void handleCancelJob(jobId)
+          }}
         />
       )}
 
       {activeTab === 'workers' && (
-        <WorkerList workers={workers} onRefresh={() => { void loadWorkers(); }} />
+        <WorkerList
+          workers={workers}
+          onRefresh={() => {
+            void loadWorkers()
+          }}
+        />
       )}
 
       {/* Modals */}
@@ -187,16 +206,24 @@ const OwnerMaintenancePage = () => {
           <div className="w-full max-w-lg">
             {activeModal.type === 'createJob' && (
               <JobForm
-                onSuccess={() => { void handleModalSuccess(); }}
-                onCancel={() => { setActiveModal(null); }}
+                onSuccess={() => {
+                  void handleModalSuccess()
+                }}
+                onCancel={() => {
+                  setActiveModal(null)
+                }}
               />
             )}
             {activeModal.type === 'quotes' && (
               <QuoteReview
                 jobTitle={activeModal.job.title}
                 quotes={activeModal.job.quotes}
-                onSuccess={() => { void handleModalSuccess(); }}
-                onCancel={() => { setActiveModal(null); }}
+                onSuccess={() => {
+                  void handleModalSuccess()
+                }}
+                onCancel={() => {
+                  setActiveModal(null)
+                }}
               />
             )}
             {activeModal.type === 'completion' && (
@@ -204,14 +231,22 @@ const OwnerMaintenancePage = () => {
                 jobTitle={activeModal.job.title}
                 completions={activeModal.job.workCompletions}
                 jobStatus={activeModal.job.status}
-                onSuccess={() => { void handleModalSuccess(); }}
-                onCancel={() => { setActiveModal(null); }}
+                onSuccess={() => {
+                  void handleModalSuccess()
+                }}
+                onCancel={() => {
+                  setActiveModal(null)
+                }}
               />
             )}
             {activeModal.type === 'inviteWorker' && (
               <InviteWorkerForm
-                onSuccess={() => { void handleModalSuccess(); }}
-                onCancel={() => { setActiveModal(null); }}
+                onSuccess={() => {
+                  void handleModalSuccess()
+                }}
+                onCancel={() => {
+                  setActiveModal(null)
+                }}
               />
             )}
           </div>
