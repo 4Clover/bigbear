@@ -4,7 +4,6 @@ import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 import { assertOwner, assertWorker, assertOwnerOrWorker } from '@/lib/auth/guards'
-import { auth } from '@/lib/auth'
 import { sendQuoteReceived, sendMaintenanceCompleted } from '@/lib/notifications'
 import type { JobPriority, JobStatus } from '@prisma/client'
 import type { PaginationParams } from '@/types/pagination'
@@ -95,6 +94,11 @@ export const submitQuote = async (data: {
 
   if (job?.status !== 'OPEN') {
     throw new Error('Job not available for quoting')
+  }
+
+  // If job is already assigned to another worker, reject
+  if (job.assignedWorkerId && job.assignedWorkerId !== workerProfile.id) {
+    throw new Error('Job already assigned to another worker')
   }
 
   const existingQuote = await prisma.quote.findFirst({
@@ -344,6 +348,7 @@ export const getMaintenanceJobs = async (
   pagination: PaginationParams = {}
 ) => {
   const session = await assertOwnerOrWorker()
+  const isOwner = session.user.role === 'OWNER'
 
   console.log('[HARDENING-AUDIT]', {
     event: 'get_maintenance_jobs',
@@ -363,6 +368,94 @@ export const getMaintenanceJobs = async (
       { title: { contains: filters.search, mode: 'insensitive' } },
       { description: { contains: filters.search, mode: 'insensitive' } },
     ]
+  }
+
+  if (!isOwner) {
+    const workerProfile = await prisma.workerProfile.findUnique({
+      where: { userId: session.user.id },
+    })
+
+    if (!workerProfile) {
+      throw new Error('Worker profile not found')
+    }
+
+    where.assignedWorkerId = workerProfile.id
+
+    const [jobs, total] = await Promise.all([
+      prisma.maintenanceJob.findMany({
+        where,
+        include: {
+          quotes: {
+            include: {
+              worker: {
+                select: {
+                  id: true,
+                  businessName: true,
+                  services: true,
+                  isActive: true,
+                  trustworthiness: true,
+                  notes: true,
+                  user: {
+                    select: {
+                      id: true,
+                      name: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+          workCompletions: {
+            include: {
+              worker: {
+                select: {
+                  id: true,
+                  businessName: true,
+                  services: true,
+                  isActive: true,
+                  trustworthiness: true,
+                  notes: true,
+                  user: {
+                    select: {
+                      id: true,
+                      name: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+          assignedWorker: {
+            select: {
+              id: true,
+              businessName: true,
+              services: true,
+              isActive: true,
+              trustworthiness: true,
+              notes: true,
+              user: {
+                select: {
+                  id: true,
+                  name: true,
+                },
+              },
+            },
+          },
+        },
+        orderBy: [{ priority: 'desc' }, { createdAt: 'desc' }],
+        take: pageSize,
+        skip: (page - 1) * pageSize,
+      }),
+      prisma.maintenanceJob.count({ where }),
+    ])
+
+    return {
+      data: jobs,
+      total,
+      page,
+      pageSize,
+      totalPages: Math.ceil(total / pageSize),
+    }
   }
 
   const [jobs, total] = await Promise.all([
@@ -397,6 +490,7 @@ export const getMaintenanceJobs = async (
 
 export const getMaintenanceJob = async (jobId: string) => {
   const session = await assertOwnerOrWorker()
+  const isOwner = session.user.role === 'OWNER'
 
   console.log('[HARDENING-AUDIT]', {
     event: 'get_maintenance_job',
@@ -405,20 +499,102 @@ export const getMaintenanceJob = async (jobId: string) => {
     userRole: session.user.role,
   })
 
-  return prisma.maintenanceJob.findUnique({
+  if (isOwner) {
+    return prisma.maintenanceJob.findUnique({
+      where: { id: jobId },
+      include: {
+        quotes: {
+          include: { worker: { include: { user: true } } },
+        },
+        workCompletions: {
+          include: { worker: { include: { user: true } } },
+        },
+        assignedWorker: {
+          include: { user: true },
+        },
+      },
+    })
+  }
+
+  const workerProfile = await prisma.workerProfile.findUnique({
+    where: { userId: session.user.id },
+  })
+
+  if (!workerProfile) {
+    throw new Error('Worker profile not found')
+  }
+
+  const job = await prisma.maintenanceJob.findUnique({
     where: { id: jobId },
     include: {
       quotes: {
-        include: { worker: { include: { user: true } } },
+        include: {
+          worker: {
+            select: {
+              id: true,
+              businessName: true,
+              services: true,
+              isActive: true,
+              trustworthiness: true,
+              notes: true,
+              user: {
+                select: {
+                  id: true,
+                  name: true,
+                },
+              },
+            },
+          },
+        },
       },
       workCompletions: {
-        include: { worker: { include: { user: true } } },
+        include: {
+          worker: {
+            select: {
+              id: true,
+              businessName: true,
+              services: true,
+              isActive: true,
+              trustworthiness: true,
+              notes: true,
+              user: {
+                select: {
+                  id: true,
+                  name: true,
+                },
+              },
+            },
+          },
+        },
       },
       assignedWorker: {
-        include: { user: true },
+        select: {
+          id: true,
+          businessName: true,
+          services: true,
+          isActive: true,
+          trustworthiness: true,
+          notes: true,
+          user: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+        },
       },
     },
   })
+
+  if (!job) {
+    return null
+  }
+
+  if (job.assignedWorkerId !== workerProfile.id) {
+    throw new Error('Unauthorized')
+  }
+
+  return job
 }
 
 export const acceptQuote = async (quoteId: string) => {
@@ -631,10 +807,7 @@ export const inviteWorker = async (data: {
 // ============================================================================
 
 export const getWorkerProfile = async () => {
-  const session = await auth()
-  if (!session?.user) {
-    throw new Error('Unauthorized')
-  }
+  const session = await assertWorker()
 
   return prisma.workerProfile.findUnique({
     where: { userId: session.user.id },
