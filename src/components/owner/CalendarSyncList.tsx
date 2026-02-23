@@ -54,11 +54,11 @@ const CalendarSyncList = ({ syncs }: CalendarSyncListProps) => {
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+    <div className="bg-white rounded-xl shadow-sm border border-stone-200 p-6">
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h2 className="text-lg font-semibold text-gray-900">External Calendars</h2>
-          <p className="text-sm text-gray-500">Sync with Airbnb, VRBO, or other iCal calendars</p>
+          <h2 className="text-lg font-semibold text-stone-950">External Calendars</h2>
+          <p className="text-sm text-stone-600">Sync with Airbnb, VRBO, or other iCal calendars</p>
         </div>
         <button
           onClick={() => {
@@ -71,10 +71,10 @@ const CalendarSyncList = ({ syncs }: CalendarSyncListProps) => {
       </div>
 
       {showAddForm && (
-        <form onSubmit={handleAdd} className="mb-6 p-4 bg-gray-50 rounded-lg">
+        <form onSubmit={handleAdd} className="mb-6 p-4 bg-stone-50 rounded-lg">
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Calendar Name</label>
+              <label className="block text-sm font-medium text-stone-800 mb-1">Calendar Name</label>
               <input
                 type="text"
                 value={name}
@@ -83,11 +83,11 @@ const CalendarSyncList = ({ syncs }: CalendarSyncListProps) => {
                 }}
                 placeholder="e.g., Airbnb, VRBO"
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">iCal URL</label>
+              <label className="block text-sm font-medium text-stone-800 mb-1">iCal URL</label>
               <input
                 type="url"
                 value={icalUrl}
@@ -96,7 +96,7 @@ const CalendarSyncList = ({ syncs }: CalendarSyncListProps) => {
                 }}
                 placeholder="https://..."
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
               />
             </div>
             <button
@@ -111,7 +111,7 @@ const CalendarSyncList = ({ syncs }: CalendarSyncListProps) => {
       )}
 
       {syncs.length === 0 ? (
-        <p className="text-gray-500 text-sm">
+        <p className="text-stone-600 text-sm">
           No external calendars connected. Add one to sync availability.
         </p>
       ) : (
@@ -119,22 +119,22 @@ const CalendarSyncList = ({ syncs }: CalendarSyncListProps) => {
           {syncs.map((sync) => (
             <div
               key={sync.id}
-              className="flex items-center justify-between p-4 bg-gray-50 rounded-lg"
+              className="flex items-center justify-between p-4 bg-stone-50 rounded-lg"
             >
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
-                  <span className="font-medium text-gray-900">{sync.name}</span>
+                  <span className="font-medium text-stone-950">{sync.name}</span>
                   <span
                     className={`text-xs px-2 py-0.5 rounded-full ${
-                      sync.isActive ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'
+                      sync.isActive ? 'bg-green-100 text-green-700' : 'bg-stone-100 text-stone-700'
                     }`}
                   >
                     {sync.isActive ? 'Active' : 'Paused'}
                   </span>
                 </div>
-                <p className="text-sm text-gray-500 truncate mt-1">{sync.icalUrl}</p>
+                <p className="text-sm text-stone-600 truncate mt-1">{sync.icalUrl}</p>
                 {sync.lastSynced && (
-                  <p className="text-xs text-gray-400 mt-1">
+                  <p className="text-xs text-stone-500 mt-1">
                     Last synced: {format(sync.lastSynced, 'MMM d, yyyy h:mm a')}
                   </p>
                 )}
@@ -148,7 +148,7 @@ const CalendarSyncList = ({ syncs }: CalendarSyncListProps) => {
                     handleToggle(sync.id, sync.isActive)
                   }}
                   disabled={isPending}
-                  className="text-sm text-gray-600 hover:text-gray-900 disabled:opacity-50"
+                  className="text-sm text-stone-700 hover:text-stone-950 disabled:opacity-50"
                 >
                   {sync.isActive ? 'Pause' : 'Resume'}
                 </button>

@@ -45,10 +45,10 @@ const NotificationPreferencesForm = ({
 
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-[1fr,80px,80px] gap-4 pb-2 border-b border-gray-200">
-        <div className="text-sm font-medium text-gray-500">Event</div>
-        <div className="text-sm font-medium text-gray-500 text-center">Email</div>
-        <div className="text-sm font-medium text-gray-500 text-center">SMS</div>
+      <div className="grid grid-cols-[1fr,80px,80px] gap-4 pb-2 border-b border-stone-200">
+        <div className="text-sm font-medium text-stone-600">Event</div>
+        <div className="text-sm font-medium text-stone-600 text-center">Email</div>
+        <div className="text-sm font-medium text-stone-600 text-center">SMS</div>
       </div>
 
       {optimisticPrefs.map((pref) => {
@@ -59,11 +59,11 @@ const NotificationPreferencesForm = ({
         return (
           <div
             key={pref.event}
-            className="grid grid-cols-[1fr,80px,80px] gap-4 py-3 border-b border-gray-100 last:border-0"
+            className="grid grid-cols-[1fr,80px,80px] gap-4 py-3 border-b border-stone-100 last:border-0"
           >
             <div>
-              <p className="font-medium text-gray-900">{eventInfo.label}</p>
-              <p className="text-sm text-gray-500">{eventInfo.description}</p>
+              <p className="font-medium text-stone-950">{eventInfo.label}</p>
+              <p className="text-sm text-stone-600">{eventInfo.description}</p>
             </div>
             <div className="flex items-center justify-center">
               <button
@@ -72,7 +72,7 @@ const NotificationPreferencesForm = ({
                 }}
                 disabled={isPending}
                 className={`relative w-11 h-6 rounded-full transition-colors ${
-                  pref.emailEnabled ? 'bg-emerald-500' : 'bg-gray-200'
+                  pref.emailEnabled ? 'bg-emerald-500' : 'bg-stone-200'
                 } ${isPending ? 'opacity-50' : ''}`}
               >
                 <span
@@ -89,7 +89,7 @@ const NotificationPreferencesForm = ({
                 }}
                 disabled={isPending}
                 className={`relative w-11 h-6 rounded-full transition-colors ${
-                  pref.smsEnabled ? 'bg-emerald-500' : 'bg-gray-200'
+                  pref.smsEnabled ? 'bg-emerald-500' : 'bg-stone-200'
                 } ${isPending ? 'opacity-50' : ''}`}
               >
                 <span
@@ -103,7 +103,7 @@ const NotificationPreferencesForm = ({
         )
       })}
 
-      <p className="text-xs text-gray-400 mt-4">Changes are saved automatically.</p>
+      <p className="text-xs text-stone-500 mt-4">Changes are saved automatically.</p>
     </div>
   )
 }

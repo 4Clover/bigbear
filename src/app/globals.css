@@ -47,7 +47,7 @@
   --card: #ffffff;
   --card-foreground: var(--stone-900);
   --muted: var(--stone-100);
-  --muted-foreground: var(--stone-600);
+  --muted-foreground: var(--stone-700);
   --border: var(--stone-200);
   --ring: var(--forest-500);
   --primary: var(--forest-500);
@@ -71,7 +71,7 @@
   --card: var(--stone-900);
   --card-foreground: var(--stone-100);
   --muted: var(--stone-800);
-  --muted-foreground: var(--stone-400);
+  --muted-foreground: var(--stone-300);
   --border: var(--stone-700);
   --ring: var(--forest-400);
   --primary: var(--forest-400);
