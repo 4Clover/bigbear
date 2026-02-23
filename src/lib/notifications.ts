@@ -2,12 +2,14 @@ import { Resend } from 'resend'
 import Twilio from 'twilio'
 import { prisma } from './prisma'
 import { escapeHtml } from './security'
+import { signGalleryUploadToken } from './gallery-token'
 import type { Booking, NotificationEvent } from '@prisma/client'
 import { format } from 'date-fns'
+import { env } from './env'
 
-const resend = new Resend(process.env.AUTH_RESEND_KEY)
+const resend = new Resend(env().AUTH_RESEND_KEY)
 
-const fromEmail = process.env.RESEND_FROM_EMAIL ?? 'noreply@example.com'
+const fromEmail = env().RESEND_FROM_EMAIL
 
 // Lazy-loaded Twilio client
 let twilioClient: ReturnType<typeof Twilio> | null = null
@@ -15,8 +17,8 @@ let twilioClient: ReturnType<typeof Twilio> | null = null
 const getTwilioClient = () => {
   if (twilioClient) return twilioClient
 
-  const accountSid = process.env.TWILIO_ACCOUNT_SID
-  const authToken = process.env.TWILIO_AUTH_TOKEN
+  const accountSid = env().TWILIO_ACCOUNT_SID
+  const authToken = env().TWILIO_AUTH_TOKEN
 
   if (!accountSid || !authToken) return null
 
@@ -30,7 +32,7 @@ export const sendSms = async (to: string, body: string): Promise<boolean> => {
   const client = getTwilioClient()
   if (!client) return false
 
-  const fromPhone = process.env.TWILIO_PHONE_NUMBER
+  const fromPhone = env().TWILIO_PHONE_NUMBER
   if (!fromPhone) return false
 
   try {
@@ -64,13 +66,13 @@ export const sendBookingConfirmation = async (booking: Booking) => {
       await resend.emails.send({
         from: fromEmail,
         to: booking.guestEmail,
-        subject: 'Booking Confirmed - Big Bear Cabin',
+        subject: 'Booking Confirmed - Grizzly Getaway',
         html: `
           <h1>Your Booking is Confirmed!</h1>
           <p>Hello ${safeGuestName},</p>
           <p>Thank you for booking with us. Here are your reservation details:</p>
           <ul>
-            <li><strong>Check-in:</strong> ${checkInFormatted} (after 3:00 PM)</li>
+            <li><strong>Check-in:</strong> ${checkInFormatted} (after 4:00 PM)</li>
             <li><strong>Check-out:</strong> ${checkOutFormatted} (before 11:00 AM)</li>
             <li><strong>Total Amount:</strong> $${Number(booking.totalAmount).toFixed(2)}</li>
           </ul>
@@ -101,7 +103,7 @@ export const sendBookingConfirmation = async (booking: Booking) => {
 
   // Send SMS if enabled and phone available
   if (preference.smsEnabled && booking.guestPhone) {
-    const smsBody = `Big Bear Cabin: Your booking is confirmed! Check-in: ${checkInFormatted}. We look forward to hosting you!`
+    const smsBody = `Grizzly Getaway: Your booking is confirmed! Check-in: ${checkInFormatted}. We look forward to hosting you!`
 
     const success = await sendSms(booking.guestPhone, smsBody)
 
@@ -132,7 +134,7 @@ export const sendBookingCancellation = async (booking: Booking, refundAmount: nu
       await resend.emails.send({
         from: fromEmail,
         to: booking.guestEmail,
-        subject: 'Booking Cancelled - Big Bear Cabin',
+        subject: 'Booking Cancelled - Grizzly Getaway',
         html: `
           <h1>Booking Cancellation Confirmation</h1>
           <p>Hello ${safeGuestName},</p>
@@ -165,7 +167,7 @@ export const sendBookingCancellation = async (booking: Booking, refundAmount: nu
   if (preference.smsEnabled && booking.guestPhone) {
     const refundText =
       refundAmount > 0 ? `Refund: $${refundAmount.toFixed(2)}` : 'No refund applicable'
-    const smsBody = `Big Bear Cabin: Your booking has been cancelled. ${refundText}. Questions? Contact us.`
+    const smsBody = `Grizzly Getaway: Your booking has been cancelled. ${refundText}. Questions? Contact us.`
 
     const success = await sendSms(booking.guestPhone, smsBody)
 
@@ -179,7 +181,6 @@ export const sendBookingCancellation = async (booking: Booking, refundAmount: nu
     )
   }
 }
-
 
 interface BookingFailedRefundInfo {
   guestEmail: string
@@ -196,7 +197,7 @@ export const sendBookingFailedRefund = async (info: BookingFailedRefundInfo) => 
     await resend.emails.send({
       from: fromEmail,
       to: guestEmail,
-      subject: 'Booking Could Not Be Completed - Refund Issued',
+      subject: 'Booking Could Not Be Completed - Grizzly Getaway',
       html: `
         <h1>Booking Could Not Be Completed</h1>
         <p>Hello ${safeGuestName},</p>
@@ -244,14 +245,14 @@ export const sendCheckinReminder = async (booking: Booking) => {
       await resend.emails.send({
         from: fromEmail,
         to: booking.guestEmail,
-        subject: 'Check-in Tomorrow - Big Bear Cabin',
+        subject: 'Check-in Tomorrow - Grizzly Getaway',
         html: `
           <h1>Your Check-in is Tomorrow!</h1>
           <p>Hello ${safeGuestName},</p>
           <p>We're excited to host you! Here's a reminder about your upcoming stay:</p>
           <ul>
             <li><strong>Check-in Date:</strong> ${checkInFormatted}</li>
-            <li><strong>Check-in Time:</strong> After 3:00 PM</li>
+            <li><strong>Check-in Time:</strong> After 4:00 PM</li>
           </ul>
           <p>We'll send you the access code and check-in instructions separately.</p>
           <p>Safe travels!</p>
@@ -279,7 +280,7 @@ export const sendCheckinReminder = async (booking: Booking) => {
 
   // Send SMS if enabled and phone available
   if (preference.smsEnabled && booking.guestPhone) {
-    const smsBody = `Big Bear Cabin: Your check-in is tomorrow (${checkInFormatted})! Check-in after 3 PM. See you soon!`
+    const smsBody = `Grizzly Getaway: Your check-in is tomorrow (${checkInFormatted})! Check-in after 4 PM. See you soon!`
 
     const success = await sendSms(booking.guestPhone, smsBody)
 
@@ -310,7 +311,7 @@ export const sendCheckoutReminder = async (booking: Booking) => {
       await resend.emails.send({
         from: fromEmail,
         to: booking.guestEmail,
-        subject: 'Check-out Tomorrow - Big Bear Cabin',
+        subject: 'Check-out Tomorrow - Grizzly Getaway',
         html: `
           <h1>Check-out Reminder</h1>
           <p>Hello ${safeGuestName},</p>
@@ -324,6 +325,8 @@ export const sendCheckoutReminder = async (booking: Booking) => {
             <li>Turn off all lights and appliances</li>
             <li>Lock all doors and windows</li>
             <li>Leave keys in the lockbox</li>
+            <li>Throw out all trash</li>
+            <li>Ensure hot tub cover is replaced</li>
           </ul>
           <p>Thank you for staying with us!</p>
         `,
@@ -350,7 +353,7 @@ export const sendCheckoutReminder = async (booking: Booking) => {
 
   // Send SMS if enabled and phone available
   if (preference.smsEnabled && booking.guestPhone) {
-    const smsBody = `Big Bear Cabin: Check-out reminder for tomorrow (${checkOutFormatted}). Please check out before 11 AM. Thank you for staying!`
+    const smsBody = `Grizzly Getaway: Check-out reminder for tomorrow (${checkOutFormatted}). Please check out before 11 AM. Thank you for staying!`
 
     const success = await sendSms(booking.guestPhone, smsBody)
 
@@ -403,7 +406,7 @@ export const sendBookingRequest = async (booking: Booking, ownerEmail: string) =
     await resend.emails.send({
       from: fromEmail,
       to: ownerEmail,
-      subject: 'New Booking Request - Big Bear Cabin',
+      subject: 'New Booking Request - Grizzly Getaway',
       html: `
         <h1>New Booking Request</h1>
         <p>You have received a new booking request:</p>
@@ -415,7 +418,7 @@ export const sendBookingRequest = async (booking: Booking, ownerEmail: string) =
           <li><strong>Guests:</strong> ${booking.numberOfGuests}</li>
           <li><strong>Amount:</strong> $${Number(booking.totalAmount).toFixed(2)}</li>
         </ul>
-        <p><a href="${process.env.AUTH_URL ?? 'http://localhost:3000'}/owner/bookings/${booking.id}">Review Booking</a></p>
+        <p><a href="${env().AUTH_URL ?? 'http://localhost:3000'}/owner/bookings/${booking.id}">Review Booking</a></p>
       `,
     })
 
@@ -446,7 +449,7 @@ export const sendPaymentReceived = async (booking: Booking, ownerEmail: string) 
     await resend.emails.send({
       from: fromEmail,
       to: ownerEmail,
-      subject: 'Payment Received - Big Bear Cabin',
+      subject: 'Payment Received - Grizzly Getaway',
       html: `
         <h1>Payment Received!</h1>
         <p>A payment has been successfully processed:</p>
@@ -490,7 +493,7 @@ export const sendPaymentFailed = async (
     await resend.emails.send({
       from: fromEmail,
       to: ownerEmail,
-      subject: 'Payment Failed - Big Bear Cabin',
+      subject: 'Payment Failed - Grizzly Getaway',
       html: `
         <h1>Payment Failed</h1>
         <p>A payment attempt has failed:</p>
@@ -531,7 +534,7 @@ export const sendQuoteReceived = async (job: JobInfo, quote: QuoteInfo, ownerEma
     await resend.emails.send({
       from: fromEmail,
       to: ownerEmail,
-      subject: `Quote Received: ${safeTitle} - Big Bear Cabin`,
+      subject: `Quote Received: ${safeTitle} - Grizzly Getaway`,
       html: `
         <h1>New Quote Received</h1>
         <p>A contractor has submitted a quote for your maintenance job:</p>
@@ -541,7 +544,7 @@ export const sendQuoteReceived = async (job: JobInfo, quote: QuoteInfo, ownerEma
           <li><strong>Estimated Time:</strong> ${quote.estimatedDays ?? 'Not specified'} days</li>
           <li><strong>Description:</strong> ${safeDescription}</li>
         </ul>
-        <p><a href="${process.env.AUTH_URL ?? 'http://localhost:3000'}/owner/maintenance/${job.id}">Review Quote</a></p>
+        <p><a href="${env().AUTH_URL ?? 'http://localhost:3000'}/owner/maintenance/${job.id}">Review Quote</a></p>
       `,
     })
 
@@ -584,7 +587,7 @@ export const sendMaintenanceCompleted = async (
     await resend.emails.send({
       from: fromEmail,
       to: ownerEmail,
-      subject: `Work Completed: ${safeTitle} - Big Bear Cabin`,
+      subject: `Work Completed: ${safeTitle} - Grizzly Getaway`,
       html: `
         <h1>Maintenance Work Completed</h1>
         <p>A maintenance job has been marked as complete:</p>
@@ -593,7 +596,7 @@ export const sendMaintenanceCompleted = async (
           <li><strong>Final Amount:</strong> $${completion.finalAmount ? completion.finalAmount.toFixed(2) : 'Not specified'}</li>
           <li><strong>Completion Notes:</strong> ${safeDescription}</li>
         </ul>
-        <p><a href="${process.env.AUTH_URL ?? 'http://localhost:3000'}/owner/maintenance/${job.id}">View Details</a></p>
+        <p><a href="${env().AUTH_URL ?? 'http://localhost:3000'}/owner/maintenance/${job.id}">View Details</a></p>
       `,
     })
 
@@ -613,6 +616,68 @@ export const sendMaintenanceCompleted = async (
       'failed',
       error instanceof Error ? error.message : 'Unknown error'
     )
+  }
+}
+
+// ============================================================================
+// Guest Gallery Invite
+// ============================================================================
+
+export const sendGalleryUploadInvite = async (booking: {
+  id: string
+  guestName: string
+  guestEmail: string
+  checkOut: Date
+}) => {
+  const preference = await prisma.notificationPreference.findUnique({
+    where: { event: 'GALLERY_INVITE' },
+  })
+
+  if (!preference?.emailEnabled && !preference?.smsEnabled) return
+
+  const token = await signGalleryUploadToken({
+    bookingId: booking.id,
+    guestName: booking.guestName,
+    guestEmail: booking.guestEmail,
+  })
+
+  const safeGuestName = escapeHtml(booking.guestName)
+  const uploadUrl = `${env().AUTH_URL ?? 'http://localhost:3000'}/gallery/upload?token=${token}`
+
+  if (preference.emailEnabled) {
+    try {
+      await resend.emails.send({
+        from: fromEmail,
+        to: booking.guestEmail,
+        subject: 'Share Your Photos - Grizzly Getaway',
+        html: `
+          <h1>Share Your Stay Photos!</h1>
+          <p>Hello ${safeGuestName},</p>
+          <p>Thank you for staying with us at Grizzly Getaway! We hope you had a wonderful time.</p>
+          <p>We'd love to see your photos from your stay. You can upload up to 3 photos to our guest gallery:</p>
+          <p><a href="${uploadUrl}">Upload Your Photos</a></p>
+          <p>This link will expire in 30 days.</p>
+          <p>Thank you for being a wonderful guest!</p>
+        `,
+      })
+
+      await logNotification(
+        'GALLERY_INVITE',
+        booking.guestEmail,
+        'email',
+        'Gallery Upload Invite',
+        'sent'
+      )
+    } catch (error) {
+      await logNotification(
+        'GALLERY_INVITE',
+        booking.guestEmail,
+        'email',
+        'Gallery Upload Invite',
+        'failed',
+        error instanceof Error ? error.message : 'Unknown error'
+      )
+    }
   }
 }
 

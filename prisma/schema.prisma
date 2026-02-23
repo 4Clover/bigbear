@@ -56,6 +56,11 @@ enum UserRole {
   ACCOUNTANT
 }
 
+enum ImageUploader {
+  OWNER
+  GUEST
+}
+
 model User {
   id            String    @id @default(cuid())
   name          String?
@@ -120,16 +125,29 @@ model Booking {
   addonsTotal     Decimal       @default(0) @db.Decimal(10, 2)
   depositAmount   Decimal       @db.Decimal(10, 2)
   totalAmount     Decimal       @db.Decimal(10, 2)
-  paymentIntentId String?
+  paymentIntentId String?       @unique
   status          BookingStatus @default(PENDING)
   notes           String?
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
 
-  guest        User           @relation(fields: [guestId], references: [id])
-  addons       BookingAddon[]
-  transactions Transaction[]
-  messages     Message[]
+  guest         User           @relation(fields: [guestId], references: [id])
+  addons        BookingAddon[]
+  transactions  Transaction[]
+  messages      Message[]
+  galleryImages GalleryImage[]
+
+  @@index([checkIn, checkOut])
+  @@index([status])
+  @@index([guestId])
+}
+
+model StripeEvent {
+  id          String   @id // Stripe evt_xxx ID (natural PK)
+  type        String   // e.g. checkout.session.completed
+  status      String   @default("pending") // pending | processing | processed
+  createdAt   DateTime @default(now())
+  processedAt DateTime?
 }
 
 model Addon {
@@ -246,6 +264,8 @@ model Transaction {
 
   @@index([date])
   @@index([type])
+  @@index([bookingId])
+  @@index([categoryId])
 }
 
 model Receipt {
@@ -302,6 +322,9 @@ model MaintenanceJob {
   assignedWorker  WorkerProfile?   @relation("AssignedJobs", fields: [assignedWorkerId], references: [id])
   quotes          Quote[]
   workCompletions WorkCompletion[]
+
+  @@index([status])
+  @@index([assignedWorkerId])
 }
 
 model Quote {
@@ -377,6 +400,7 @@ enum NotificationEvent {
   MAINTENANCE_QUOTE_RECEIVED
   MAINTENANCE_COMPLETED
   NEW_MESSAGE
+  GALLERY_INVITE
 }
 
 model NotificationPreference {
@@ -409,17 +433,22 @@ model NotificationLog {
 // ============================================================================
 
 model GalleryImage {
-  id          String   @id @default(cuid())
+  id          String        @id @default(cuid())
   url         String
   alt         String?
   caption     String?
   category    String?
-  sortOrder   Int      @default(0)
-  isFeatured  Boolean  @default(false)
-  isPublished Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  sortOrder   Int           @default(0)
+  isFeatured  Boolean       @default(false)
+  isPublished Boolean       @default(true)
+  uploadedBy  ImageUploader @default(OWNER)
+  bookingId   String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  booking Booking? @relation(fields: [bookingId], references: [id])
 
   @@index([category])
   @@index([sortOrder])
+  @@index([bookingId])
 }

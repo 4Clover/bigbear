@@ -11,24 +11,38 @@ const envSchema = z
 
     // Auth
     AUTH_SECRET: z.string().min(1, 'AUTH_SECRET is required'),
+    AUTH_URL: z.url().optional(),
     AUTH_RESEND_KEY: z.string().min(1, 'AUTH_RESEND_KEY is required'),
     RESEND_FROM_EMAIL: z.email({ message: 'RESEND_FROM_EMAIL must be a valid email' }),
 
     // Stripe
     STRIPE_SECRET_KEY: z.string().startsWith('sk_', 'STRIPE_SECRET_KEY must start with sk_'),
-    STRIPE_WEBHOOK_SECRET: z.string().startsWith('whsec_', 'STRIPE_WEBHOOK_SECRET must start with whsec_'),
+    STRIPE_WEBHOOK_SECRET: z
+      .string()
+      .startsWith('whsec_', 'STRIPE_WEBHOOK_SECRET must start with whsec_'),
 
     // Security tokens
     ICAL_SECRET: z.string().min(16, 'ICAL_SECRET must be at least 16 characters'),
     CRON_SECRET: z.string().min(16, 'CRON_SECRET must be at least 16 characters'),
 
     // Twilio SMS - optional, but if any is set, all must be set
-    TWILIO_ACCOUNT_SID: z.string().startsWith('AC', 'TWILIO_ACCOUNT_SID must start with AC').optional(),
-    TWILIO_AUTH_TOKEN: z.string().min(32, 'TWILIO_AUTH_TOKEN must be at least 32 characters').optional(),
+    TWILIO_ACCOUNT_SID: z
+      .string()
+      .startsWith('AC', 'TWILIO_ACCOUNT_SID must start with AC')
+      .optional(),
+    TWILIO_AUTH_TOKEN: z
+      .string()
+      .min(32, 'TWILIO_AUTH_TOKEN must be at least 32 characters')
+      .optional(),
     TWILIO_PHONE_NUMBER: z
       .string()
       .regex(/^\+\d{10,15}$/, 'TWILIO_PHONE_NUMBER must be in E.164 format (e.g., +15551234567)')
       .optional(),
+
+    // Google OAuth - optional, but if any is set, all must be set
+    AUTH_GOOGLE_ID: z.string().min(1).optional(),
+    AUTH_GOOGLE_SECRET: z.string().min(1).optional(),
+    AUTHORIZED_ADMIN_EMAILS: z.string().min(1).optional(),
 
     // Upstash Redis (for rate limiting) - optional, falls back to in-memory
     UPSTASH_REDIS_REST_URL: z.url().optional(),
@@ -50,8 +64,20 @@ const envSchema = z
       return setCount === 0 || setCount === 3
     },
     {
-      message: 'If any Twilio credential is set, all three must be set (TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_PHONE_NUMBER)',
+      message:
+        'If any Twilio credential is set, all three must be set (TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_PHONE_NUMBER)',
       path: ['TWILIO_ACCOUNT_SID'],
+    }
+  )
+  .refine(
+    (data) => {
+      const googleVars = [data.AUTH_GOOGLE_ID, data.AUTH_GOOGLE_SECRET]
+      const setCount = googleVars.filter(Boolean).length
+      return setCount === 0 || setCount === 2
+    },
+    {
+      message: 'If either AUTH_GOOGLE_ID or AUTH_GOOGLE_SECRET is set, both must be set',
+      path: ['AUTH_GOOGLE_ID'],
     }
   )
 

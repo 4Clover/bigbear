@@ -296,10 +296,10 @@ describe('Owner Cancellation Refund Data Path', () => {
 
   describe('Days until check-in calculation', () => {
     it('should calculate days correctly from check-in date', () => {
-      const today = new Date()
-      const checkIn14Days = addDays(today, 14)
-      const checkIn7Days = addDays(today, 7)
-      const checkIn3Days = addDays(today, 3)
+      const today = new Date('2026-06-01T12:00:00Z')
+      const checkIn14Days = new Date('2026-06-15T12:00:00Z')
+      const checkIn7Days = new Date('2026-06-08T12:00:00Z')
+      const checkIn3Days = new Date('2026-06-04T12:00:00Z')
 
       const calculateDays = (checkIn: Date, now: Date) => {
         const diffMs = checkIn.getTime() - now.getTime()

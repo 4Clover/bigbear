@@ -33,28 +33,32 @@ export const createExpense = async (data: {
     return { errors: z.treeifyError(validated.error).properties }
   }
 
-  const transaction = await prisma.transaction.create({
-    data: {
-      type: 'EXPENSE',
-      categoryId: validated.data.categoryId,
-      amount: validated.data.amount,
-      date: validated.data.date,
-      description: validated.data.description,
-      vendor: validated.data.vendor,
-    },
-  })
+  const transaction = await prisma.$transaction(async (tx) => {
+    const newTransaction = await tx.transaction.create({
+      data: {
+        type: 'EXPENSE',
+        categoryId: validated.data.categoryId,
+        amount: validated.data.amount,
+        date: validated.data.date,
+        description: validated.data.description,
+        vendor: validated.data.vendor,
+      },
+    })
 
-  if (validated.data.receiptUrls && validated.data.receiptUrls.length > 0) {
-    for (const url of validated.data.receiptUrls) {
-      await prisma.receipt.create({
-        data: {
-          transactionId: transaction.id,
-          fileUrl: url,
-          fileName: url.split('/').pop() ?? 'receipt',
-        },
-      })
+    if (validated.data.receiptUrls && validated.data.receiptUrls.length > 0) {
+      for (const url of validated.data.receiptUrls) {
+        await tx.receipt.create({
+          data: {
+            transactionId: newTransaction.id,
+            fileUrl: url,
+            fileName: url.split('/').pop() ?? 'receipt',
+          },
+        })
+      }
     }
-  }
+
+    return newTransaction
+  })
 
   revalidatePath('/owner/finance')
   return { success: true, transaction: { ...transaction, amount: Number(transaction.amount) } }
@@ -89,16 +93,15 @@ export const deleteTransaction = async (transactionId: string) => {
   })
 
   for (const receipt of receipts) {
-    try {
-      await deleteBlob(receipt.fileUrl)
-    } catch (error) {
+    await deleteBlob(receipt.fileUrl).catch((error: unknown) => {
       console.error('Failed to delete blob:', receipt.fileUrl, error)
-    }
+    })
   }
 
-  await prisma.transaction.delete({
-    where: { id: transactionId },
-  })
+  await prisma.$transaction([
+    prisma.receipt.deleteMany({ where: { transactionId } }),
+    prisma.transaction.delete({ where: { id: transactionId } }),
+  ])
 
   revalidatePath('/owner/finance')
   return { success: true }
@@ -212,37 +215,52 @@ export const getFinanceSummary = async (year: number, month?: number) => {
   const startDate = month ? new Date(year, month - 1, 1) : new Date(year, 0, 1)
   const endDate = month ? new Date(year, month, 0) : new Date(year, 11, 31)
 
-  const transactions = await prisma.transaction.findMany({
-    where: {
-      date: { gte: startDate, lte: endDate },
-    },
-    include: { category: true },
-  })
+  const dateFilter = { gte: startDate, lte: endDate }
 
-  const income = transactions
-    .filter((t) => t.type === 'INCOME')
-    .reduce((sum, t) => sum + Number(t.amount), 0)
+  const [incomeAgg, expenseAgg, categoryGroups, transactionCount] = await Promise.all([
+    prisma.transaction.aggregate({
+      where: { date: dateFilter, type: 'INCOME' },
+      _sum: { amount: true },
+    }),
+    prisma.transaction.aggregate({
+      where: { date: dateFilter, type: 'EXPENSE' },
+      _sum: { amount: true },
+    }),
+    prisma.transaction.groupBy({
+      by: ['categoryId', 'type'],
+      where: { date: dateFilter },
+      _sum: { amount: true },
+    }),
+    prisma.transaction.count({ where: { date: dateFilter } }),
+  ])
 
-  const expenses = transactions
-    .filter((t) => t.type === 'EXPENSE')
-    .reduce((sum, t) => sum + Number(t.amount), 0)
+  const income = Number(incomeAgg._sum.amount) || 0
+  const expenses = Number(expenseAgg._sum.amount) || 0
 
-  const byCategory = transactions.reduce<Record<string, number>>(
-    (acc, t) => {
-      const key = t.category.name
-      acc[key] ??= 0
-      acc[key] += Number(t.amount) * (t.type === 'EXPENSE' ? -1 : 1)
-      return acc
-    },
-    {}
-  )
+  // Resolve category names for the groupBy results
+  const categoryIds = [...new Set(categoryGroups.map((g) => g.categoryId))]
+  const categories =
+    categoryIds.length > 0
+      ? await prisma.expenseCategory.findMany({
+          where: { id: { in: categoryIds } },
+          take: 100,
+        })
+      : []
+  const categoryMap = new Map(categories.map((c) => [c.id, c.name]))
+
+  const byCategory: Record<string, number> = {}
+  for (const group of categoryGroups) {
+    const name = categoryMap.get(group.categoryId) ?? 'Unknown'
+    byCategory[name] =
+      (byCategory[name] ?? 0) + Number(group._sum.amount ?? 0) * (group.type === 'EXPENSE' ? -1 : 1)
+  }
 
   return {
     income,
     expenses,
     netIncome: income - expenses,
     byCategory,
-    transactionCount: transactions.length,
+    transactionCount,
   }
 }
 
@@ -251,5 +269,6 @@ export const getExpenseCategories = async () => {
 
   return prisma.expenseCategory.findMany({
     orderBy: { sortOrder: 'asc' },
+    take: 100,
   })
 }

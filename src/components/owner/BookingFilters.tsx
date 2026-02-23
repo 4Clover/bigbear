@@ -41,7 +41,7 @@ const BookingFilters = ({
     [router, searchParams]
   )
 
-  const handleSearchSubmit = (e: React.FormEvent) => {
+  const handleSearchSubmit = (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault()
     updateParams('search', search || null)
   }
@@ -66,10 +66,10 @@ const BookingFilters = ({
   const hasFilters = currentStatus ?? currentSearch ?? currentFrom ?? currentTo
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+    <div className="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
       <div className="flex flex-wrap gap-4 items-end">
         <form onSubmit={handleSearchSubmit} className="flex-1 min-w-[200px]">
-          <label className="block text-sm font-medium text-gray-700 mb-1">Search</label>
+          <label className="block text-sm font-medium text-stone-800 mb-1">Search</label>
           <div className="flex gap-2">
             <input
               type="text"
@@ -78,7 +78,7 @@ const BookingFilters = ({
                 setSearch(e.target.value)
               }}
               placeholder="Guest name or email..."
-              className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+              className="flex-1 px-3 py-2 border border-stone-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
             />
             <button
               type="submit"
@@ -90,41 +90,41 @@ const BookingFilters = ({
         </form>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">From</label>
+          <label className="block text-sm font-medium text-stone-800 mb-1">From</label>
           <input
             type="date"
             value={currentFrom ?? ''}
             onChange={(e) => {
               updateParams('from', e.target.value || null)
             }}
-            className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+            className="px-3 py-2 border border-stone-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">To</label>
+          <label className="block text-sm font-medium text-stone-800 mb-1">To</label>
           <input
             type="date"
             value={currentTo ?? ''}
             onChange={(e) => {
               updateParams('to', e.target.value || null)
             }}
-            className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+            className="px-3 py-2 border border-stone-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
           />
         </div>
 
         {hasFilters && (
           <button
             onClick={clearFilters}
-            className="px-4 py-2 text-sm text-gray-600 hover:text-gray-900"
+            className="px-4 py-2 text-sm text-stone-700 hover:text-stone-950"
           >
             Clear filters
           </button>
         )}
       </div>
 
-      <div className="mt-4 pt-4 border-t border-gray-100">
-        <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
+      <div className="mt-4 pt-4 border-t border-stone-100">
+        <label className="block text-sm font-medium text-stone-800 mb-2">Status</label>
         <div className="flex flex-wrap gap-2">
           {statuses.map((status) => {
             const isSelected = selectedStatuses.includes(status.value)
@@ -137,7 +137,7 @@ const BookingFilters = ({
                 className={`px-3 py-1.5 text-sm font-medium rounded-full border transition-colors ${
                   isSelected
                     ? 'bg-emerald-100 text-emerald-700 border-emerald-200'
-                    : 'bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100'
+                    : 'bg-stone-50 text-stone-700 border-stone-200 hover:bg-stone-100'
                 }`}
               >
                 {status.label}

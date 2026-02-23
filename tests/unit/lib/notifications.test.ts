@@ -8,6 +8,7 @@ import type { NotificationPreference } from '@prisma/client'
 
 // Mock modules
 vi.mock('@/lib/prisma', () => import('../../__mocks__/prisma'))
+vi.mock('@/lib/env', () => import('../../__mocks__/env'))
 vi.mock('resend', () => import('../../__mocks__/resend'))
 vi.mock('twilio', () => import('../../__mocks__/twilio'))
 
@@ -113,7 +114,7 @@ describe('Notification Service', () => {
       expect(mockSend).toHaveBeenCalledWith(
         expect.objectContaining({
           to: booking.guestEmail,
-          subject: 'Booking Confirmed - Big Bear Cabin',
+          subject: 'Booking Confirmed - Grizzly Getaway',
         })
       )
     })
@@ -238,7 +239,7 @@ describe('Notification Service', () => {
       expect(mockSend).toHaveBeenCalledWith(
         expect.objectContaining({
           to: booking.guestEmail,
-          subject: 'Booking Cancelled - Big Bear Cabin',
+          subject: 'Booking Cancelled - Grizzly Getaway',
         })
       )
     })

@@ -3,7 +3,7 @@ import { BookingContent } from './BookingContent'
 
 export const metadata = {
   title: 'Book Your Stay',
-  description: 'Reserve your mountain getaway at Big Bear Cabin.',
+  description: 'Reserve your mountain getaway at Grizzly Getaway.',
 }
 
 export default function BookPage() {

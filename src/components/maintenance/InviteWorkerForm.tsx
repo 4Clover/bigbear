@@ -25,7 +25,7 @@ const InviteWorkerForm = ({ onSuccess, onCancel }: InviteWorkerFormProps) => {
     setServices(services.filter((_, i) => i !== index))
   }
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault()
     setIsSubmitting(true)
     setError(null)

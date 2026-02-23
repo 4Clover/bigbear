@@ -56,20 +56,22 @@ export const ReportSelector = ({ currentType, currentYear, currentMonth }: Repor
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+    <div className="bg-white rounded-xl shadow-sm border border-stone-200 p-6 mb-6">
       <div className="flex flex-wrap gap-4 items-center">
         {/* Report Type Selector */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Report Type</label>
-          <div className="flex rounded-lg border border-gray-300 overflow-hidden">
+          <label className="block text-sm font-medium text-stone-800 mb-1">Report Type</label>
+          <div className="flex rounded-lg border border-stone-300 overflow-hidden">
             {(['monthly', 'annual', 'schedule-e'] as ReportType[]).map((type) => (
               <button
                 key={type}
-                onClick={() => { handleTypeChange(type); }}
+                onClick={() => {
+                  handleTypeChange(type)
+                }}
                 className={`px-4 py-2 text-sm font-medium transition-colors ${
                   currentType === type
                     ? 'bg-emerald-600 text-white'
-                    : 'bg-white text-gray-700 hover:bg-gray-50'
+                    : 'bg-white text-stone-800 hover:bg-stone-50'
                 }`}
               >
                 {type === 'monthly' ? 'Monthly' : type === 'annual' ? 'Annual' : 'Schedule E'}
@@ -80,11 +82,13 @@ export const ReportSelector = ({ currentType, currentYear, currentMonth }: Repor
 
         {/* Year Selector */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Year</label>
+          <label className="block text-sm font-medium text-stone-800 mb-1">Year</label>
           <select
             value={currentYear}
-            onChange={(e) => { updateParams('year', e.target.value); }}
-            className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+            onChange={(e) => {
+              updateParams('year', e.target.value)
+            }}
+            className="px-3 py-2 border border-stone-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
           >
             {years.map((year) => (
               <option key={year} value={year}>
@@ -97,11 +101,13 @@ export const ReportSelector = ({ currentType, currentYear, currentMonth }: Repor
         {/* Month Selector (only for monthly reports) */}
         {currentType === 'monthly' && (
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Month</label>
+            <label className="block text-sm font-medium text-stone-800 mb-1">Month</label>
             <select
               value={currentMonth ?? new Date().getMonth() + 1}
-              onChange={(e) => { updateParams('month', e.target.value); }}
-              className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+              onChange={(e) => {
+                updateParams('month', e.target.value)
+              }}
+              className="px-3 py-2 border border-stone-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
             >
               {months.map((month) => (
                 <option key={month.value} value={month.value}>

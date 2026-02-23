@@ -2,7 +2,7 @@ import { prisma } from '@/lib/prisma'
 import { NotificationEvent } from '@prisma/client'
 import NotificationPreferencesForm from '@/components/owner/NotificationPreferencesForm'
 
-const eventLabels: Record<NotificationEvent, { label: string; description: string }> = {
+const eventLabels = {
   BOOKING_REQUEST: {
     label: 'Booking Request',
     description: 'When a new booking request is submitted',
@@ -42,6 +42,10 @@ const eventLabels: Record<NotificationEvent, { label: string; description: strin
   NEW_MESSAGE: {
     label: 'New Message',
     description: 'When a new message is received',
+  },
+  GALLERY_INVITE: {
+    label: 'Gallery Invite',
+    description: 'When a guest gallery upload invite is sent',
   },
 }
 

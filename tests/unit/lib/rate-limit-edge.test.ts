@@ -1,5 +1,13 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 
+// Mock env to read from process.env at call time (supports test env manipulation)
+vi.mock('@/lib/env', () => ({
+  env: () => ({
+    UPSTASH_REDIS_REST_URL: process.env.UPSTASH_REDIS_REST_URL,
+    UPSTASH_REDIS_REST_TOKEN: process.env.UPSTASH_REDIS_REST_TOKEN,
+  }),
+}))
+
 // Store original env
 const originalEnv = { ...process.env }
 
@@ -150,9 +158,9 @@ describe('Rate Limiting Edge Cases', () => {
       vi.resetModules()
       const { checkRateLimit } = await import('@/lib/rate-limit')
 
-      await expect(
-        checkRateLimit('test:ip', { limit: 5, windowSeconds: 60 })
-      ).rejects.toThrow('UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN are required in production')
+      await expect(checkRateLimit('test:ip', { limit: 5, windowSeconds: 60 })).rejects.toThrow(
+        'UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN are required in production'
+      )
 
       vi.unstubAllEnvs()
     })

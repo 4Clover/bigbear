@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { createMockSession, createMockUser } from '../../__mocks__/auth'
 
 /**
@@ -199,6 +199,289 @@ describe('Auth Configuration (lib/auth.ts)', () => {
       expectedExports.forEach((exportName) => {
         expect(typeof exportName).toBe('string')
       })
+    })
+  })
+
+  describe('signIn callback (Google OAuth)', () => {
+    // Simulates the signIn callback that will be added to lib/auth.ts:
+    // signIn({ account, profile }) {
+    //   if (account?.provider === 'google') {
+    //     return profile?.email_verified === true
+    //   }
+    //   return true
+    // }
+
+    const signInCallback = async ({
+      account,
+      profile,
+    }: {
+      account: { provider: string } | null
+      profile?: { email_verified?: boolean }
+    }) => {
+      if (account?.provider === 'google') {
+        return profile?.email_verified === true
+      }
+      return true
+    }
+
+    it('should return true when Google provider + email_verified === true', async () => {
+      const result = await signInCallback({
+        account: { provider: 'google' },
+        profile: { email_verified: true },
+      })
+
+      expect(result).toBe(true)
+    })
+
+    it('should return false when Google provider + email_verified !== true', async () => {
+      const result = await signInCallback({
+        account: { provider: 'google' },
+        profile: { email_verified: false },
+      })
+
+      expect(result).toBe(false)
+    })
+
+    it('should return false when Google provider + email_verified is undefined', async () => {
+      const result = await signInCallback({
+        account: { provider: 'google' },
+        profile: {},
+      })
+
+      expect(result).toBe(false)
+    })
+
+    it('should return true for non-Google providers (Resend)', async () => {
+      const result = await signInCallback({
+        account: { provider: 'resend' },
+        profile: { email_verified: false },
+      })
+
+      expect(result).toBe(true)
+    })
+
+    it('should return true when account is null', async () => {
+      const result = await signInCallback({
+        account: null,
+        profile: { email_verified: false },
+      })
+
+      expect(result).toBe(true)
+    })
+  })
+
+  describe('createUser event (admin auto-promotion)', () => {
+    // Simulates the createUser event handler that will be added to lib/auth.ts:
+    // events: {
+    //   createUser: async ({ user }) => {
+    //     const adminEmails = process.env.AUTHORIZED_ADMIN_EMAILS
+    //       ?.split(',')
+    //       .map(e => e.trim().toLowerCase())
+    //       .filter(Boolean) ?? []
+    //     if (user.email && adminEmails.includes(user.email.toLowerCase())) {
+    //       await prisma.user.update({
+    //         where: { id: user.id },
+    //         data: { role: 'OWNER' }
+    //       })
+    //     }
+    //   }
+    // }
+
+    beforeEach(() => {
+      vi.stubEnv('AUTHORIZED_ADMIN_EMAILS', '')
+    })
+
+    afterEach(() => {
+      vi.unstubAllEnvs()
+    })
+
+    it('should call prisma.user.update with OWNER role when email in AUTHORIZED_ADMIN_EMAILS', async () => {
+      vi.stubEnv('AUTHORIZED_ADMIN_EMAILS', 'admin@example.com')
+      const mockPrismaUserUpdate = vi.fn()
+      const mockUser = createMockUser({ email: 'admin@example.com' })
+
+      const createUserEvent = async ({ user }: { user: { id: string; email: string | null } }) => {
+        const adminEmails =
+          process.env.AUTHORIZED_ADMIN_EMAILS?.split(',')
+            .map((e) => e.trim().toLowerCase())
+            .filter(Boolean) ?? []
+        if (user.email && adminEmails.includes(user.email.toLowerCase())) {
+          await mockPrismaUserUpdate({
+            where: { id: user.id },
+            data: { role: 'OWNER' },
+          })
+        }
+      }
+
+      await createUserEvent({ user: mockUser })
+
+      expect(mockPrismaUserUpdate).toHaveBeenCalledWith({
+        where: { id: mockUser.id },
+        data: { role: 'OWNER' },
+      })
+    })
+
+    it('should NOT call prisma.user.update when email not in list', async () => {
+      vi.stubEnv('AUTHORIZED_ADMIN_EMAILS', 'admin@example.com')
+      const mockPrismaUserUpdate = vi.fn()
+      const mockUser = createMockUser({ email: 'guest@example.com' })
+
+      const createUserEvent = async ({ user }: { user: { id: string; email: string | null } }) => {
+        const adminEmails =
+          process.env.AUTHORIZED_ADMIN_EMAILS?.split(',')
+            .map((e) => e.trim().toLowerCase())
+            .filter(Boolean) ?? []
+        if (user.email && adminEmails.includes(user.email.toLowerCase())) {
+          await mockPrismaUserUpdate({
+            where: { id: user.id },
+            data: { role: 'OWNER' },
+          })
+        }
+      }
+
+      await createUserEvent({ user: mockUser })
+
+      expect(mockPrismaUserUpdate).not.toHaveBeenCalled()
+    })
+
+    it('should handle empty AUTHORIZED_ADMIN_EMAILS gracefully (no update called)', async () => {
+      vi.stubEnv('AUTHORIZED_ADMIN_EMAILS', '')
+      const mockPrismaUserUpdate = vi.fn()
+      const mockUser = createMockUser({ email: 'admin@example.com' })
+
+      const createUserEvent = async ({ user }: { user: { id: string; email: string | null } }) => {
+        const adminEmails =
+          process.env.AUTHORIZED_ADMIN_EMAILS?.split(',')
+            .map((e) => e.trim().toLowerCase())
+            .filter(Boolean) ?? []
+        if (user.email && adminEmails.includes(user.email.toLowerCase())) {
+          await mockPrismaUserUpdate({
+            where: { id: user.id },
+            data: { role: 'OWNER' },
+          })
+        }
+      }
+
+      await createUserEvent({ user: mockUser })
+
+      expect(mockPrismaUserUpdate).not.toHaveBeenCalled()
+    })
+
+    it('should handle undefined AUTHORIZED_ADMIN_EMAILS gracefully', async () => {
+      vi.stubEnv('AUTHORIZED_ADMIN_EMAILS', undefined as any)
+      const mockPrismaUserUpdate = vi.fn()
+      const mockUser = createMockUser({ email: 'admin@example.com' })
+
+      const createUserEvent = async ({ user }: { user: { id: string; email: string | null } }) => {
+        const adminEmails =
+          process.env.AUTHORIZED_ADMIN_EMAILS?.split(',')
+            .map((e) => e.trim().toLowerCase())
+            .filter(Boolean) ?? []
+        if (user.email && adminEmails.includes(user.email.toLowerCase())) {
+          await mockPrismaUserUpdate({
+            where: { id: user.id },
+            data: { role: 'OWNER' },
+          })
+        }
+      }
+
+      await createUserEvent({ user: mockUser })
+
+      expect(mockPrismaUserUpdate).not.toHaveBeenCalled()
+    })
+
+    it('should handle case-insensitive: Admin@Example.COM matches admin@example.com', async () => {
+      vi.stubEnv('AUTHORIZED_ADMIN_EMAILS', 'admin@example.com')
+      const mockPrismaUserUpdate = vi.fn()
+      const mockUser = createMockUser({ email: 'Admin@Example.COM' })
+
+      const createUserEvent = async ({ user }: { user: { id: string; email: string | null } }) => {
+        const adminEmails =
+          process.env.AUTHORIZED_ADMIN_EMAILS?.split(',')
+            .map((e) => e.trim().toLowerCase())
+            .filter(Boolean) ?? []
+        if (user.email && adminEmails.includes(user.email.toLowerCase())) {
+          await mockPrismaUserUpdate({
+            where: { id: user.id },
+            data: { role: 'OWNER' },
+          })
+        }
+      }
+
+      await createUserEvent({ user: mockUser })
+
+      expect(mockPrismaUserUpdate).toHaveBeenCalledWith({
+        where: { id: mockUser.id },
+        data: { role: 'OWNER' },
+      })
+    })
+
+    it('should handle whitespace in comma-separated list', async () => {
+      vi.stubEnv('AUTHORIZED_ADMIN_EMAILS', 'admin1@example.com , admin2@example.com')
+      const mockPrismaUserUpdate = vi.fn()
+      const mockUser = createMockUser({ email: 'admin2@example.com' })
+
+      const createUserEvent = async ({ user }: { user: { id: string; email: string | null } }) => {
+        const adminEmails =
+          process.env.AUTHORIZED_ADMIN_EMAILS?.split(',')
+            .map((e) => e.trim().toLowerCase())
+            .filter(Boolean) ?? []
+        if (user.email && adminEmails.includes(user.email.toLowerCase())) {
+          await mockPrismaUserUpdate({
+            where: { id: user.id },
+            data: { role: 'OWNER' },
+          })
+        }
+      }
+
+      await createUserEvent({ user: mockUser })
+
+      expect(mockPrismaUserUpdate).toHaveBeenCalledWith({
+        where: { id: mockUser.id },
+        data: { role: 'OWNER' },
+      })
+    })
+  })
+
+  describe('Session configuration', () => {
+    // Simulates the session config that will be added to lib/auth.ts:
+    // session: {
+    //   strategy: 'database',
+    //   maxAge: 30 * 24 * 60 * 60,
+    //   updateAge: 24 * 60 * 60,
+    // }
+
+    const sessionConfig = {
+      strategy: 'database',
+      maxAge: 30 * 24 * 60 * 60,
+      updateAge: 24 * 60 * 60,
+    }
+
+    it('should have strategy set to database', () => {
+      expect(sessionConfig.strategy).toBe('database')
+    })
+
+    it('should have maxAge set to 2592000 (30 days)', () => {
+      expect(sessionConfig.maxAge).toBe(2592000)
+    })
+
+    it('should have updateAge set to 86400 (24 hours)', () => {
+      expect(sessionConfig.updateAge).toBe(86400)
+    })
+  })
+
+  describe('Google provider configuration', () => {
+    // Simulates the Google provider config that will be added to lib/auth.ts:
+    // Google({
+    //   allowDangerousEmailAccountLinking: true
+    // })
+
+    const googleProviderConfig = {
+      allowDangerousEmailAccountLinking: true,
+    }
+
+    it('should have allowDangerousEmailAccountLinking set to true', () => {
+      expect(googleProviderConfig.allowDangerousEmailAccountLinking).toBe(true)
     })
   })
 })

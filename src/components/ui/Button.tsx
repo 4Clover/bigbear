@@ -1,7 +1,8 @@
 'use client'
 
+import { forwardRef } from 'react'
 import { Loader2 } from 'lucide-react'
-import type { ButtonHTMLAttributes, Ref } from 'react'
+import type { ButtonHTMLAttributes } from 'react'
 
 type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'ghost' | 'destructive'
 type ButtonSize = 'sm' | 'md' | 'lg'
@@ -10,7 +11,6 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant
   size?: ButtonSize
   isLoading?: boolean
-  ref?: Ref<HTMLButtonElement>
 }
 
 const variantStyles: Record<ButtonVariant, string> = {
@@ -54,34 +54,31 @@ const sizeStyles: Record<ButtonSize, string> = {
   lg: 'px-6 py-3 text-lg',
 }
 
-export const Button = ({
-  variant = 'primary',
-  size = 'md',
-  isLoading,
-  className = '',
-  children,
-  disabled,
-  ref,
-  ...props
-}: ButtonProps) => {
-  return (
-    <button
-      ref={ref}
-      className={`
-        inline-flex items-center justify-center rounded-lg font-medium
-        transition-colors duration-200
-        focus:outline-none focus:ring-2 focus:ring-offset-2
-        dark:focus:ring-offset-stone-900
-        disabled:opacity-50 disabled:cursor-not-allowed
-        ${variantStyles[variant]}
-        ${sizeStyles[size]}
-        ${className}
-      `}
-      disabled={Boolean(disabled) || Boolean(isLoading)}
-      {...props}
-    >
-      {isLoading && <Loader2 className="animate-spin -ml-1 mr-2 h-4 w-4" />}
-      {children}
-    </button>
-  )
-}
+export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
+  (
+    { variant = 'primary', size = 'md', isLoading, className = '', children, disabled, ...props },
+    ref
+  ) => {
+    return (
+      <button
+        ref={ref}
+        className={`
+          inline-flex items-center justify-center rounded-lg font-medium
+          transition-colors duration-200
+          focus:outline-none focus:ring-2 focus:ring-offset-2
+          dark:focus:ring-offset-stone-900
+          disabled:opacity-50 disabled:cursor-not-allowed
+          ${variantStyles[variant]}
+          ${sizeStyles[size]}
+          ${className}
+        `}
+        disabled={Boolean(disabled) || Boolean(isLoading)}
+        {...props}
+      >
+        {isLoading && <Loader2 className="animate-spin -ml-1 mr-2 h-4 w-4" />}
+        {children}
+      </button>
+    )
+  }
+)
+Button.displayName = 'Button'

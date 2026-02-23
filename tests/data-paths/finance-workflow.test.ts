@@ -1,9 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { prismaMock } from '../__mocks__/prisma'
 import { mockAuth, createMockSession } from '../__mocks__/auth'
+import { Prisma } from '@prisma/client'
 
 // Prisma client extension now converts Decimals to plain numbers
-const mockDecimal = (value: number) => value
+const mockDecimal = (value: number): Prisma.Decimal => new Prisma.Decimal(value)
 
 vi.mock('@/lib/prisma', () => ({
   prisma: prismaMock,
@@ -55,6 +56,14 @@ describe('Finance Workflow Data Paths', () => {
         user: { id: '1', email: 'owner@test.com', name: 'Owner', role: 'OWNER' },
       })
     )
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ;(prismaMock.$transaction as any).mockImplementation(async (fnOrArray: unknown) => {
+      if (typeof fnOrArray === 'function') {
+        return (fnOrArray as (tx: typeof prismaMock) => Promise<unknown>)(prismaMock)
+      }
+      return Promise.all(fnOrArray as Promise<unknown>[])
+    })
+    prismaMock.receipt.deleteMany.mockResolvedValue({ count: 0 })
   })
 
   // =============================================================================
@@ -92,7 +101,7 @@ describe('Finance Workflow Data Paths', () => {
       })
 
       expect(createResult.success).toBe(true)
-      expect(createResult.transaction.id).toBe(transactionId)
+      expect(createResult.transaction?.id).toBe(transactionId)
 
       // Step 2: Update expense
       const updatedTransaction = {
@@ -465,7 +474,7 @@ describe('Finance Workflow Data Paths', () => {
       }
 
       // Simulate a month with mixed transactions
-      const transactions = [
+      const _transactions = [
         // Week 1: Rental income
         {
           id: 'tx-1',
@@ -556,7 +565,21 @@ describe('Finance Workflow Data Paths', () => {
         },
       ]
 
-      prismaMock.transaction.findMany.mockResolvedValueOnce(transactions as never)
+      // getFinanceSummary now uses aggregate + groupBy + count + expenseCategory.findMany
+      prismaMock.transaction.aggregate
+        .mockResolvedValueOnce({ _sum: { amount: mockDecimal(2600) } } as never) // income
+        .mockResolvedValueOnce({ _sum: { amount: mockDecimal(500) } } as never) // expense
+      ;(prismaMock.transaction.groupBy as any).mockResolvedValueOnce([
+        { categoryId: 'cat-rental', type: 'INCOME', _sum: { amount: mockDecimal(2600) } },
+        { categoryId: 'cat-utilities', type: 'EXPENSE', _sum: { amount: mockDecimal(200) } },
+        { categoryId: 'cat-repairs', type: 'EXPENSE', _sum: { amount: mockDecimal(300) } },
+      ] as never)
+      prismaMock.transaction.count.mockResolvedValueOnce(6 as never)
+      prismaMock.expenseCategory.findMany.mockResolvedValueOnce([
+        rentalCategory,
+        utilitiesCategory,
+        repairsCategory,
+      ] as never)
 
       const summary = await getFinanceSummary(2024, 6)
 
@@ -607,7 +630,7 @@ describe('Finance Workflow Data Paths', () => {
       }
 
       // Low income month with major repair
-      const transactions = [
+      const _transactions = [
         {
           id: 'tx-1',
           type: 'INCOME' as const,
@@ -638,7 +661,18 @@ describe('Finance Workflow Data Paths', () => {
         },
       ]
 
-      prismaMock.transaction.findMany.mockResolvedValueOnce(transactions as never)
+      prismaMock.transaction.aggregate
+        .mockResolvedValueOnce({ _sum: { amount: mockDecimal(500) } } as never)
+        .mockResolvedValueOnce({ _sum: { amount: mockDecimal(2500) } } as never)
+      ;(prismaMock.transaction.groupBy as any).mockResolvedValueOnce([
+        { categoryId: 'cat-rental', type: 'INCOME', _sum: { amount: mockDecimal(500) } },
+        { categoryId: 'cat-repairs', type: 'EXPENSE', _sum: { amount: mockDecimal(2500) } },
+      ] as never)
+      prismaMock.transaction.count.mockResolvedValueOnce(2 as never)
+      prismaMock.expenseCategory.findMany.mockResolvedValueOnce([
+        rentalCategory,
+        repairsCategory,
+      ] as never)
 
       const summary = await getFinanceSummary(2024, 2)
 

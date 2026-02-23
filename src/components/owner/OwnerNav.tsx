@@ -1,11 +1,13 @@
 'use client'
 
 import {
+  ArrowLeft,
   BarChart3,
   Calendar,
   ClipboardList,
   DollarSign,
   Home,
+  Images,
   LogOut,
   Settings,
   TreePine,
@@ -15,7 +17,6 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { signOut } from 'next-auth/react'
 import type { LucideIcon } from 'lucide-react'
-import { ThemeToggle } from '@/components/ui'
 
 interface OwnerNavProps {
   user: {
@@ -37,6 +38,7 @@ const navItems: NavItem[] = [
   { href: '/owner/maintenance', label: 'Maintenance', icon: Wrench },
   { href: '/owner/finance', label: 'Finance', icon: DollarSign },
   { href: '/owner/finance/reports', label: 'Reports', icon: BarChart3 },
+  { href: '/owner/gallery', label: 'Gallery', icon: Images },
   { href: '/owner/settings', label: 'Settings', icon: Settings },
 ]
 
@@ -92,17 +94,21 @@ const OwnerNav = ({ user }: OwnerNavProps) => {
               </span>
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-foreground truncate">
-                {user.name ?? 'Owner'}
-              </p>
+              <p className="text-sm font-medium text-foreground truncate">{user.name ?? 'Owner'}</p>
               <p className="text-xs text-muted-foreground truncate">{user.email}</p>
             </div>
           </div>
-          <ThemeToggle />
         </div>
+        <Link
+          href="/"
+          className="w-full mt-2 flex items-center gap-3 px-4 py-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors"
+        >
+          <ArrowLeft className="w-5 h-5" />
+          <span className="text-sm font-medium">Homepage</span>
+        </Link>
         <button
           onClick={handleSignOut}
-          className="w-full mt-2 flex items-center gap-3 px-4 py-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors"
+          className="w-full mt-1 flex items-center gap-3 px-4 py-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors"
         >
           <LogOut className="w-5 h-5" />
           <span className="text-sm font-medium">Sign Out</span>

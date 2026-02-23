@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma'
 import { checkRateLimit, getClientIdentifier, RATE_LIMITS } from '@/lib/rate-limit'
 import { isDateRangeAvailable } from '@/lib/utils/calendar'
 import { z } from 'zod'
+import { env } from '@/lib/env'
 
 // Zod schema for checkout request validation
 const AddonSchema = z.object({
@@ -12,12 +13,8 @@ const AddonSchema = z.object({
 })
 
 const CheckoutRequestSchema = z.object({
-  checkIn: z
-    .string()
-    .refine((date) => !isNaN(Date.parse(date)), 'Invalid check-in date format'),
-  checkOut: z
-    .string()
-    .refine((date) => !isNaN(Date.parse(date)), 'Invalid check-out date format'),
+  checkIn: z.string().refine((date) => !isNaN(Date.parse(date)), 'Invalid check-in date format'),
+  checkOut: z.string().refine((date) => !isNaN(Date.parse(date)), 'Invalid check-out date format'),
   guestName: z.string().min(1, 'Guest name is required').max(100, 'Guest name too long'),
   guestEmail: z.email('Invalid email address'),
   guestPhone: z
@@ -117,10 +114,7 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
     ])
 
     if (!isDateRangeAvailable(checkInDate, checkOutDate, existingBookings, blockedDates)) {
-      return NextResponse.json(
-        { error: 'Selected dates are no longer available' },
-        { status: 409 }
-      )
+      return NextResponse.json({ error: 'Selected dates are no longer available' }, { status: 409 })
     }
 
     const basePrice = Number(pricing.baseNightlyRate) * nights + Number(pricing.cleaningFee)
@@ -139,6 +133,18 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
 
     const totalAmount = basePrice + addonsTotal
     const depositAmount = totalAmount * (pricing.depositPercentage / 100)
+
+    console.log('[HARDENING-AUDIT]', {
+      event: 'checkout_session_creation',
+      guestEmail,
+      nights,
+      basePrice,
+      addonsTotal,
+      depositAmount,
+      totalAmount,
+      finalAmount: totalAmount + depositAmount,
+      addonCount: addons.length,
+    })
 
     // Create Stripe Checkout Session
     const session = await stripe.checkout.sessions.create({
@@ -171,8 +177,8 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
         pricingTimestamp: Date.now().toString(),
       },
       customer_email: guestEmail,
-      success_url: `${process.env.NEXT_PUBLIC_APP_URL ?? ''}/booking/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL ?? ''}/book?cancelled=true`,
+      success_url: `${env().NEXT_PUBLIC_APP_URL ?? ''}/booking/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${env().NEXT_PUBLIC_APP_URL ?? ''}/book?cancelled=true`,
     })
 
     return NextResponse.json({ url: session.url })

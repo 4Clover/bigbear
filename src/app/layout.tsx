@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
 import { ThemeProvider } from '@/components/ThemeProvider'
+import { ThemeToggle } from '@/components/ui'
 import './globals.css'
 
 const geistSans = Geist({
@@ -15,20 +16,34 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: 'Big Bear Cabin | Mountain Retreat',
-    template: '%s | Big Bear Cabin',
+    default: 'Grizzly Getaway | Mountain Retreat',
+    template: '%s | Grizzly Getaway',
   },
   description:
-    'Escape to our cozy mountain cabin in Big Bear. Perfect for families, couples, and groups seeking a peaceful retreat in nature.',
-  keywords: ['Big Bear', 'cabin rental', 'mountain retreat', 'vacation rental', 'Big Bear Lake'],
-  authors: [{ name: 'Big Bear Cabin' }],
+    'Escape to Grizzly Getaway — a cozy mountain cabin in Big Bear with a hot tub, 90" TV, and modern amenities. Minutes from Bear Mountain and Snow Summit ski resorts. Perfect for families, couples, and groups.',
+  keywords: [
+    'Grizzly Getaway',
+    'Big Bear',
+    'Big Bear Lake',
+    'cabin rental',
+    'mountain retreat',
+    'vacation rental',
+    'snowboarding',
+    'ski resort',
+    'Bear Mountain',
+    'Snow Summit',
+    'hot tub',
+    'modern appliances',
+    '90 inch TV',
+  ],
+  authors: [{ name: 'Grizzly Getaway' }],
   openGraph: {
-    title: 'Big Bear Cabin | Mountain Retreat',
+    title: 'Grizzly Getaway | Mountain Retreat',
     description:
-      'Escape to our cozy mountain cabin in Big Bear. Perfect for families, couples, and groups seeking a peaceful retreat in nature.',
+      'Escape to Grizzly Getaway — a cozy mountain cabin in Big Bear with a hot tub, 90" TV, and modern amenities. Minutes from Bear Mountain and Snow Summit ski resorts. Perfect for families, couples, and groups.',
     type: 'website',
     locale: 'en_US',
-    siteName: 'Big Bear Cabin',
+    siteName: 'Grizzly Getaway',
   },
 }
 
@@ -40,7 +55,10 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <ThemeProvider>{children}</ThemeProvider>
+        <ThemeProvider>
+          {children}
+          <ThemeToggle />
+        </ThemeProvider>
       </body>
     </html>
   )

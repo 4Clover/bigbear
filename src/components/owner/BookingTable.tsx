@@ -126,7 +126,7 @@ const BookingTable = ({ bookings }: BookingTableProps) => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span
-                      className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${statusColors[booking.status] ?? ''}`}
+                      className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${statusColors[booking.status]}`}
                     >
                       {booking.status}
                     </span>

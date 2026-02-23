@@ -2,21 +2,9 @@ packages:
   - .
 
 onlyBuiltDependencies:
-  - /
-  - '@'
   - '@prisma/engines'
-  - a
-  - c
-  - e
   - esbuild
-  - i
-  - l
-  - m
-  - n
-  - p
   - prisma
-  - r
-  - s
   - sharp
   - t
   - unrs-resolver

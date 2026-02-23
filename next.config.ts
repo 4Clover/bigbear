@@ -57,8 +57,8 @@ const securityHeaders = [
       "form-action 'self'",
       // Frame ancestors (clickjacking protection)
       "frame-ancestors 'self'",
-      // Upgrade insecure requests in production
-      'upgrade-insecure-requests',
+      // Upgrade insecure requests in production only
+      ...(isDev ? [] : ['upgrade-insecure-requests']),
     ].join('; '),
   },
 ]

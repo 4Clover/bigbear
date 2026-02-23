@@ -89,6 +89,7 @@ const notificationEvents: NotificationEvent[] = [
   'MAINTENANCE_QUOTE_RECEIVED',
   'MAINTENANCE_COMPLETED',
   'NEW_MESSAGE',
+  'GALLERY_INVITE',
 ]
 
 const addons = [

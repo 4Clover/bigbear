@@ -14,7 +14,7 @@ const statusColors: Record<BookingStatus, string> = {
   CONFIRMED: 'bg-green-100 text-green-800 border-green-200',
   CANCELLED: 'bg-red-100 text-red-800 border-red-200',
   COMPLETED: 'bg-blue-100 text-blue-800 border-blue-200',
-  NO_SHOW: 'bg-gray-100 text-gray-800 border-gray-200',
+  NO_SHOW: 'bg-stone-100 text-stone-900 border-stone-200',
 }
 
 const BookingCard = ({ booking, onApprove, onReject, onCancel, isLoading }: BookingCardProps) => {
@@ -24,15 +24,15 @@ const BookingCard = ({ booking, onApprove, onReject, onCancel, isLoading }: Book
   )
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+    <div className="bg-white rounded-xl shadow-sm border border-stone-200 p-6">
       <div className="flex items-start justify-between mb-4">
         <div>
-          <h3 className="font-semibold text-lg text-gray-900">{booking.guestName}</h3>
-          <p className="text-sm text-gray-500">{booking.guestEmail}</p>
-          {booking.guestPhone && <p className="text-sm text-gray-500">{booking.guestPhone}</p>}
+          <h3 className="font-semibold text-lg text-stone-950">{booking.guestName}</h3>
+          <p className="text-sm text-stone-600">{booking.guestEmail}</p>
+          {booking.guestPhone && <p className="text-sm text-stone-600">{booking.guestPhone}</p>}
         </div>
         <span
-          className={`text-xs font-medium px-3 py-1 rounded-full border ${statusColors[booking.status] ?? ''}`}
+          className={`text-xs font-medium px-3 py-1 rounded-full border ${statusColors[booking.status]}`}
         >
           {booking.status}
         </span>
@@ -40,18 +40,20 @@ const BookingCard = ({ booking, onApprove, onReject, onCancel, isLoading }: Book
 
       <div className="grid grid-cols-2 gap-4 mb-4">
         <div>
-          <p className="text-xs text-gray-500 uppercase tracking-wide">Check-in</p>
-          <p className="font-medium text-gray-900">{format(booking.checkIn, 'EEE, MMM d, yyyy')}</p>
+          <p className="text-xs text-stone-600 uppercase tracking-wide">Check-in</p>
+          <p className="font-medium text-stone-950">
+            {format(booking.checkIn, 'EEE, MMM d, yyyy')}
+          </p>
         </div>
         <div>
-          <p className="text-xs text-gray-500 uppercase tracking-wide">Check-out</p>
-          <p className="font-medium text-gray-900">
+          <p className="text-xs text-stone-600 uppercase tracking-wide">Check-out</p>
+          <p className="font-medium text-stone-950">
             {format(booking.checkOut, 'EEE, MMM d, yyyy')}
           </p>
         </div>
       </div>
 
-      <div className="flex items-center gap-4 text-sm text-gray-600 mb-4">
+      <div className="flex items-center gap-4 text-sm text-stone-700 mb-4">
         <span>
           {nights} night{nights !== 1 ? 's' : ''}
         </span>
@@ -61,10 +63,10 @@ const BookingCard = ({ booking, onApprove, onReject, onCancel, isLoading }: Book
         </span>
       </div>
 
-      <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+      <div className="flex items-center justify-between pt-4 border-t border-stone-100">
         <div>
-          <p className="text-xs text-gray-500">Total</p>
-          <p className="text-xl font-bold text-gray-900">
+          <p className="text-xs text-stone-600">Total</p>
+          <p className="text-xl font-bold text-stone-950">
             ${Number(booking.totalAmount).toLocaleString()}
           </p>
         </div>
@@ -89,7 +91,7 @@ const BookingCard = ({ booking, onApprove, onReject, onCancel, isLoading }: Book
                     onReject(booking.id)
                   }}
                   disabled={isLoading}
-                  className="px-4 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 disabled:opacity-50 transition-colors"
+                  className="px-4 py-2 bg-stone-100 text-stone-800 text-sm font-medium rounded-lg hover:bg-stone-200 disabled:opacity-50 transition-colors"
                 >
                   Reject
                 </button>
@@ -111,9 +113,9 @@ const BookingCard = ({ booking, onApprove, onReject, onCancel, isLoading }: Book
       </div>
 
       {booking.specialRequests && (
-        <div className="mt-4 pt-4 border-t border-gray-100">
-          <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Special Requests</p>
-          <p className="text-sm text-gray-700">{booking.specialRequests}</p>
+        <div className="mt-4 pt-4 border-t border-stone-100">
+          <p className="text-xs text-stone-600 uppercase tracking-wide mb-1">Special Requests</p>
+          <p className="text-sm text-stone-800">{booking.specialRequests}</p>
         </div>
       )}
     </div>

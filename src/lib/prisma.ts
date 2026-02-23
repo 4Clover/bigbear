@@ -1,8 +1,9 @@
 import { PrismaClient, Prisma } from '@prisma/client'
 import { PrismaNeon } from '@prisma/adapter-neon'
+import { env } from './env'
 
 const getConnectionString = (): string => {
-  const connectionString = process.env.DATABASE_URL
+  const connectionString = env().DATABASE_URL
   if (!connectionString) {
     throw new Error('DATABASE_URL environment variable is not set')
   }

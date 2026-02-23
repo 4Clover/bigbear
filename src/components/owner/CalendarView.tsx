@@ -99,7 +99,7 @@ const CalendarView = ({
   }, [bookings, blockedDates])
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+    <div className="bg-white rounded-xl shadow-sm border border-stone-200 p-4">
       <style>{`
         .rbc-calendar {
           font-family: inherit;
@@ -161,27 +161,27 @@ const CalendarView = ({
         eventPropGetter={eventStyleGetter}
         views={[Views.MONTH, Views.WEEK, Views.DAY]}
       />
-      <div className="mt-4 pt-4 border-t border-gray-100">
+      <div className="mt-4 pt-4 border-t border-stone-100">
         <div className="flex flex-wrap gap-4 text-sm">
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded bg-emerald-500" />
-            <span className="text-gray-600">Confirmed</span>
+            <span className="text-stone-700">Confirmed</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded bg-amber-500" />
-            <span className="text-gray-600">Pending</span>
+            <span className="text-stone-700">Pending</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded bg-blue-500" />
-            <span className="text-gray-600">Completed</span>
+            <span className="text-stone-700">Completed</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded bg-gray-500" />
-            <span className="text-gray-600">Blocked</span>
+            <div className="w-3 h-3 rounded bg-stone-500" />
+            <span className="text-stone-700">Blocked</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded bg-red-500" />
-            <span className="text-gray-600">Cancelled</span>
+            <span className="text-stone-700">Cancelled</span>
           </div>
         </div>
       </div>

@@ -7,6 +7,7 @@ import type { NotificationPreference } from '@prisma/client'
 
 // Mock modules
 vi.mock('@/lib/prisma', () => import('../../__mocks__/prisma'))
+vi.mock('@/lib/env', () => import('../../__mocks__/env'))
 vi.mock('@/lib/auth/guards', () => ({
   assertOwner: vi.fn().mockResolvedValue(undefined),
 }))
@@ -24,9 +25,8 @@ vi.mock('next/cache', () => ({
 }))
 
 // Import after mocks
-const { approveBookingRequest, rejectBookingRequest, cancelBooking } = await import(
-  '@/actions/bookings'
-)
+const { approveBookingRequest, rejectBookingRequest, cancelBooking } =
+  await import('@/actions/bookings')
 
 const createPreferenceFixture = (
   event: string,
@@ -150,7 +150,7 @@ describe('Booking Actions', () => {
       )
       prismaMock.notificationLog.create.mockResolvedValue({} as never)
 
-      const result = await cancelBooking(booking.id, 'guest')
+      const result = await cancelBooking(booking.id)
 
       expect(result.success).toBe(true)
       expect(mockSend).toHaveBeenCalledWith(

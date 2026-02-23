@@ -1,9 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { prismaMock } from '../../__mocks__/prisma'
 import { mockAuth, createMockSession } from '../../__mocks__/auth'
+import { Prisma } from '@prisma/client'
 
 // Prisma client extension now converts Decimals to plain numbers
-const mockDecimal = (value: number) => value
+const mockDecimal = (value: number): Prisma.Decimal => new Prisma.Decimal(value)
 
 vi.mock('@/lib/prisma', () => ({
   prisma: prismaMock,
@@ -33,10 +34,11 @@ import {
   getWorkerQuotes as _getWorkerQuotes,
   submitQuote,
   bookTimeslot as _bookTimeslot,
-  submitWorkCompletion as _submitWorkCompletion,
+  submitWorkCompletion,
   startWork as _startWork,
   createMaintenanceJob,
   getMaintenanceJobs as _getMaintenanceJobs,
+  getMaintenanceJob as _getMaintenanceJob,
   acceptQuote,
   approveWorkCompletion,
   markWorkerPaid,
@@ -137,6 +139,214 @@ describe('Maintenance Actions', () => {
     })
   })
 
+  describe('Worker data scope hardening', () => {
+    it('should return only assigned jobs for WORKER in getMaintenanceJobs', async () => {
+      mockAuth.mockResolvedValueOnce(
+        createMockSession({
+          user: { id: 'worker-user-1', email: 'worker@test.com', name: 'Worker', role: 'WORKER' },
+        })
+      )
+
+      prismaMock.workerProfile.findUnique.mockResolvedValueOnce({
+        id: 'worker-profile-1',
+        userId: 'worker-user-1',
+        businessName: null,
+        services: [],
+        phoneNumber: null,
+        address: null,
+        taxId: null,
+        isActive: true,
+        trustworthiness: null,
+        notes: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+
+      prismaMock.maintenanceJob.findMany.mockResolvedValueOnce([])
+      prismaMock.maintenanceJob.count.mockResolvedValueOnce(0)
+
+      await _getMaintenanceJobs()
+
+      expect(prismaMock.workerProfile.findUnique).toHaveBeenCalledWith({
+        where: { userId: 'worker-user-1' },
+      })
+      expect(prismaMock.maintenanceJob.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({ where: { assignedWorkerId: 'worker-profile-1' } })
+      )
+    })
+
+    it('should throw Unauthorized for WORKER fetching unassigned job', async () => {
+      mockAuth.mockResolvedValueOnce(
+        createMockSession({
+          user: { id: 'worker-user-1', email: 'worker@test.com', name: 'Worker', role: 'WORKER' },
+        })
+      )
+
+      prismaMock.workerProfile.findUnique.mockResolvedValueOnce({
+        id: 'worker-profile-1',
+        userId: 'worker-user-1',
+        businessName: null,
+        services: [],
+        phoneNumber: null,
+        address: null,
+        taxId: null,
+        isActive: true,
+        trustworthiness: null,
+        notes: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+
+      prismaMock.maintenanceJob.findUnique.mockResolvedValueOnce({
+        id: 'job-foreign',
+        title: 'Fix roof',
+        description: null,
+        priority: 'HIGH' as const,
+        status: 'ASSIGNED' as const,
+        dueDate: null,
+        images: [],
+        notes: null,
+        assignedWorkerId: 'worker-profile-2',
+        scheduledDate: null,
+        scheduledTime: null,
+        completedAt: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        quotes: [],
+        workCompletions: [],
+        assignedWorker: null,
+      } as never)
+
+      await expect(_getMaintenanceJob('job-foreign')).rejects.toThrow('Unauthorized')
+    })
+
+    it('should keep OWNER access unchanged in getMaintenanceJobs', async () => {
+      mockAuth.mockResolvedValueOnce(
+        createMockSession({
+          user: { id: 'owner-user-1', email: 'owner@test.com', name: 'Owner', role: 'OWNER' },
+        })
+      )
+
+      prismaMock.maintenanceJob.findMany.mockResolvedValueOnce([])
+      prismaMock.maintenanceJob.count.mockResolvedValueOnce(0)
+
+      await _getMaintenanceJobs()
+
+      expect(prismaMock.workerProfile.findUnique).not.toHaveBeenCalled()
+      expect(prismaMock.maintenanceJob.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          include: {
+            quotes: { include: { worker: { include: { user: true } } } },
+            workCompletions: { include: { worker: { include: { user: true } } } },
+            assignedWorker: { include: { user: true } },
+          },
+        })
+      )
+    })
+
+    it('should not expose worker email phone or taxId in WORKER-scoped results', async () => {
+      mockAuth.mockResolvedValueOnce(
+        createMockSession({
+          user: { id: 'worker-user-1', email: 'worker@test.com', name: 'Worker', role: 'WORKER' },
+        })
+      )
+
+      prismaMock.workerProfile.findUnique.mockResolvedValueOnce({
+        id: 'worker-profile-1',
+        userId: 'worker-user-1',
+        businessName: null,
+        services: [],
+        phoneNumber: null,
+        address: null,
+        taxId: null,
+        isActive: true,
+        trustworthiness: null,
+        notes: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+
+      prismaMock.maintenanceJob.findUnique.mockResolvedValueOnce({
+        id: 'job-1',
+        title: 'Fix sink',
+        description: null,
+        priority: 'MEDIUM' as const,
+        status: 'ASSIGNED' as const,
+        dueDate: null,
+        images: [],
+        notes: null,
+        assignedWorkerId: 'worker-profile-1',
+        scheduledDate: null,
+        scheduledTime: null,
+        completedAt: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        quotes: [
+          {
+            id: 'quote-1',
+            jobId: 'job-1',
+            workerId: 'worker-profile-2',
+            amount: mockDecimal(250),
+            description: null,
+            estimatedDays: null,
+            isApproved: false,
+            submittedAt: new Date(),
+            expiresAt: null,
+            worker: {
+              id: 'worker-profile-2',
+              businessName: 'Other Worker',
+              services: ['Plumbing'],
+              isActive: true,
+              trustworthiness: null,
+              notes: null,
+              user: {
+                id: 'other-user-id',
+                name: 'Other Worker',
+              },
+            },
+          },
+        ],
+        workCompletions: [],
+        assignedWorker: null,
+      } as never)
+
+      const result = await _getMaintenanceJob('job-1')
+
+      expect(prismaMock.maintenanceJob.findUnique).toHaveBeenCalledWith(
+        expect.objectContaining({
+          include: {
+            quotes: {
+              include: {
+                worker: {
+                  select: expect.objectContaining({
+                    user: { select: { id: true, name: true } },
+                  }),
+                },
+              },
+            },
+            workCompletions: {
+              include: {
+                worker: {
+                  select: expect.objectContaining({
+                    user: { select: { id: true, name: true } },
+                  }),
+                },
+              },
+            },
+            assignedWorker: {
+              select: expect.objectContaining({
+                user: { select: { id: true, name: true } },
+              }),
+            },
+          },
+        })
+      )
+      expect(result?.quotes[0]?.worker.user).not.toHaveProperty('email')
+      expect(result?.quotes[0]?.worker).not.toHaveProperty('phoneNumber')
+      expect(result?.quotes[0]?.worker).not.toHaveProperty('taxId')
+    })
+  })
+
   // =============================================================================
   // submitQuote TESTS
   // =============================================================================
@@ -183,7 +393,8 @@ describe('Maintenance Actions', () => {
         updatedAt: new Date(),
       })
       prismaMock.quote.findFirst.mockResolvedValueOnce(null)
-      prismaMock.quote.create.mockResolvedValueOnce({
+
+      const mockQuote = {
         id: 'quote-1',
         jobId: 'job-1',
         workerId: 'worker-profile-1',
@@ -193,23 +404,8 @@ describe('Maintenance Actions', () => {
         isApproved: false,
         submittedAt: new Date(),
         expiresAt: null,
-      })
-      prismaMock.maintenanceJob.update.mockResolvedValueOnce({
-        id: 'job-1',
-        title: 'Fix sink',
-        description: null,
-        priority: 'MEDIUM' as const,
-        status: 'QUOTED' as const,
-        dueDate: null,
-        images: [],
-        notes: null,
-        assignedWorkerId: null,
-        scheduledDate: null,
-        scheduledTime: null,
-        completedAt: null,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      })
+      }
+      prismaMock.$transaction.mockResolvedValueOnce([mockQuote, {} as never])
 
       const result = await submitQuote({
         jobId: 'job-1',
@@ -220,6 +416,7 @@ describe('Maintenance Actions', () => {
 
       expect(result.success).toBe(true)
       expect(result.quote).toBeDefined()
+      expect(prismaMock.$transaction).toHaveBeenCalled()
     })
 
     it('should reject quote for non-OPEN job', async () => {
@@ -241,9 +438,9 @@ describe('Maintenance Actions', () => {
         updatedAt: new Date(),
       })
 
-      await expect(
-        submitQuote({ jobId: 'job-1', amount: 500 })
-      ).rejects.toThrow('Job not available for quoting')
+      await expect(submitQuote({ jobId: 'job-1', amount: 500 })).rejects.toThrow(
+        'Job not available for quoting'
+      )
     })
 
     it('should reject duplicate quote from same worker', async () => {
@@ -276,17 +473,340 @@ describe('Maintenance Actions', () => {
         expiresAt: null,
       })
 
-      await expect(
-        submitQuote({ jobId: 'job-1', amount: 500 })
-      ).rejects.toThrow('You have already submitted a quote for this job')
+      await expect(submitQuote({ jobId: 'job-1', amount: 500 })).rejects.toThrow(
+        'You have already submitted a quote for this job'
+      )
+    })
+
+    it('should reject quote when job is assigned to another worker', async () => {
+      prismaMock.workerProfile.findUnique.mockResolvedValueOnce(mockWorkerProfile)
+      prismaMock.maintenanceJob.findUnique.mockResolvedValueOnce({
+        id: 'job-1',
+        title: 'Fix sink',
+        description: null,
+        priority: 'MEDIUM' as const,
+        status: 'OPEN' as const,
+        dueDate: null,
+        images: [],
+        notes: null,
+        assignedWorkerId: 'other-worker-profile',
+        scheduledDate: null,
+        scheduledTime: null,
+        completedAt: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+
+      await expect(submitQuote({ jobId: 'job-1', amount: 500 })).rejects.toThrow(
+        'Job already assigned to another worker'
+      )
+    })
+
+    it('should allow quote when job is assigned to the same worker', async () => {
+      prismaMock.workerProfile.findUnique.mockResolvedValueOnce(mockWorkerProfile)
+      prismaMock.maintenanceJob.findUnique.mockResolvedValueOnce({
+        id: 'job-1',
+        title: 'Fix sink',
+        description: null,
+        priority: 'MEDIUM' as const,
+        status: 'OPEN' as const,
+        dueDate: null,
+        images: [],
+        notes: null,
+        assignedWorkerId: 'worker-profile-1',
+        scheduledDate: null,
+        scheduledTime: null,
+        completedAt: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+      prismaMock.quote.findFirst.mockResolvedValueOnce(null)
+
+      const mockQuote = {
+        id: 'quote-1',
+        jobId: 'job-1',
+        workerId: 'worker-profile-1',
+        amount: mockDecimal(500),
+        description: null,
+        estimatedDays: null,
+        isApproved: false,
+        submittedAt: new Date(),
+        expiresAt: null,
+      }
+      prismaMock.$transaction.mockResolvedValueOnce([mockQuote, {} as never])
+
+      const result = await submitQuote({ jobId: 'job-1', amount: 500 })
+
+      expect(result.success).toBe(true)
+      expect(prismaMock.$transaction).toHaveBeenCalled()
     })
 
     it('should reject if worker profile not found', async () => {
       prismaMock.workerProfile.findUnique.mockResolvedValueOnce(null)
 
+      await expect(submitQuote({ jobId: 'job-1', amount: 500 })).rejects.toThrow(
+        'Worker profile not found'
+      )
+    })
+  })
+
+  // =============================================================================
+  // submitQuote $transaction rollback TESTS
+  // =============================================================================
+  describe('submitQuote transaction atomicity', () => {
+    const mockWorkerProfile = {
+      id: 'worker-profile-1',
+      userId: '1',
+      businessName: 'Test Business',
+      services: [],
+      phoneNumber: null,
+      address: null,
+      taxId: null,
+      isActive: true,
+      trustworthiness: null,
+      notes: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    }
+
+    beforeEach(() => {
+      mockAuth.mockResolvedValue(
+        createMockSession({
+          user: { id: '1', email: 'worker@test.com', name: 'Worker', role: 'WORKER' },
+        })
+      )
+    })
+
+    it('should rollback job status if quote creation fails in transaction', async () => {
+      prismaMock.workerProfile.findUnique.mockResolvedValueOnce(mockWorkerProfile)
+      prismaMock.maintenanceJob.findUnique.mockResolvedValueOnce({
+        id: 'job-1',
+        title: 'Fix sink',
+        description: null,
+        priority: 'MEDIUM' as const,
+        status: 'OPEN' as const,
+        dueDate: null,
+        images: [],
+        notes: null,
+        assignedWorkerId: null,
+        scheduledDate: null,
+        scheduledTime: null,
+        completedAt: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+      prismaMock.quote.findFirst.mockResolvedValueOnce(null)
+      prismaMock.$transaction.mockRejectedValueOnce(new Error('DB error'))
+
+      await expect(submitQuote({ jobId: 'job-1', amount: 500 })).rejects.toThrow('DB error')
+
+      expect(prismaMock.$transaction).toHaveBeenCalled()
+    })
+
+    it('should use $transaction for atomic quote creation and job status update', async () => {
+      prismaMock.workerProfile.findUnique.mockResolvedValueOnce(mockWorkerProfile)
+      prismaMock.maintenanceJob.findUnique.mockResolvedValueOnce({
+        id: 'job-1',
+        title: 'Fix sink',
+        description: null,
+        priority: 'MEDIUM' as const,
+        status: 'OPEN' as const,
+        dueDate: null,
+        images: [],
+        notes: null,
+        assignedWorkerId: null,
+        scheduledDate: null,
+        scheduledTime: null,
+        completedAt: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+      prismaMock.quote.findFirst.mockResolvedValueOnce(null)
+
+      const mockQuote = {
+        id: 'quote-1',
+        jobId: 'job-1',
+        workerId: 'worker-profile-1',
+        amount: mockDecimal(500),
+        description: null,
+        estimatedDays: null,
+        isApproved: false,
+        submittedAt: new Date(),
+        expiresAt: null,
+      }
+      prismaMock.$transaction.mockResolvedValueOnce([mockQuote, {} as never])
+
+      const result = await submitQuote({ jobId: 'job-1', amount: 500 })
+
+      expect(result.success).toBe(true)
+      expect(prismaMock.$transaction).toHaveBeenCalledTimes(1)
+    })
+  })
+
+  // =============================================================================
+  // submitWorkCompletion TESTS
+  // =============================================================================
+  describe('submitWorkCompletion', () => {
+    const mockWorkerProfile = {
+      id: 'worker-profile-1',
+      userId: '1',
+      businessName: 'Test Business',
+      services: [],
+      phoneNumber: null,
+      address: null,
+      taxId: null,
+      isActive: true,
+      trustworthiness: null,
+      notes: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    }
+
+    beforeEach(() => {
+      mockAuth.mockResolvedValue(
+        createMockSession({
+          user: { id: '1', email: 'worker@test.com', name: 'Worker', role: 'WORKER' },
+        })
+      )
+    })
+
+    it('should submit work completion atomically with $transaction', async () => {
+      prismaMock.workerProfile.findUnique.mockResolvedValueOnce(mockWorkerProfile)
+      prismaMock.maintenanceJob.findUnique.mockResolvedValueOnce({
+        id: 'job-1',
+        title: 'Fix sink',
+        description: null,
+        priority: 'MEDIUM' as const,
+        status: 'IN_PROGRESS' as const,
+        dueDate: null,
+        images: [],
+        notes: null,
+        assignedWorkerId: 'worker-profile-1',
+        scheduledDate: null,
+        scheduledTime: null,
+        completedAt: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+
+      const mockCompletion = {
+        id: 'completion-1',
+        jobId: 'job-1',
+        workerId: 'worker-profile-1',
+        description: 'Fixed the sink',
+        images: [],
+        hoursWorked: mockDecimal(2),
+        materialsUsed: null,
+        unexpectedIssues: null,
+        finalAmount: mockDecimal(500),
+        isApproved: false,
+        isPaid: false,
+        submittedAt: new Date(),
+        approvedAt: null,
+        paidAt: null,
+      }
+      prismaMock.$transaction.mockResolvedValueOnce([mockCompletion, {} as never])
+
+      const result = await submitWorkCompletion({
+        jobId: 'job-1',
+        description: 'Fixed the sink',
+        images: [],
+        finalAmount: 500,
+      })
+
+      expect(result.success).toBe(true)
+      expect(result.completion).toBeDefined()
+      expect(prismaMock.$transaction).toHaveBeenCalledTimes(1)
+    })
+
+    it('should rollback job status if work completion creation fails in transaction', async () => {
+      prismaMock.workerProfile.findUnique.mockResolvedValueOnce(mockWorkerProfile)
+      prismaMock.maintenanceJob.findUnique.mockResolvedValueOnce({
+        id: 'job-1',
+        title: 'Fix sink',
+        description: null,
+        priority: 'MEDIUM' as const,
+        status: 'IN_PROGRESS' as const,
+        dueDate: null,
+        images: [],
+        notes: null,
+        assignedWorkerId: 'worker-profile-1',
+        scheduledDate: null,
+        scheduledTime: null,
+        completedAt: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+      prismaMock.$transaction.mockRejectedValueOnce(new Error('DB error'))
+
       await expect(
-        submitQuote({ jobId: 'job-1', amount: 500 })
-      ).rejects.toThrow('Worker profile not found')
+        submitWorkCompletion({
+          jobId: 'job-1',
+          description: 'Fixed the sink',
+          images: [],
+          finalAmount: 500,
+        })
+      ).rejects.toThrow('DB error')
+
+      expect(prismaMock.$transaction).toHaveBeenCalled()
+    })
+
+    it('should reject if job is not in completable state', async () => {
+      prismaMock.workerProfile.findUnique.mockResolvedValueOnce(mockWorkerProfile)
+      prismaMock.maintenanceJob.findUnique.mockResolvedValueOnce({
+        id: 'job-1',
+        title: 'Fix sink',
+        description: null,
+        priority: 'MEDIUM' as const,
+        status: 'OPEN' as const,
+        dueDate: null,
+        images: [],
+        notes: null,
+        assignedWorkerId: 'worker-profile-1',
+        scheduledDate: null,
+        scheduledTime: null,
+        completedAt: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+
+      await expect(
+        submitWorkCompletion({
+          jobId: 'job-1',
+          description: 'Fixed',
+          images: [],
+          finalAmount: 500,
+        })
+      ).rejects.toThrow('Job is not in a state that can be completed')
+    })
+
+    it('should reject if job is not assigned to the worker', async () => {
+      prismaMock.workerProfile.findUnique.mockResolvedValueOnce(mockWorkerProfile)
+      prismaMock.maintenanceJob.findUnique.mockResolvedValueOnce({
+        id: 'job-1',
+        title: 'Fix sink',
+        description: null,
+        priority: 'MEDIUM' as const,
+        status: 'IN_PROGRESS' as const,
+        dueDate: null,
+        images: [],
+        notes: null,
+        assignedWorkerId: 'other-worker-profile',
+        scheduledDate: null,
+        scheduledTime: null,
+        completedAt: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+
+      await expect(
+        submitWorkCompletion({
+          jobId: 'job-1',
+          description: 'Fixed',
+          images: [],
+          finalAmount: 500,
+        })
+      ).rejects.toThrow('Job not assigned to you')
     })
   })
 

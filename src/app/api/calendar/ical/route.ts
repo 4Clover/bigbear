@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { formatICalDate } from '@/lib/utils/calendar'
+import { env } from '@/lib/env'
 
 export const dynamic = 'force-dynamic'
 
@@ -10,13 +11,17 @@ const formatICalTimestamp = (date: Date): string => {
 }
 
 export const GET = async (request: Request): Promise<NextResponse> => {
-  // Authenticate via bearer token or query param (for calendar app compatibility)
+  // NOTE: Query param token kept for iCal client compatibility.
+  // Apple Calendar, Google Calendar, and other iCal clients don't support
+  // custom Authorization headers. The token is a long random secret that
+  // provides adequate security for read-only calendar data.
+  // Security trade-off: token visible in server logs and browser history.
   const url = new URL(request.url)
   const tokenParam = url.searchParams.get('token')
   const authHeader = request.headers.get('authorization')
   const bearerToken = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null
 
-  const icalSecret = process.env.ICAL_SECRET
+  const icalSecret = env().ICAL_SECRET
   if (!icalSecret) {
     console.error('ICAL_SECRET is not configured')
     return NextResponse.json({ error: 'Calendar export not configured' }, { status: 500 })
@@ -69,7 +74,8 @@ END:VEVENT
       const uid = `blocked-${blocked.id}@cabin`
       const dtstart = formatICalDate(blocked.startDate)
       const dtend = formatICalDate(blocked.endDate)
-      const summary = blocked.reason ? `Blocked - ${blocked.reason}` : 'Blocked'
+      // Never expose internal reason in public iCal feed — generic label only
+      const summary = 'Blocked'
 
       ical += `BEGIN:VEVENT
 UID:${uid}

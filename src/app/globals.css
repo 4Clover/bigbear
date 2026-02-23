@@ -47,7 +47,7 @@
   --card: #ffffff;
   --card-foreground: var(--stone-900);
   --muted: var(--stone-100);
-  --muted-foreground: var(--stone-600);
+  --muted-foreground: var(--stone-700);
   --border: var(--stone-200);
   --ring: var(--forest-500);
   --primary: var(--forest-500);
@@ -71,7 +71,7 @@
   --card: var(--stone-900);
   --card-foreground: var(--stone-100);
   --muted: var(--stone-800);
-  --muted-foreground: var(--stone-400);
+  --muted-foreground: var(--stone-300);
   --border: var(--stone-700);
   --ring: var(--forest-400);
   --primary: var(--forest-400);
@@ -158,9 +158,13 @@
 
 /* Base styles */
 body {
-  background-color: var(--background);
+  background-color: transparent;
   color: var(--foreground);
-  font-family: var(--font-sans), system-ui, -apple-system, sans-serif;
+  font-family:
+    var(--font-sans),
+    system-ui,
+    -apple-system,
+    sans-serif;
 }
 
 /* Focus styles */
@@ -213,5 +217,23 @@ body {
 
 /* Smooth transitions for theme changes */
 html {
-  transition: background-color 0.2s ease, color 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
+  background-image: url('/background.png');
+  background-size: cover;
+  background-position: center bottom;
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+}
+
+/* Semi-transparent overlay for public pages */
+.bg-overlay {
+  background-color: color-mix(in srgb, var(--background) 70%, transparent);
+  backdrop-filter: blur(2px);
+  --muted-foreground: var(--stone-800);
+}
+
+.dark .bg-overlay {
+  --muted-foreground: var(--stone-200);
 }

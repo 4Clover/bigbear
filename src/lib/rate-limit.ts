@@ -5,6 +5,7 @@
 
 import { Ratelimit } from '@upstash/ratelimit'
 import { Redis } from '@upstash/redis'
+import { env } from './env'
 
 // --- Types ---
 
@@ -24,7 +25,7 @@ interface RateLimitResult {
 // --- Upstash Redis Implementation ---
 
 const isUpstashConfigured = (): boolean =>
-  Boolean(process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN)
+  Boolean(env().UPSTASH_REDIS_REST_URL && env().UPSTASH_REDIS_REST_TOKEN)
 
 // Lazy-initialized Redis client
 let redis: Redis | null = null

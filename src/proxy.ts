@@ -19,7 +19,7 @@ export const proxy = auth((req) => {
     // Not authenticated at all
     if (!session?.user) {
       const loginUrl = new URL('/login', req.nextUrl.origin)
-      loginUrl.searchParams.set('callbackUrl', pathname)
+      loginUrl.searchParams.set('callbackUrl', pathname + req.nextUrl.search)
       return NextResponse.redirect(loginUrl)
     }
 
