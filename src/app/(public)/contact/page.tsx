@@ -132,7 +132,7 @@ export default function ContactPage() {
               </div>
               <div>
                 <h3 className="font-semibold mb-1 text-foreground">Location</h3>
-                <p className="text-muted-foreground">1394 La Crescenta Dr, Big Bear, CA 92314</p>
+                <p className="text-muted-foreground">Big Bear, CA</p>
               </div>
             </div>
 

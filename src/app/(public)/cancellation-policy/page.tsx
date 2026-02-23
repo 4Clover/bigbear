@@ -16,7 +16,7 @@ export default function CancellationPolicyPage() {
           <section>
             <h2 className="text-2xl font-bold mt-8 mb-4 text-foreground">Overview</h2>
             <p className="text-muted-foreground">
-              At Grizzly Getaway (1394 La Crescenta Dr, Big Bear, CA 92314), we understand that
+              At Grizzly Getaway in Big Bear, CA, we understand that
               plans can change. Our cancellation policy is designed to be fair to both guests and
               property owners. The refund amount depends on how far in advance you cancel before
               your check-in date.

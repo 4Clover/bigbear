@@ -16,7 +16,7 @@ export default function TermsPage() {
           <section>
             <h2 className="text-2xl font-bold mt-8 mb-4 text-foreground">1. Booking and Payment</h2>
             <p className="text-muted-foreground">
-              By booking a stay at Grizzly Getaway (1394 La Crescenta Dr, Big Bear, CA 92314), you
+              By booking a stay at Grizzly Getaway in Big Bear, CA, you
               agree to these terms. A booking is confirmed once payment is received. We accept
               payment via Stripe and other methods as displayed during checkout. All prices are in
               USD and include applicable taxes unless otherwise stated.
