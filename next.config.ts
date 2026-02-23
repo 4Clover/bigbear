@@ -45,8 +45,8 @@ const securityHeaders = [
       "img-src 'self' blob: data: https://*.public.blob.vercel-storage.com",
       // Fonts: self
       "font-src 'self'",
-      // Connect: self + Stripe API + Upstash
-      "connect-src 'self' https://api.stripe.com https://*.upstash.io",
+      // Connect: self + Stripe API + Upstash + Vercel Blob
+      "connect-src 'self' https://api.stripe.com https://*.upstash.io https://vercel.com https://*.public.blob.vercel-storage.com",
       // Frames: self + Stripe (for 3D Secure)
       "frame-src 'self' https://js.stripe.com https://hooks.stripe.com",
       // Block object/embed

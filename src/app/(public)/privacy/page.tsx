@@ -16,7 +16,7 @@ export default function PrivacyPage() {
           <section>
             <h2 className="text-2xl font-bold mt-8 mb-4 text-foreground">1. Introduction</h2>
             <p className="text-muted-foreground">
-              Grizzly Getaway (1394 La Crescenta Dr, Big Bear, CA 92314) is committed to protecting
+              Grizzly Getaway, located in Big Bear, CA, is committed to protecting
               your privacy. This Privacy Policy explains how we collect, use, and protect your
               personal information when you book a stay with us.
             </p>

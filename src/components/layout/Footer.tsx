@@ -61,7 +61,7 @@ export const Footer = () => {
             <ul className="space-y-2 text-sm">
               <li className="flex items-center gap-2">
                 <MapPin className="h-4 w-4 text-forest-400" />
-                1394 La Crescenta Dr, Big Bear, CA 92314
+                Big Bear, CA
               </li>
               <li>
                 <a
