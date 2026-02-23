@@ -303,12 +303,16 @@ describe('payment webhook correctness hardening', () => {
     setupCheckoutTransactionMocks()
     mockConstructEvent.mockReturnValue(createCheckoutEvent())
 
-    mockSendBookingConfirmation.mockReturnValue(new Promise(() => {}))
+    mockSendBookingConfirmation.mockReturnValue(new Promise(() => { /* non-blocking */ }))
 
     const timeoutResult = Symbol('timeout')
     const response = await Promise.race([
       POST(createWebhookRequest()).then(() => 'resolved'),
-      new Promise<symbol>((resolve) => setTimeout(() => resolve(timeoutResult), 100)),
+      new Promise<symbol>((resolve) => {
+        setTimeout(() => {
+          resolve(timeoutResult)
+        }, 100)
+      }),
     ])
 
     expect(response).not.toBe(timeoutResult)

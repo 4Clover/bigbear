@@ -22,7 +22,7 @@ const BlockDateModal = ({ isOpen, onClose, selectedRange, existingBlock }: Block
     selectedRange?.end ? format(selectedRange.end, 'yyyy-MM-dd') : ''
   )
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault()
     startTransition(async () => {
       try {

@@ -41,7 +41,7 @@ const BookingFilters = ({
     [router, searchParams]
   )
 
-  const handleSearchSubmit = (e: React.FormEvent) => {
+  const handleSearchSubmit = (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault()
     updateParams('search', search || null)
   }

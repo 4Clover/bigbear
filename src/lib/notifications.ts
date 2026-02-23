@@ -9,7 +9,7 @@ import { env } from './env'
 
 const resend = new Resend(env().AUTH_RESEND_KEY)
 
-const fromEmail = env().RESEND_FROM_EMAIL ?? 'noreply@example.com'
+const fromEmail = env().RESEND_FROM_EMAIL
 
 // Lazy-loaded Twilio client
 let twilioClient: ReturnType<typeof Twilio> | null = null

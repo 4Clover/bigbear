@@ -1,9 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { prismaMock } from '../__mocks__/prisma'
 import { mockAuth, createMockSession } from '../__mocks__/auth'
+import { Prisma } from '@prisma/client'
 
 // Prisma client extension now converts Decimals to plain numbers
-const mockDecimal = (value: number) => value
+const mockDecimal = (value: number): Prisma.Decimal => new Prisma.Decimal(value)
 
 vi.mock('@/lib/prisma', () => ({
   prisma: prismaMock,
@@ -55,7 +56,7 @@ describe('Finance Workflow Data Paths', () => {
         user: { id: '1', email: 'owner@test.com', name: 'Owner', role: 'OWNER' },
       })
     )
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ;(prismaMock.$transaction as any).mockImplementation(async (fnOrArray: unknown) => {
       if (typeof fnOrArray === 'function') {
         return (fnOrArray as (tx: typeof prismaMock) => Promise<unknown>)(prismaMock)
@@ -100,7 +101,7 @@ describe('Finance Workflow Data Paths', () => {
       })
 
       expect(createResult.success).toBe(true)
-      expect(createResult.transaction.id).toBe(transactionId)
+      expect(createResult.transaction?.id).toBe(transactionId)
 
       // Step 2: Update expense
       const updatedTransaction = {
@@ -473,7 +474,7 @@ describe('Finance Workflow Data Paths', () => {
       }
 
       // Simulate a month with mixed transactions
-      const transactions = [
+      const _transactions = [
         // Week 1: Rental income
         {
           id: 'tx-1',
@@ -629,7 +630,7 @@ describe('Finance Workflow Data Paths', () => {
       }
 
       // Low income month with major repair
-      const transactions = [
+      const _transactions = [
         {
           id: 'tx-1',
           type: 'INCOME' as const,

@@ -15,7 +15,7 @@ const CalendarSyncList = ({ syncs }: CalendarSyncListProps) => {
   const [name, setName] = useState('')
   const [icalUrl, setIcalUrl] = useState('')
 
-  const handleAdd = (e: React.FormEvent) => {
+  const handleAdd = (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault()
     startTransition(async () => {
       try {

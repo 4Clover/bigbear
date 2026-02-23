@@ -1,9 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { prismaMock } from '../../__mocks__/prisma'
 import { mockAuth, createMockSession } from '../../__mocks__/auth'
+import { Prisma } from '@prisma/client'
 
 // Prisma client extension now converts Decimals to plain numbers
-const mockDecimal = (value: number) => value
+const mockDecimal = (value: number): Prisma.Decimal => new Prisma.Decimal(value)
 
 vi.mock('@/lib/prisma', () => ({
   prisma: prismaMock,
@@ -42,7 +43,7 @@ import {
 describe('Finance Actions', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ;(prismaMock.$transaction as any).mockImplementation(async (fnOrArray: unknown) => {
       if (typeof fnOrArray === 'function') {
         return (fnOrArray as (tx: typeof prismaMock) => Promise<unknown>)(prismaMock)
@@ -269,7 +270,7 @@ describe('Finance Actions', () => {
       })
 
       expect(result.success).toBe(true)
-      expect(result.transaction).toEqual(mockTransaction)
+      expect(result.transaction).toEqual({ ...mockTransaction, amount: Number(mockTransaction.amount) })
       expect(prismaMock.receipt.create).not.toHaveBeenCalled()
     })
 
@@ -453,7 +454,7 @@ describe('Finance Actions', () => {
       const result = await updateTransaction('tx-1', { amount: 200 })
 
       expect(result.success).toBe(true)
-      expect(result.transaction).toEqual(mockTransaction)
+      expect(result.transaction).toEqual({ ...mockTransaction, amount: Number(mockTransaction.amount) })
       expect(prismaMock.transaction.update).toHaveBeenCalledWith({
         where: { id: 'tx-1' },
         data: { amount: 200 },
@@ -1028,7 +1029,7 @@ describe('Finance Actions', () => {
   // =============================================================================
   describe('getFinanceSummary', () => {
     // Prisma groupBy has deeply nested conditional types that vitest-mock-extended cannot resolve
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const groupByMock = (prismaMock.transaction as any).groupBy as ReturnType<typeof vi.fn>
 
     const mockSummaryAggregates = (

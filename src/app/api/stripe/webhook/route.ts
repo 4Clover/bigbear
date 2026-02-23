@@ -246,7 +246,7 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
                 bookingId: newBooking.id,
                 addonId: addon.id,
                 quantity: addon.quantity,
-                price: Number(addon.price ?? 0),
+                price: addon.price ?? 0,
               },
             })
           }
@@ -280,9 +280,9 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
         const booking = transactionResult.booking
 
         // Send notifications (guest confirmation + owner notification)
-        void sendBookingConfirmation(booking).catch(() => {})
+        void sendBookingConfirmation(booking).catch(() => { /* non-blocking */ })
         sendPaymentReceived(booking, OWNER_EMAIL).catch(() => {
-          // Owner notification failure should not affect webhook response
+          /* non-blocking */
         })
       } catch (error) {
         if (
@@ -362,7 +362,7 @@ export const POST = async (request: NextRequest): Promise<NextResponse> => {
         where: { id: event.id },
         data: { status: 'pending' },
       })
-      .catch(() => {})
+      .catch(() => { /* non-blocking */ })
     throw err
   }
 }

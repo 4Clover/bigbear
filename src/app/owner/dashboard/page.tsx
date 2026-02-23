@@ -176,8 +176,8 @@ const DashboardPage = async () => {
                       {format(booking.createdAt, 'MMM d, yyyy')}
                     </p>
                   </div>
-                  <Badge variant={bookingStatusVariant[booking.status] ?? 'default'}>
-                    {bookingStatusLabel[booking.status] ?? booking.status}
+                  <Badge variant={bookingStatusVariant[booking.status]}>
+                    {bookingStatusLabel[booking.status]}
                   </Badge>
                 </div>
               ))}

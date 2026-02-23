@@ -451,7 +451,7 @@ describe('Auth Regression - Maintenance Actions', () => {
     it('GUEST error message is exactly Unauthorized', async () => {
       mockAuth.mockResolvedValue(guestSession())
 
-      const error = await getAvailableJobs().catch((e: Error) => e)
+      const error = await getAvailableJobs().catch((e: unknown) => e)
       expect(error).toBeInstanceOf(Error)
       expect((error as Error).message).toBe('Unauthorized')
     })

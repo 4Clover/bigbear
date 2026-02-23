@@ -1,9 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { prismaMock } from '../../__mocks__/prisma'
 import { mockAuth, createMockSession } from '../../__mocks__/auth'
+import { Prisma } from '@prisma/client'
 
 // Prisma client extension now converts Decimals to plain numbers
-const mockDecimal = (value: number) => value
+const mockDecimal = (value: number): Prisma.Decimal => new Prisma.Decimal(value)
 
 vi.mock('@/lib/prisma', () => ({
   prisma: prismaMock,

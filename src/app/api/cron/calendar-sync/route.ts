@@ -27,7 +27,7 @@ export const GET = async (request: Request): Promise<NextResponse> => {
 
       // Fetch with 30-second timeout
       const controller = new AbortController()
-      const fetchTimeout = setTimeout(() => controller.abort(), 30_000)
+      const fetchTimeout = setTimeout(() => { controller.abort() }, 30_000)
       let icalText: string
       try {
         const response = await fetch(sync.icalUrl, { signal: controller.signal })

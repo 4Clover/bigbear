@@ -55,9 +55,10 @@ function CategoryBreakdownInner({ data, title }: Readonly<CategoryBreakdownProps
             dataKey="value"
             label={({ name, percent }) => `${String(name)} (${((percent ?? 0) * 100).toFixed(0)}%)`}
           >
-            {data.map((_, index) => (
-              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-            ))}
+            {data.map((_, index) => {
+              // eslint-disable-next-line @typescript-eslint/no-deprecated
+              return <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+            })}
           </Pie>
           <Tooltip
             formatter={(value) => [formatCurrency(Number(value)), 'Amount']}
@@ -82,6 +83,7 @@ export function CategoryBreakdown(props: Readonly<CategoryBreakdownProps>) {
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true)
   }, [])
 

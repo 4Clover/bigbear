@@ -32,7 +32,7 @@ const BookingCard = ({ booking, onApprove, onReject, onCancel, isLoading }: Book
           {booking.guestPhone && <p className="text-sm text-stone-600">{booking.guestPhone}</p>}
         </div>
         <span
-          className={`text-xs font-medium px-3 py-1 rounded-full border ${statusColors[booking.status] ?? ''}`}
+          className={`text-xs font-medium px-3 py-1 rounded-full border ${statusColors[booking.status]}`}
         >
           {booking.status}
         </span>

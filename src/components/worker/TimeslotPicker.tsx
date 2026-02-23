@@ -31,7 +31,7 @@ const TimeslotPicker = ({ jobId, jobTitle, onSuccess, onCancel }: TimeslotPicker
 
   const minDate = new Date().toISOString().split('T')[0]
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault()
     if (!selectedDate || !selectedTime) return
 

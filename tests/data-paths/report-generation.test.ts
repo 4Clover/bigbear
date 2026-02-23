@@ -220,10 +220,10 @@ describe('Report Generation Data Paths', () => {
       )
       const totalIncome = transactions
         .filter((t) => t.type === 'INCOME')
-        .reduce((sum, t) => sum + Number(t.amount), 0)
+        .reduce((sum, t) => sum + t.amount, 0)
       const totalExpense = transactions
         .filter((t) => t.type === 'EXPENSE')
-        .reduce((sum, t) => sum + Number(t.amount), 0)
+        .reduce((sum, t) => sum + t.amount, 0)
 
       prismaMock.transaction.aggregate
         .mockResolvedValueOnce({ _sum: { amount: mockDecimal(totalIncome) } } as never)
