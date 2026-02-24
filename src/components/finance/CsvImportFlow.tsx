@@ -46,7 +46,7 @@ export const CsvImportFlow = ({ categories }: CsvImportFlowProps) => {
     setParseErrors(result.errors)
     const newMappings: Record<number, string> = {}
     result.rows.forEach((row, index) => {
-      const bCat = row.category.toLowerCase()
+      const bCat = row.category?.toLowerCase() ?? ''
       const match = categories.find(
         (c) => bCat.includes(c.name.toLowerCase()) || c.name.toLowerCase().includes(bCat)
       )
@@ -66,7 +66,7 @@ export const CsvImportFlow = ({ categories }: CsvImportFlowProps) => {
   }
 
   const uniqueBankCategories = useMemo(() => {
-    return Array.from(new Set(parsedRows.map((r) => r.category))).sort()
+    return Array.from(new Set(parsedRows.map((r) => r.category ?? '').filter(Boolean))).sort()
   }, [parsedRows])
 
   const filteredRows = useMemo(() => {
@@ -77,7 +77,7 @@ export const CsvImportFlow = ({ categories }: CsvImportFlowProps) => {
         const memoMatch = row.memo ? row.memo.toLowerCase().includes(term) : false
         if (!descMatch && !memoMatch) return false
       }
-      if (bankCategory && row.category !== bankCategory) {
+      if (bankCategory && (row.category ?? '') !== bankCategory) {
         return false
       }
 
@@ -318,7 +318,7 @@ export const CsvImportFlow = ({ categories }: CsvImportFlowProps) => {
                           {formatDate(row.transactionDate)}
                         </td>
                         <td className="px-4 py-3 text-foreground">{row.description}</td>
-                        <td className="px-4 py-3 text-muted-foreground">{row.category}</td>
+                        <td className="px-4 py-3 text-muted-foreground">{row.category ?? '\u2014'}</td>
                         <td className="px-4 py-3 text-foreground text-right whitespace-nowrap">
                           {formatCurrency(row.amount)}
                         </td>
@@ -471,7 +471,7 @@ export const CsvImportFlow = ({ categories }: CsvImportFlowProps) => {
                           )}
                         </div>
                       </td>
-                      <td className="px-4 py-3 text-muted-foreground">{row.category}</td>
+                      <td className="px-4 py-3 text-muted-foreground">{row.category ?? '\u2014'}</td>
                       <td className="px-4 py-3 text-foreground text-right whitespace-nowrap">
                         {formatCurrency(row.amount)}
                       </td>
