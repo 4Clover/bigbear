@@ -29,24 +29,24 @@ export default function NotificationLogTable({ logs }: NotificationLogTableProps
       <table className="w-full border-collapse">
         <thead>
           <tr className="border-b bg-muted/50">
-            <th className="px-4 py-3 text-left text-sm font-medium">Date</th>
-            <th className="px-4 py-3 text-left text-sm font-medium">Event</th>
-            <th className="px-4 py-3 text-left text-sm font-medium">Channel</th>
-            <th className="px-4 py-3 text-left text-sm font-medium">Recipient</th>
-            <th className="px-4 py-3 text-left text-sm font-medium">Subject</th>
-            <th className="px-4 py-3 text-left text-sm font-medium">Status</th>
+            <th className="px-2 py-3 md:px-4 md:py-3 text-left text-sm font-medium">Date</th>
+            <th className="px-2 py-3 md:px-4 md:py-3 text-left text-sm font-medium">Event</th>
+            <th className="hidden md:table-cell px-2 py-3 md:px-4 md:py-3 text-left text-sm font-medium">Channel</th>
+            <th className="px-2 py-3 md:px-4 md:py-3 text-left text-sm font-medium">Recipient</th>
+            <th className="hidden md:table-cell px-2 py-3 md:px-4 md:py-3 text-left text-sm font-medium">Subject</th>
+            <th className="px-2 py-3 md:px-4 md:py-3 text-left text-sm font-medium">Status</th>
           </tr>
         </thead>
         <tbody>
           {logs.map((log) => (
             <tr key={log.id} className="border-b hover:bg-muted/30">
-              <td className="px-4 py-3 text-sm whitespace-nowrap">{log.createdAt}</td>
-              <td className="px-4 py-3 text-sm">
+              <td className="px-2 py-3 md:px-4 md:py-3 text-sm whitespace-nowrap">{log.createdAt}</td>
+              <td className="px-2 py-3 md:px-4 md:py-3 text-sm">
                 <span className="font-mono text-xs bg-muted px-2 py-1 rounded">
                   {log.event.replace(/_/g, ' ')}
                 </span>
               </td>
-              <td className="px-4 py-3 text-sm">
+              <td className="hidden md:table-cell px-2 py-3 md:px-4 md:py-3 text-sm">
                 <span
                   className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${
                     log.channel === 'email'
@@ -57,13 +57,13 @@ export default function NotificationLogTable({ logs }: NotificationLogTableProps
                   {log.channel}
                 </span>
               </td>
-              <td className="px-4 py-3 text-sm truncate max-w-[200px]" title={log.recipient}>
+              <td className="px-2 py-3 md:px-4 md:py-3 text-sm truncate max-w-[200px]" title={log.recipient}>
                 {log.recipient}
               </td>
-              <td className="px-4 py-3 text-sm truncate max-w-[200px]" title={log.subject}>
+              <td className="hidden md:table-cell px-2 py-3 md:px-4 md:py-3 text-sm truncate max-w-[200px]" title={log.subject}>
                 {log.subject || '-'}
               </td>
-              <td className="px-4 py-3 text-sm">
+              <td className="px-2 py-3 md:px-4 md:py-3 text-sm">
                 {log.status === 'sent' ? (
                   <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-green-100 text-green-700">
                     Sent

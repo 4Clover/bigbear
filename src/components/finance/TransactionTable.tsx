@@ -62,32 +62,32 @@ export const TransactionTable = ({
   }
 
   return (
-    <div className="bg-card rounded-xl shadow-sm border border-border overflow-hidden">
+    <div className="bg-card rounded-xl shadow-sm border border-border overflow-x-auto">
       <table className="min-w-full divide-y divide-border">
         <thead className="bg-muted">
           <tr>
-            <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+            <th className="px-2 py-3 md:px-6 md:py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
               Date
             </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+            <th className="hidden md:table-cell px-2 py-3 md:px-6 md:py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
               Type
             </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+            <th className="px-2 py-3 md:px-6 md:py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
               Category
             </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+            <th className="px-2 py-3 md:px-6 md:py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
               Description
             </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+            <th className="hidden md:table-cell px-2 py-3 md:px-6 md:py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
               Vendor
             </th>
-            <th className="px-6 py-3 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider">
+            <th className="px-2 py-3 md:px-6 md:py-3 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider">
               Amount
             </th>
-            <th className="px-6 py-3 text-center text-xs font-medium text-muted-foreground uppercase tracking-wider">
+            <th className="hidden md:table-cell px-2 py-3 md:px-6 md:py-3 text-center text-xs font-medium text-muted-foreground uppercase tracking-wider">
               Receipts
             </th>
-            <th className="px-6 py-3 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider">
+            <th className="px-2 py-3 md:px-6 md:py-3 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider">
               Actions
             </th>
           </tr>
@@ -101,10 +101,10 @@ export const TransactionTable = ({
                 setEditingTransaction(transaction)
               }}
             >
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground">
+              <td className="px-2 py-3 md:px-6 md:py-4 whitespace-nowrap text-sm text-foreground">
                 {formatDate(transaction.date)}
               </td>
-              <td className="px-6 py-4 whitespace-nowrap">
+              <td className="hidden md:table-cell px-2 py-3 md:px-6 md:py-4 whitespace-nowrap">
                 <span
                   className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
                     transaction.type === 'INCOME'
@@ -115,24 +115,24 @@ export const TransactionTable = ({
                   {transaction.type}
                 </span>
               </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground">
+              <td className="px-2 py-3 md:px-6 md:py-4 whitespace-nowrap text-sm text-foreground">
                 {transaction.category.name}
               </td>
-              <td className="px-6 py-4 text-sm text-foreground max-w-xs truncate">
+              <td className="px-2 py-3 md:px-6 md:py-4 text-sm text-foreground max-w-xs truncate">
                 {transaction.description ?? '-'}
               </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
+              <td className="hidden md:table-cell px-2 py-3 md:px-6 md:py-4 whitespace-nowrap text-sm text-muted-foreground">
                 {transaction.vendor ?? '-'}
               </td>
               <td
-                className={`px-6 py-4 whitespace-nowrap text-sm font-medium text-right ${
+                className={`px-2 py-3 md:px-6 md:py-4 whitespace-nowrap text-sm font-medium text-right ${
                   transaction.type === 'INCOME' ? 'text-forest-600 dark:text-forest-400' : 'text-red-600 dark:text-red-400'
                 }`}
               >
                 {transaction.type === 'EXPENSE' ? '-' : '+'}
                 {formatCurrency(transaction.amount)}
               </td>
-              <td className="px-6 py-4 whitespace-nowrap text-center">
+              <td className="hidden md:table-cell px-2 py-3 md:px-6 md:py-4 whitespace-nowrap text-center">
                 {transaction.receipts.length > 0 ? (
                   <button
                     onClick={(e) => {
@@ -148,7 +148,7 @@ export const TransactionTable = ({
                   <span className="text-muted-foreground">-</span>
                 )}
               </td>
-              <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
+              <td className="px-2 py-3 md:px-6 md:py-4 whitespace-nowrap text-right text-sm">
                 <button
                   onClick={(e) => {
                     e.stopPropagation()
