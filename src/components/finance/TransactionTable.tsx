@@ -1,10 +1,12 @@
 'use client'
 
-import { useTransition } from 'react'
-import { Paperclip } from 'lucide-react'
-import { deleteTransaction } from '@/actions/finance'
+import { useTransition, useState, useEffect } from 'react'
+import { Paperclip, Camera } from 'lucide-react'
+import { deleteTransaction, getExpenseCategories } from '@/actions/finance'
+
 import { formatCurrency, formatDate } from '@/lib/format'
 import { Pagination } from '@/components/ui/Pagination'
+import { TransactionEditModal } from './TransactionEditModal'
 import type { Transaction, ExpenseCategory, Receipt } from '@prisma/client'
 
 type TransactionWithRelations = Omit<Transaction, 'amount'> & {
@@ -31,6 +33,12 @@ export const TransactionTable = ({
   onViewReceipts,
 }: TransactionTableProps) => {
   const [isPending, startTransition] = useTransition()
+  const [editingTransaction, setEditingTransaction] = useState<TransactionWithRelations | null>(null)
+  const [categories, setCategories] = useState<ExpenseCategory[]>([])
+
+  useEffect(() => {
+    void getExpenseCategories().then(setCategories)
+  }, [])
 
   const handleDelete = (id: string) => {
     if (!confirm('Are you sure you want to delete this transaction?')) return
@@ -86,7 +94,13 @@ export const TransactionTable = ({
         </thead>
         <tbody className="bg-card divide-y divide-border">
           {transactions.map((transaction) => (
-            <tr key={transaction.id} className="hover:bg-muted/50">
+            <tr
+              key={transaction.id}
+              className="hover:bg-muted/50 cursor-pointer"
+              onClick={() => {
+                setEditingTransaction(transaction)
+              }}
+            >
               <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground">
                 {formatDate(transaction.date)}
               </td>
@@ -121,7 +135,10 @@ export const TransactionTable = ({
               <td className="px-6 py-4 whitespace-nowrap text-center">
                 {transaction.receipts.length > 0 ? (
                   <button
-                    onClick={() => onViewReceipts?.(transaction)}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      onViewReceipts?.(transaction)
+                    }}
                     className="text-forest-600 hover:text-forest-700 dark:text-forest-400 dark:hover:text-forest-300"
                   >
                     <Paperclip className="w-5 h-5 inline" />
@@ -133,7 +150,18 @@ export const TransactionTable = ({
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
                 <button
-                  onClick={() => {
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setEditingTransaction(transaction)
+                  }}
+                  className="text-forest-600 hover:text-forest-700 dark:text-forest-400 mr-3"
+                  title="Edit / Attach Receipt"
+                >
+                  <Camera className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation()
                     handleDelete(transaction.id)
                   }}
                   disabled={isPending}
@@ -147,6 +175,19 @@ export const TransactionTable = ({
         </tbody>
       </table>
       <Pagination page={page} totalPages={totalPages} total={total} pageSize={pageSize} />
+      
+      {editingTransaction && (
+        <TransactionEditModal
+          transaction={editingTransaction}
+          categories={categories}
+          onClose={() => {
+            setEditingTransaction(null)
+          }}
+          onSuccess={() => {
+            setEditingTransaction(null)
+          }}
+        />
+      )}
     </div>
   )
 }

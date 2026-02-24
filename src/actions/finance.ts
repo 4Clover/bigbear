@@ -277,3 +277,78 @@ export const getExpenseCategories = async () => {
     take: 100,
   })
 }
+
+
+export const importExpensesFromCsv = async (
+  rows: {
+    date: Date
+    description: string
+    vendor?: string
+    amount: number
+    categoryId: string
+    notes?: string
+  }[]
+) => {
+  await assertOwnerOrAccountant()
+
+  const rowSchema = z.object({
+    date: z.coerce.date(),
+    description: z.string().min(1),
+    vendor: z.string().optional(),
+    amount: z.number().positive(),
+    categoryId: z.string().min(1),
+    notes: z.string().optional(),
+  })
+  const inputSchema = z.array(rowSchema)
+  const validated = inputSchema.safeParse(rows)
+  if (!validated.success) {
+    return { created: 0, skipped: 0, errors: [{ row: 0, message: 'Invalid input data' }] }
+  }
+
+  let created = 0
+  let skipped = 0
+  const errors: { row: number; message: string }[] = []
+
+  await prisma.$transaction(async (tx) => {
+    for (let i = 0; i < validated.data.length; i++) {
+      const row = validated.data[i]
+      if (!row) continue
+
+      const existing = await tx.transaction.findFirst({
+        where: {
+          date: row.date,
+          amount: row.amount,
+          description: row.description,
+        },
+      })
+
+      if (existing) {
+        skipped++
+        continue
+      }
+
+      try {
+        await tx.transaction.create({
+          data: {
+            type: 'EXPENSE',
+            categoryId: row.categoryId,
+            amount: row.amount,
+            date: row.date,
+            description: row.description,
+            vendor: row.vendor,
+            notes: row.notes,
+          },
+        })
+        created++
+      } catch (error) {
+        errors.push({
+          row: i + 1,
+          message: error instanceof Error ? error.message : 'Unknown error',
+        })
+      }
+    }
+  })
+
+  revalidatePath('/owner/finance')
+  return { created, skipped, errors }
+}
