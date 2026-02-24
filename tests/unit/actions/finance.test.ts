@@ -521,6 +521,23 @@ describe('Finance Actions', () => {
 
       expect(mockRevalidatePath).toHaveBeenCalledWith('/owner/finance')
     })
+
+    it('should reject unauthenticated users from updating', async () => {
+      mockAuth.mockResolvedValueOnce(null)
+
+      await expect(updateTransaction('tx-1', { amount: 200 })).rejects.toThrow('Unauthorized')
+    })
+
+    it('should propagate Prisma error for non-existent transaction', async () => {
+      prismaMock.transaction.update.mockRejectedValueOnce(
+        new Error('Record to update not found.')
+      )
+
+      await expect(updateTransaction('non-existent', { amount: 200 })).rejects.toThrow(
+        'Record to update not found.'
+      )
+      expect(mockRevalidatePath).not.toHaveBeenCalled()
+    })
   })
 
   // =============================================================================
@@ -779,6 +796,31 @@ describe('Finance Actions', () => {
           fileName: 'receipt.pdf',
         })
       ).rejects.toThrow('Unauthorized')
+    })
+
+    it('should reject unauthenticated users from adding receipts', async () => {
+      mockAuth.mockResolvedValueOnce(null)
+
+      await expect(
+        addReceiptToTransaction('tx-1', {
+          fileUrl: 'https://blob.test/receipt.pdf',
+          fileName: 'receipt.pdf',
+        })
+      ).rejects.toThrow('Unauthorized')
+    })
+
+    it('should propagate Prisma error for invalid transactionId', async () => {
+      prismaMock.receipt.create.mockRejectedValueOnce(
+        new Error('Foreign key constraint failed on the field: `transactionId`')
+      )
+
+      await expect(
+        addReceiptToTransaction('non-existent-tx', {
+          fileUrl: 'https://blob.test/receipt.pdf',
+          fileName: 'receipt.pdf',
+        })
+      ).rejects.toThrow('Foreign key constraint failed on the field: `transactionId`')
+      expect(mockRevalidatePath).not.toHaveBeenCalled()
     })
   })
 
