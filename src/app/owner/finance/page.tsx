@@ -42,12 +42,20 @@ const FinancePage = async ({ searchParams }: { searchParams: Promise<SearchParam
           <h1 className="text-2xl font-bold text-foreground">Finance</h1>
           <p className="text-muted-foreground">Track income, expenses, and receipts</p>
         </div>
-        <Link
-          href="/owner/finance/expenses"
-          className="px-4 py-2 bg-forest-600 text-white text-sm font-medium rounded-lg hover:bg-forest-700 transition-colors"
-        >
-          Add Expense
-        </Link>
+        <div className="flex items-center gap-3">
+          <Link
+            href="/owner/finance/import"
+            className="px-4 py-2 border-2 border-forest-500 text-forest-600 dark:border-forest-400 dark:text-forest-400 text-sm font-medium rounded-lg hover:bg-forest-50 dark:hover:bg-forest-950 transition-colors"
+          >
+            Import CSV
+          </Link>
+          <Link
+            href="/owner/finance/expenses"
+            className="px-4 py-2 bg-forest-600 text-white text-sm font-medium rounded-lg hover:bg-forest-700 transition-colors"
+          >
+            Add Expense
+          </Link>
+        </div>
       </div>
 
       <FinanceStats
