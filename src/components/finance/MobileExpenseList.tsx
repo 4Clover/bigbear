@@ -6,6 +6,8 @@ import { getTransactions } from '@/actions/finance'
 import { formatCurrency, formatDate } from '@/lib/format'
 import type { Transaction, ExpenseCategory, Receipt } from '@prisma/client'
 
+import { TransactionEditModal } from './TransactionEditModal'
+
 type TransactionWithRelations = Omit<Transaction, 'amount'> & {
   amount: number
   category: ExpenseCategory
@@ -13,10 +15,10 @@ type TransactionWithRelations = Omit<Transaction, 'amount'> & {
 }
 
 interface MobileExpenseListProps {
-  onAttachReceipt: (transaction: TransactionWithRelations) => void
+  categories: ExpenseCategory[]
 }
 
-export const MobileExpenseList = ({ onAttachReceipt }: MobileExpenseListProps) => {
+export const MobileExpenseList = ({ categories }: MobileExpenseListProps) => {
   const [search, setSearch] = useState('')
   const [debouncedSearch, setDebouncedSearch] = useState('')
   const [transactions, setTransactions] = useState<TransactionWithRelations[]>([])
@@ -24,6 +26,7 @@ export const MobileExpenseList = ({ onAttachReceipt }: MobileExpenseListProps) =
   const [hasMore, setHasMore] = useState(true)
   const [isPending, startTransition] = useTransition()
   const [isLoadingMore, setIsLoadingMore] = useState(false)
+  const [attachingTransaction, setAttachingTransaction] = useState<TransactionWithRelations | null>(null)
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -124,7 +127,7 @@ export const MobileExpenseList = ({ onAttachReceipt }: MobileExpenseListProps) =
 
             <button
               onClick={() => {
-                onAttachReceipt(transaction)
+                setAttachingTransaction(transaction)
               }}
               className="mt-1 w-full h-11 min-h-[44px] flex items-center justify-center bg-forest-50 text-forest-700 hover:bg-forest-100 dark:bg-forest-900/30 dark:text-forest-400 dark:hover:bg-forest-900/50 rounded-lg text-sm font-semibold transition-colors touch-manipulation"
             >
@@ -146,6 +149,30 @@ export const MobileExpenseList = ({ onAttachReceipt }: MobileExpenseListProps) =
 
       {isPending && !isLoadingMore && transactions.length === 0 && (
         <div className="text-center py-8 text-muted-foreground">Loading expenses...</div>
+      )}
+
+      {attachingTransaction && (
+        <TransactionEditModal
+          transaction={attachingTransaction}
+          categories={categories}
+          onClose={() => {
+            setAttachingTransaction(null)
+          }}
+          onSuccess={() => {
+            setAttachingTransaction(null)
+            startTransition(async () => {
+              try {
+                const result = await getTransactions(
+                  { search: debouncedSearch || undefined, type: 'EXPENSE' },
+                  { page: 1, pageSize: page * 10 }
+                )
+                setTransactions(result.data)
+              } catch (error) {
+                console.error('Failed to refresh transactions:', error)
+              }
+            })
+          }}
+        />
       )}
     </div>
   )

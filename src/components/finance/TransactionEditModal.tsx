@@ -95,6 +95,8 @@ export const TransactionEditModal = ({
           fileName: file.name,
         })
       }
+      onSuccess?.()
+      onClose()
     } catch (error) {
       console.error('Upload failed:', error)
       alert('Failed to upload file')

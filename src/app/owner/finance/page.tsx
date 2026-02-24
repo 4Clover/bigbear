@@ -3,6 +3,7 @@ import { getTransactions, getFinanceSummary, getExpenseCategories } from '@/acti
 import { FinanceStats } from '@/components/finance/FinanceStats'
 import { TransactionFilters } from '@/components/finance/TransactionFilters'
 import { TransactionTable } from '@/components/finance/TransactionTable'
+import { MobileExpenseList } from '@/components/finance/MobileExpenseList'
 import type { TransactionType } from '@prisma/client'
 
 interface SearchParams {
@@ -65,13 +66,19 @@ const FinancePage = async ({ searchParams }: { searchParams: Promise<SearchParam
         currentTo={params.to}
       />
 
-      <TransactionTable
-        transactions={paginatedTransactions.data}
-        page={paginatedTransactions.page}
-        totalPages={paginatedTransactions.totalPages}
-        total={paginatedTransactions.total}
-        pageSize={paginatedTransactions.pageSize}
-      />
+      <div className="block md:hidden">
+        <MobileExpenseList categories={categories} />
+      </div>
+
+      <div className="hidden md:block">
+        <TransactionTable
+          transactions={paginatedTransactions.data}
+          page={paginatedTransactions.page}
+          totalPages={paginatedTransactions.totalPages}
+          total={paginatedTransactions.total}
+          pageSize={paginatedTransactions.pageSize}
+        />
+      </div>
     </div>
   )
 }
