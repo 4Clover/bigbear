@@ -180,10 +180,15 @@ export const getTransactions = async (
     if (filters.endDate) (where.date as Record<string, Date>).lte = filters.endDate
   }
   if (filters?.search) {
-    where.OR = [
+    const searchConditions: Record<string, unknown>[] = [
       { description: { contains: filters.search, mode: 'insensitive' } },
       { vendor: { contains: filters.search, mode: 'insensitive' } },
     ]
+    const searchNum = Number(filters.search.replace(/^\$/, ''))
+    if (!isNaN(searchNum)) {
+      searchConditions.push({ amount: searchNum })
+    }
+    where.OR = searchConditions
   }
 
   const [transactions, total] = await Promise.all([
