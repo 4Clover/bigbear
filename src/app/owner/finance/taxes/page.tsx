@@ -2,18 +2,20 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { HandsontableWrapper } from '@/components/finance/HandsontableWrapper'
+import dynamic from 'next/dynamic'
 import { SchedulESummarySheet } from '@/components/finance/SchedulESummarySheet'
+
+const TaxesTransactionSheet = dynamic(
+  () => import('@/components/finance/TaxesTransactionSheet').then((m) => m.TaxesTransactionSheet),
+  { ssr: false, loading: () => <div className="animate-pulse bg-muted rounded-lg h-64" /> }
+)
 
 const TaxesPage = () => {
   const [activeTab, setActiveTab] = useState<'transactions' | 'schedule-e'>('transactions')
   const [year, setYear] = useState(new Date().getFullYear())
 
-  const placeholderData: unknown[][] = []
-  const colHeaders = ['Date', 'Category', 'Vendor', 'Description', 'Amount', 'Notes']
-
   const currentYear = new Date().getFullYear()
-  const years = Array.from({ length: 5 }, (_, i) => currentYear - i)
+  const years = Array.from({ length: currentYear - 2020 + 1 }, (_, i) => currentYear - i)
 
   return (
     <div className="space-y-8">
@@ -55,33 +57,31 @@ const TaxesPage = () => {
             Schedule E Summary
           </button>
         </div>
-        <div className="flex items-center gap-2">
-          <label htmlFor="tax-year" className="text-sm font-medium text-muted-foreground">
-            Year:
-          </label>
-          <select
-            id="tax-year"
-            value={year}
-            onChange={(e) => {
-              setYear(Number(e.target.value))
-            }}
-            className="rounded-lg border border-border bg-card px-3 py-1.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-forest-500"
-          >
-            {years.map((y) => (
-              <option key={y} value={y}>
-                {y}
-              </option>
-            ))}
-          </select>
-        </div>
+        {activeTab === 'schedule-e' && (
+          <div className="flex items-center gap-2">
+            <label htmlFor="tax-year" className="text-sm font-medium text-muted-foreground">
+              Year:
+            </label>
+            <select
+              id="tax-year"
+              value={year}
+              onChange={(e) => {
+                setYear(Number(e.target.value))
+              }}
+              className="rounded-lg border border-border bg-card px-3 py-1.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-forest-500"
+            >
+              {years.map((y) => (
+                <option key={y} value={y}>
+                  {y}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
       </div>
 
       <div>
-        {activeTab === 'transactions' && (
-          <div className="space-y-4">
-            <HandsontableWrapper data={placeholderData} colHeaders={colHeaders} height={500} />
-          </div>
-        )}
+        {activeTab === 'transactions' && <TaxesTransactionSheet />}
 
         {activeTab === 'schedule-e' && <SchedulESummarySheet year={year} />}
       </div>
