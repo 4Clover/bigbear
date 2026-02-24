@@ -130,11 +130,11 @@ export const ExpenseForm = ({ categories }: ExpenseFormProps) => {
         </div>
       </div>
 
-      <div className="flex justify-end gap-3">
-        <Button type="button" variant="ghost" onClick={() => { router.back(); }} disabled={isPending}>
+      <div className="flex flex-col-reverse sm:flex-row justify-end gap-3">
+        <Button type="button" variant="ghost" onClick={() => { router.back(); }} disabled={isPending} className="w-full sm:w-auto">
           Cancel
         </Button>
-        <Button type="submit" isLoading={isPending}>
+        <Button type="submit" isLoading={isPending} className="w-full sm:w-auto">
           Save Expense
         </Button>
       </div>

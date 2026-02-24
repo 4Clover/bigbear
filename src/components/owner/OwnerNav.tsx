@@ -9,8 +9,10 @@ import {
   Home,
   Images,
   LogOut,
+  Receipt,
   Settings,
   TreePine,
+  Upload,
   Wrench,
 } from 'lucide-react'
 import Link from 'next/link'
@@ -37,6 +39,8 @@ const navItems: NavItem[] = [
   { href: '/owner/calendar', label: 'Calendar', icon: Calendar },
   { href: '/owner/maintenance', label: 'Maintenance', icon: Wrench },
   { href: '/owner/finance', label: 'Finance', icon: DollarSign },
+  { href: '/owner/finance/import', label: 'Import CSV', icon: Upload },
+  { href: '/owner/finance/taxes', label: 'Taxes', icon: Receipt },
   { href: '/owner/finance/reports', label: 'Reports', icon: BarChart3 },
   { href: '/owner/gallery', label: 'Gallery', icon: Images },
   { href: '/owner/settings', label: 'Settings', icon: Settings },
@@ -50,7 +54,7 @@ const OwnerNav = ({ user }: OwnerNavProps) => {
   }
 
   return (
-    <aside className="w-64 bg-card border-r border-border min-h-screen flex flex-col">
+    <aside className="bg-card border-r border-border min-h-screen flex flex-col w-full">
       <div className="p-6 border-b border-border">
         <Link href="/owner/dashboard" className="flex items-center gap-2">
           <TreePine className="h-8 w-8 text-forest-500" />

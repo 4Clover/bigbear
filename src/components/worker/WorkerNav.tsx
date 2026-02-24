@@ -33,7 +33,7 @@ const WorkerNav = ({ user }: WorkerNavProps) => {
   }
 
   return (
-    <aside className="w-64 bg-card border-r border-border min-h-screen flex flex-col">
+    <aside className="bg-card border-r border-border min-h-screen flex flex-col w-full">
       <div className="p-6 border-b border-border">
         <Link href="/worker/jobs" className="flex items-center gap-2">
           <Wrench className="h-8 w-8 text-wood-500" />

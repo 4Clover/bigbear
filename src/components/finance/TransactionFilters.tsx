@@ -57,8 +57,8 @@ export const TransactionFilters = ({
 
   return (
     <div className="bg-card rounded-xl shadow-sm border border-border p-4">
-      <div className="flex flex-wrap gap-4 items-end">
-        <form onSubmit={handleSearchSubmit} className="flex-1 min-w-[200px]">
+      <div className="flex flex-col sm:flex-row flex-wrap gap-4 items-end">
+        <form onSubmit={handleSearchSubmit} className="w-full sm:flex-1">
           <label className="block text-sm font-medium text-foreground mb-1">Search</label>
           <div className="flex gap-2">
             <input
@@ -77,12 +77,12 @@ export const TransactionFilters = ({
           </div>
         </form>
 
-        <div>
+        <div className="w-full sm:w-auto">
           <label className="block text-sm font-medium text-foreground mb-1">Type</label>
           <select
             value={currentType ?? ''}
             onChange={(e) => { updateParams('type', e.target.value || null); }}
-            className="px-3 py-2 border border-border rounded-lg text-sm bg-background text-foreground focus:ring-2 focus:ring-primary focus:border-primary"
+            className="w-full sm:w-auto px-3 py-2 border border-border rounded-lg text-sm bg-background text-foreground focus:ring-2 focus:ring-primary focus:border-primary"
           >
             <option value="">All types</option>
             {transactionTypes.map((type) => (
@@ -93,12 +93,12 @@ export const TransactionFilters = ({
           </select>
         </div>
 
-        <div>
+        <div className="w-full sm:w-auto">
           <label className="block text-sm font-medium text-foreground mb-1">Category</label>
           <select
             value={currentCategoryId ?? ''}
             onChange={(e) => { updateParams('categoryId', e.target.value || null); }}
-            className="px-3 py-2 border border-border rounded-lg text-sm bg-background text-foreground focus:ring-2 focus:ring-primary focus:border-primary"
+            className="w-full sm:w-auto px-3 py-2 border border-border rounded-lg text-sm bg-background text-foreground focus:ring-2 focus:ring-primary focus:border-primary"
           >
             <option value="">All categories</option>
             {categories.map((category) => (
@@ -109,23 +109,23 @@ export const TransactionFilters = ({
           </select>
         </div>
 
-        <div>
+        <div className="w-full sm:w-auto">
           <label className="block text-sm font-medium text-foreground mb-1">From</label>
           <input
             type="date"
             value={currentFrom ?? ''}
             onChange={(e) => { updateParams('from', e.target.value || null); }}
-            className="px-3 py-2 border border-border rounded-lg text-sm bg-background text-foreground focus:ring-2 focus:ring-primary focus:border-primary"
+            className="w-full sm:w-auto px-3 py-2 border border-border rounded-lg text-sm bg-background text-foreground focus:ring-2 focus:ring-primary focus:border-primary"
           />
         </div>
 
-        <div>
+        <div className="w-full sm:w-auto">
           <label className="block text-sm font-medium text-foreground mb-1">To</label>
           <input
             type="date"
             value={currentTo ?? ''}
             onChange={(e) => { updateParams('to', e.target.value || null); }}
-            className="px-3 py-2 border border-border rounded-lg text-sm bg-background text-foreground focus:ring-2 focus:ring-primary focus:border-primary"
+            className="w-full sm:w-auto px-3 py-2 border border-border rounded-lg text-sm bg-background text-foreground focus:ring-2 focus:ring-primary focus:border-primary"
           />
         </div>
 

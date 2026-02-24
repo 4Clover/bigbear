@@ -12,6 +12,28 @@ interface GalleryUploaderProps {
   disabled?: boolean
 }
 
+
+const isHeicFile = (file: File): boolean => {
+  const type = file.type.toLowerCase()
+  if (type === 'image/heic' || type === 'image/heif') return true
+  return /\.hei[cf]$/i.test(file.name)
+}
+
+const convertHeicToJpeg = async (file: File): Promise<File> => {
+  const heic2any = (await import('heic2any')).default
+  const result = await heic2any({
+    blob: file,
+    toType: 'image/jpeg',
+    quality: 0.85,
+  })
+  const jpegBlob = Array.isArray(result) ? result[0] : result
+  if (!jpegBlob) {
+    throw new Error('HEIC conversion produced no output')
+  }
+  const newName = file.name.replace(/\.hei[cf]$/i, '.jpg')
+  return new File([jpegBlob], newName, { type: 'image/jpeg' })
+}
+
 const GalleryUploader = ({
   onUpload,
   uploadUrl = '/api/upload/gallery',
@@ -34,20 +56,37 @@ const GalleryUploader = ({
       setError(null)
 
       try {
-        const newImages: string[] = []
-
-        for (const file of Array.from(files)) {
-          const blob = await upload(file.name, file, {
-            access: 'public',
-            handleUploadUrl: uploadUrl,
-            ...(clientPayload ? { clientPayload } : {}),
+        const results = await Promise.allSettled(
+          Array.from(files).map(async (file) => {
+            const processedFile = isHeicFile(file)
+              ? await convertHeicToJpeg(file)
+              : file
+            const blob = await upload(processedFile.name, processedFile, {
+              access: 'public',
+              handleUploadUrl: uploadUrl,
+              ...(clientPayload ? { clientPayload } : {}),
+            })
+            return blob.url
           })
+        )
 
-          newImages.push(blob.url)
-          onUpload(blob.url)
+        const succeeded: string[] = []
+        const failedCount = results.filter((r) => r.status === 'rejected').length
+
+        for (const result of results) {
+          if (result.status === 'fulfilled') {
+            succeeded.push(result.value)
+            onUpload(result.value)
+          }
         }
 
-        setUploadedImages((prev) => [...prev, ...newImages])
+        if (succeeded.length > 0) {
+          setUploadedImages((prev) => [...prev, ...succeeded])
+        }
+
+        if (failedCount > 0) {
+          setError(`${String(failedCount)} image(s) failed to upload. Please try again.`)
+        }
       } catch (uploadError) {
         console.error('Gallery upload failed:', uploadError)
         setError('Failed to upload image. Please try again.')
@@ -134,7 +173,7 @@ const GalleryUploader = ({
           ref={inputRef}
           type="file"
           multiple
-          accept="image/jpeg,image/png,image/webp"
+          accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif"
           onChange={handleChange}
           disabled={isDisabled}
           className="hidden"
@@ -153,7 +192,7 @@ const GalleryUploader = ({
           )}
         </p>
         <p className="mt-1 text-xs text-stone-600 dark:text-stone-300">
-          JPG, PNG, or WebP up to 10MB each
+          JPG, PNG, WebP, or HEIC up to 10MB each
         </p>
       </div>
 

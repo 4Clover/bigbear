@@ -41,7 +41,7 @@ export const FinanceStats = ({
   ]
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
       {stats.map((stat) => (
         <div key={stat.label} className="bg-card rounded-xl shadow-sm border border-border p-6">
           <p className="text-sm font-medium text-muted-foreground">{stat.label}</p>
