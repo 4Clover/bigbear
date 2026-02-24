@@ -1,14 +1,22 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useTransition } from 'react'
+import Link from 'next/link'
 import { Button } from '@/components/ui/Button'
 import { parseBankCsv } from '@/lib/csv-parser'
+import { importExpensesFromCsv } from '@/actions/finance'
 import type { BankCsvRow, ParseError } from '@/lib/csv-parser'
 import type { ExpenseCategory } from '@prisma/client'
 import { formatCurrency, formatDate } from '@/lib/format'
 
 interface CsvImportFlowProps {
   categories: ExpenseCategory[]
+}
+
+interface ImportResult {
+  created: number
+  skipped: number
+  errors: { row: number; message: string }[]
 }
 
 export const CsvImportFlow = ({ categories }: CsvImportFlowProps) => {
@@ -25,6 +33,9 @@ export const CsvImportFlow = ({ categories }: CsvImportFlowProps) => {
   const [search, setSearch] = useState('')
   const [selectedRowIndices, setSelectedRowIndices] = useState<Set<number>>(new Set())
   const [categoryMappings, setCategoryMappings] = useState<Record<number, string>>({})
+
+  const [isPending, startTransition] = useTransition()
+  const [importResult, setImportResult] = useState<ImportResult | null>(null)
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -51,6 +62,7 @@ export const CsvImportFlow = ({ categories }: CsvImportFlowProps) => {
     setFromDate('')
     setToDate('')
     setSelectedRowIndices(new Set())
+    setImportResult(null)
   }
 
   const uniqueBankCategories = useMemo(() => {
@@ -123,17 +135,47 @@ export const CsvImportFlow = ({ categories }: CsvImportFlowProps) => {
   }
 
   const handleImport = () => {
-    const dataToImport = Array.from(selectedRowIndices).map((index) => ({
-      row: parsedRows[index],
-      categoryId: categoryMappings[index],
-    }))
-    console.log('Would import:', dataToImport)
-    alert('Import will be wired in next step')
+    startTransition(async () => {
+      try {
+        const rows = Array.from(selectedRowIndices)
+          .map((index) => {
+            const row = parsedRows[index]
+            const categoryId = categoryMappings[index]
+            if (!row || !categoryId) return null
+            return {
+              date: row.transactionDate,
+              description: row.description,
+              amount: Math.abs(row.amount),
+              categoryId,
+              vendor: undefined,
+              notes: row.memo ?? undefined,
+            }
+          })
+          .filter((r): r is NonNullable<typeof r> => r !== null)
+
+        const result = await importExpensesFromCsv(rows)
+        setImportResult(result)
+      } catch (error) {
+        console.error('CSV import failed:', error)
+        setImportResult({
+          created: 0,
+          skipped: 0,
+          errors: [
+            {
+              row: 0,
+              message: error instanceof Error ? error.message : 'Import failed',
+            },
+          ],
+        })
+      }
+    })
   }
 
   const selectedCount = selectedRowIndices.size
   const isImportDisabled =
-    selectedCount === 0 || Array.from(selectedRowIndices).some((idx) => !categoryMappings[idx])
+    isPending ||
+    selectedCount === 0 ||
+    Array.from(selectedRowIndices).some((idx) => !categoryMappings[idx])
 
   return (
     <div className="space-y-6">
@@ -241,7 +283,7 @@ export const CsvImportFlow = ({ categories }: CsvImportFlowProps) => {
                     onChange={(e) => {
                       setToDate(e.target.value)
                     }}
-                    className="w-full px-3 py-2 border border-border rounded-lg text-sm bg-background text-foreground focus:ring-2 focus:ring-primary focus:border-primary"
+                    className="w-full px-3 py-2 border border-border rounded-lg text-sm bg-background text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary focus:border-primary"
                   />
                 </div>
               </div>
@@ -302,6 +344,7 @@ export const CsvImportFlow = ({ categories }: CsvImportFlowProps) => {
               onClick={() => {
                 setStep(1)
               }}
+              disabled={isPending}
             >
               &larr; Back
             </Button>
@@ -309,20 +352,77 @@ export const CsvImportFlow = ({ categories }: CsvImportFlowProps) => {
 
           <div className="flex flex-wrap gap-4 items-center justify-between p-4 bg-muted/30 rounded-lg border border-border">
             <div className="flex items-center gap-3">
-              <Button variant="secondary" onClick={handleSelectAll}>
+              <Button variant="secondary" onClick={handleSelectAll} disabled={isPending}>
                 Select All Filtered
               </Button>
-              <Button variant="outline" onClick={handleDeselectAll}>
+              <Button variant="outline" onClick={handleDeselectAll} disabled={isPending}>
                 Deselect All
               </Button>
               <span className="text-sm font-medium text-foreground ml-2">
                 {selectedCount} selected
               </span>
             </div>
-            <Button onClick={handleImport} disabled={isImportDisabled}>
-              Import Selected ({selectedCount})
+            <Button
+              onClick={() => {
+                handleImport()
+              }}
+              disabled={isImportDisabled}
+              isLoading={isPending}
+            >
+              {isPending ? 'Importing...' : `Import Selected (${String(selectedCount)})`}
             </Button>
           </div>
+
+          {importResult && (
+            <div
+              className={`p-4 rounded-lg border text-sm space-y-3 ${
+                importResult.errors.length > 0
+                  ? 'bg-warning/10 border-warning/30'
+                  : 'bg-success/10 border-success/30'
+              }`}
+            >
+              <div className="flex flex-wrap gap-4 items-center">
+                <span className="font-semibold text-foreground">Import Complete</span>
+                <span className="text-success font-medium">{importResult.created} created</span>
+                {importResult.skipped > 0 && (
+                  <span className="text-muted-foreground">
+                    {importResult.skipped} skipped (duplicates)
+                  </span>
+                )}
+                {importResult.errors.length > 0 && (
+                  <span className="text-destructive font-medium">
+                    {importResult.errors.length}{' '}
+                    {importResult.errors.length === 1 ? 'error' : 'errors'}
+                  </span>
+                )}
+              </div>
+
+              {importResult.errors.length > 0 && (
+                <div className="bg-destructive/10 text-destructive p-3 rounded-lg border border-destructive/20">
+                  <p className="font-semibold mb-1">Error details:</p>
+                  <ul className="list-disc pl-5 max-h-40 overflow-y-auto space-y-0.5">
+                    {importResult.errors.map((err, i) => (
+                      <li key={i}>
+                        {err.row > 0 ? `Row ${String(err.row)}: ` : ''}
+                        {err.message}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {importResult.created > 0 && (
+                <div>
+                  <Link
+                    href="/owner/finance"
+                    className="inline-flex items-center gap-1 text-sm font-medium text-forest-600 hover:text-forest-700 dark:text-forest-400 dark:hover:text-forest-300 transition-colors"
+                  >
+                    View in Finance &rarr;
+                  </Link>
+                </div>
+              )}
+            </div>
+          )}
 
           <div className="overflow-x-auto border border-border rounded-xl">
             <table className="w-full text-sm text-left">
@@ -354,6 +454,7 @@ export const CsvImportFlow = ({ categories }: CsvImportFlowProps) => {
                           onChange={() => {
                             toggleRowSelection(globalIndex)
                           }}
+                          disabled={isPending}
                           className="rounded border-border text-primary focus:ring-primary bg-background w-4 h-4 cursor-pointer"
                         />
                       </td>
@@ -376,10 +477,11 @@ export const CsvImportFlow = ({ categories }: CsvImportFlowProps) => {
                       </td>
                       <td className="px-4 py-3">
                         <select
-                          value={categoryMappings[globalIndex] || ''}
+                          value={categoryMappings[globalIndex] ?? ''}
                           onChange={(e) => {
                             handleCategoryMappingChange(globalIndex, e.target.value)
                           }}
+                          disabled={isPending}
                           className={`w-full px-3 py-1.5 border rounded-lg text-sm bg-background text-foreground focus:ring-2 focus:ring-primary focus:border-primary transition-colors ${
                             isSelected && !categoryMappings[globalIndex]
                               ? 'border-destructive ring-1 ring-destructive/50'
