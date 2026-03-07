@@ -7,7 +7,7 @@ const getStripeClient = () => {
     throw new Error('STRIPE_SECRET_KEY is not set')
   }
   return new Stripe(secretKey, {
-    apiVersion: '2026-01-28.clover',
+    apiVersion: '2026-02-25.clover',
   })
 }
 

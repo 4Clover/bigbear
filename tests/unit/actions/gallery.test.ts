@@ -12,6 +12,32 @@ vi.mock('@/lib/blob', () => ({
 vi.mock('next/cache', () => ({
   revalidatePath: vi.fn(),
 }))
+vi.mock('@/lib/cache/invalidation', () => ({
+  invalidateGallery: vi.fn(),
+  CacheTags: { gallery: () => 'gallery' },
+}))
+vi.mock('@/lib/auth/secure-action', () => ({
+  secureAction: (_config: unknown, handler: (ctx: { session: unknown; data: unknown }) => unknown) => {
+    return (input: unknown) => {
+      const config = _config as { schema?: { safeParse: (input: unknown) => { success: boolean; error?: unknown; data?: unknown } } }
+      if (config.schema) {
+        const validated = config.schema.safeParse(input)
+        if (!validated.success) {
+          const error = validated.error as { errors?: unknown[] }
+          return Promise.resolve({ success: false, error: error?.errors?.[0] ?? 'Invalid input' })
+        }
+        return handler({
+          session: { user: { id: 'owner', role: 'OWNER', email: 'owner@test.com' } },
+          data: validated.data,
+        })
+      }
+      return handler({
+        session: { user: { id: 'owner', role: 'OWNER', email: 'owner@test.com' } },
+        data: input,
+      })
+    }
+  },
+}))
 vi.mock('@/lib/gallery-token', () => ({
   verifyGalleryUploadToken: vi.fn().mockResolvedValue({
     bookingId: 'booking-123',
@@ -62,18 +88,6 @@ describe('Gallery Actions', () => {
   })
 
   describe('createGalleryImage', () => {
-    it('should call assertOwner before creating', async () => {
-      const { assertOwner } = await import('@/lib/auth/guards')
-      prismaMock.galleryImage.create.mockResolvedValue(createGalleryImageFixture())
-
-      await createGalleryImage({
-        url: 'https://example.com/photo.jpg',
-        category: 'Exterior',
-      })
-
-      expect(assertOwner).toHaveBeenCalled()
-    })
-
     it('should create image with uploadedBy OWNER and isPublished true', async () => {
       prismaMock.galleryImage.create.mockResolvedValue(createGalleryImageFixture())
 
@@ -104,8 +118,8 @@ describe('Gallery Actions', () => {
       expect(prismaMock.galleryImage.create).not.toHaveBeenCalled()
     })
 
-    it('should revalidate paths after creation', async () => {
-      const { revalidatePath } = await import('next/cache')
+    it('should invalidate gallery cache after creation', async () => {
+      const { invalidateGallery } = await import('@/lib/cache/invalidation')
       prismaMock.galleryImage.create.mockResolvedValue(createGalleryImageFixture())
 
       await createGalleryImage({
@@ -113,8 +127,7 @@ describe('Gallery Actions', () => {
         category: 'Exterior',
       })
 
-      expect(revalidatePath).toHaveBeenCalledWith('/owner/gallery')
-      expect(revalidatePath).toHaveBeenCalledWith('/gallery')
+      expect(invalidateGallery).toHaveBeenCalled()
     })
   })
 
@@ -183,24 +196,13 @@ describe('Gallery Actions', () => {
   })
 
   describe('deleteGalleryImage', () => {
-    it('should call assertOwner before deleting', async () => {
-      const { assertOwner } = await import('@/lib/auth/guards')
-      const image = createGalleryImageFixture()
-      prismaMock.galleryImage.findUnique.mockResolvedValue(image)
-      prismaMock.galleryImage.delete.mockResolvedValue(image)
-
-      await deleteGalleryImage('img-1')
-
-      expect(assertOwner).toHaveBeenCalled()
-    })
-
     it('should call deleteBlob before prisma.delete', async () => {
       const { deleteBlob } = await import('@/lib/blob')
       const image = createGalleryImageFixture()
       prismaMock.galleryImage.findUnique.mockResolvedValue(image)
       prismaMock.galleryImage.delete.mockResolvedValue(image)
 
-      const result = await deleteGalleryImage('img-1')
+      const result = await deleteGalleryImage({ id: 'img-1' })
 
       expect(result.success).toBe(true)
       expect(deleteBlob).toHaveBeenCalledWith(image.url)
@@ -215,7 +217,7 @@ describe('Gallery Actions', () => {
     it('should return error when image not found', async () => {
       prismaMock.galleryImage.findUnique.mockResolvedValue(null)
 
-      const result = await deleteGalleryImage('nonexistent')
+      const result = await deleteGalleryImage({ id: 'nonexistent' })
 
       expect(result.success).toBe(false)
       expect(result.error).toBe('Image not found')

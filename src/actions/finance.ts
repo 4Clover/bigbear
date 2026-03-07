@@ -180,10 +180,15 @@ export const getTransactions = async (
     if (filters.endDate) (where.date as Record<string, Date>).lte = filters.endDate
   }
   if (filters?.search) {
-    where.OR = [
+    const searchConditions: Record<string, unknown>[] = [
       { description: { contains: filters.search, mode: 'insensitive' } },
       { vendor: { contains: filters.search, mode: 'insensitive' } },
     ]
+    const searchNum = Number(filters.search.replace(/^\$/, ''))
+    if (!isNaN(searchNum)) {
+      searchConditions.push({ amount: searchNum })
+    }
+    where.OR = searchConditions
   }
 
   const [transactions, total] = await Promise.all([
@@ -271,4 +276,79 @@ export const getExpenseCategories = async () => {
     orderBy: { sortOrder: 'asc' },
     take: 100,
   })
+}
+
+
+export const importExpensesFromCsv = async (
+  rows: {
+    date: Date
+    description: string
+    vendor?: string
+    amount: number
+    categoryId: string
+    notes?: string
+  }[]
+) => {
+  await assertOwnerOrAccountant()
+
+  const rowSchema = z.object({
+    date: z.coerce.date(),
+    description: z.string().min(1),
+    vendor: z.string().optional(),
+    amount: z.number().positive(),
+    categoryId: z.string().min(1),
+    notes: z.string().optional(),
+  })
+  const inputSchema = z.array(rowSchema)
+  const validated = inputSchema.safeParse(rows)
+  if (!validated.success) {
+    return { created: 0, skipped: 0, errors: [{ row: 0, message: 'Invalid input data' }] }
+  }
+
+  let created = 0
+  let skipped = 0
+  const errors: { row: number; message: string }[] = []
+
+  await prisma.$transaction(async (tx) => {
+    for (let i = 0; i < validated.data.length; i++) {
+      const row = validated.data[i]
+      if (!row) continue
+
+      const existing = await tx.transaction.findFirst({
+        where: {
+          date: row.date,
+          amount: row.amount,
+          description: row.description,
+        },
+      })
+
+      if (existing) {
+        skipped++
+        continue
+      }
+
+      try {
+        await tx.transaction.create({
+          data: {
+            type: 'EXPENSE',
+            categoryId: row.categoryId,
+            amount: row.amount,
+            date: row.date,
+            description: row.description,
+            vendor: row.vendor,
+            notes: row.notes,
+          },
+        })
+        created++
+      } catch (error) {
+        errors.push({
+          row: i + 1,
+          message: error instanceof Error ? error.message : 'Unknown error',
+        })
+      }
+    }
+  })
+
+  revalidatePath('/owner/finance')
+  return { created, skipped, errors }
 }

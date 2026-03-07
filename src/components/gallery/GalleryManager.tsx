@@ -19,6 +19,7 @@ import {
 import { CSS } from '@dnd-kit/utilities'
 import { GripVertical } from 'lucide-react'
 import { useMemo, useState, useTransition } from 'react'
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 
 import {
   approveGalleryImage,
@@ -318,6 +319,8 @@ export const GalleryManager = ({ images }: GalleryManagerProps) => {
     message: string
   } | null>(null)
   const [isPending, startTransition] = useTransition()
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null)
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
@@ -444,11 +447,17 @@ export const GalleryManager = ({ images }: GalleryManagerProps) => {
   }
 
   const handleDelete = (id: string) => {
-    if (!window.confirm('Are you sure you want to delete this image?')) {
-      return
-    }
+    setPendingDeleteId(id)
+    setDeleteConfirmOpen(true)
+  }
+
+  const confirmDelete = () => {
+    if (!pendingDeleteId) return
+    const id = pendingDeleteId
 
     setStatusMessage(null)
+    setDeleteConfirmOpen(false)
+    setPendingDeleteId(null)
 
     startTransition(async () => {
       const result = await deleteGalleryImage(id)
@@ -503,6 +512,7 @@ export const GalleryManager = ({ images }: GalleryManagerProps) => {
   }
 
   return (
+    <>
     <div className="space-y-6">
       <div className="flex flex-wrap gap-2">
         {(Object.keys(FILTER_LABELS) as FilterTab[]).map((filterKey) => {
@@ -591,5 +601,17 @@ export const GalleryManager = ({ images }: GalleryManagerProps) => {
         </DndContext>
       )}
     </div>
+      <ConfirmDialog
+        open={deleteConfirmOpen}
+        onOpenChange={setDeleteConfirmOpen}
+        title="Delete Image"
+        description="Are you sure you want to delete this image? This action cannot be undone."
+        confirmLabel="Delete"
+        variant="destructive"
+        onConfirm={confirmDelete}
+        isLoading={isPending}
+      />
+
+    </>
   )
 }

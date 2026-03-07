@@ -81,22 +81,22 @@ const BookingTable = ({ bookings }: BookingTableProps) => {
         <table className="min-w-full divide-y divide-border">
           <thead className="bg-muted">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+              <th className="px-2 py-3 md:px-6 md:py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                 Guest
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+              <th className="px-2 py-3 md:px-6 md:py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                 Dates
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+              <th className="hidden md:table-cell px-2 py-3 md:px-6 md:py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                 Guests
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+              <th className="hidden md:table-cell px-2 py-3 md:px-6 md:py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                 Total
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+              <th className="px-2 py-3 md:px-6 md:py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                 Status
               </th>
-              <th className="px-6 py-3 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider">
+              <th className="px-2 py-3 md:px-6 md:py-3 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider">
                 Actions
               </th>
             </tr>
@@ -106,32 +106,32 @@ const BookingTable = ({ bookings }: BookingTableProps) => {
               const isActionPending = isPending && actionId === booking.id
               return (
                 <tr key={booking.id} className="hover:bg-muted/50">
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  <td className="px-2 py-3 md:px-6 md:py-4 whitespace-nowrap">
                     <div>
                       <div className="text-sm font-medium text-foreground">{booking.guestName}</div>
                       <div className="text-sm text-muted-foreground">{booking.guestEmail}</div>
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  <td className="px-2 py-3 md:px-6 md:py-4 whitespace-nowrap">
                     <div className="text-sm text-foreground">
                       {format(booking.checkIn, 'MMM d')} - {format(booking.checkOut, 'MMM d')}
                     </div>
                     <div className="text-sm text-muted-foreground">{format(booking.checkIn, 'yyyy')}</div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground">
+                  <td className="hidden md:table-cell px-2 py-3 md:px-6 md:py-4 whitespace-nowrap text-sm text-foreground">
                     {booking.numberOfGuests}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-foreground">
+                  <td className="hidden md:table-cell px-2 py-3 md:px-6 md:py-4 whitespace-nowrap text-sm font-medium text-foreground">
                     ${Number(booking.totalAmount).toLocaleString()}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  <td className="px-2 py-3 md:px-6 md:py-4 whitespace-nowrap">
                     <span
                       className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${statusColors[booking.status]}`}
                     >
                       {booking.status}
                     </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
+                  <td className="px-2 py-3 md:px-6 md:py-4 whitespace-nowrap text-right text-sm">
                     <div className="flex justify-end gap-2">
                       {booking.status === 'PENDING' && (
                         <>

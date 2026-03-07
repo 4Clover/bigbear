@@ -21,6 +21,12 @@ vi.mock('@/lib/notifications', () => ({
   sendGalleryUploadInvite: mockSendGalleryUploadInvite,
 }))
 
+vi.mock('@/lib/api/route-gates', () => ({
+  cronRoute: (handler: (req: Request) => Promise<Response>) => handler,
+  authenticatedRoute: vi.fn(),
+  publicRoute: vi.fn(),
+}))
+
 const { GET } = await import('@/app/api/cron/reminders/route')
 
 function createCronRequest(): Request {
@@ -92,7 +98,7 @@ describe('cron reminders dedup behavior', () => {
         .mockResolvedValueOnce([]) // GUEST_CHECKOUT_REMINDER
         .mockResolvedValueOnce([{ recipient: 'already-sent@test.com' }] as never) // GALLERY_INVITE
 
-      const response = await GET(createCronRequest())
+      const response = await GET(createCronRequest() as never)
       const json = await response.json()
 
       // Should only send to the new guest
@@ -117,7 +123,7 @@ describe('cron reminders dedup behavior', () => {
         .mockResolvedValueOnce([]) // GUEST_CHECKOUT_REMINDER
         .mockResolvedValueOnce([]) // GALLERY_INVITE - none sent
 
-      const response = await GET(createCronRequest())
+      const response = await GET(createCronRequest() as never)
       const json = await response.json()
 
       expect(mockSendGalleryUploadInvite).toHaveBeenCalledTimes(2)
@@ -143,7 +149,7 @@ describe('cron reminders dedup behavior', () => {
         .mockResolvedValueOnce([]) // GUEST_CHECKOUT_REMINDER
         .mockResolvedValueOnce([]) // GALLERY_INVITE
 
-      const response = await GET(createCronRequest())
+      const response = await GET(createCronRequest() as never)
       const json = await response.json()
 
       expect(mockSendCheckinReminder).toHaveBeenCalledTimes(1)
@@ -176,7 +182,7 @@ describe('cron reminders dedup behavior', () => {
         ] as never) // GUEST_CHECKOUT_REMINDER
         .mockResolvedValueOnce([]) // GALLERY_INVITE
 
-      const response = await GET(createCronRequest())
+      const response = await GET(createCronRequest() as never)
       const json = await response.json()
 
       expect(mockSendCheckoutReminder).toHaveBeenCalledTimes(1)
@@ -202,7 +208,7 @@ describe('cron reminders dedup behavior', () => {
         .mockResolvedValueOnce([]) // GUEST_CHECKOUT_REMINDER
         .mockResolvedValueOnce([]) // GALLERY_INVITE
 
-      await GET(createCronRequest())
+      await GET(createCronRequest() as never)
 
       // Batch: exactly 3 findMany calls for dedup (one per event type)
       expect(prismaMock.notificationLog.findMany).toHaveBeenCalledTimes(3)

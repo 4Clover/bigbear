@@ -79,22 +79,22 @@ const JobList = ({
         <table className="min-w-full divide-y divide-border">
           <thead className="bg-muted">
             <tr>
-              <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+              <th className="px-2 py-3 md:px-4 md:py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                 Job
               </th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+              <th className="hidden md:table-cell px-2 py-3 md:px-4 md:py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                 Priority
               </th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+              <th className="px-2 py-3 md:px-4 md:py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                 Status
               </th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+              <th className="hidden md:table-cell px-2 py-3 md:px-4 md:py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                 Due
               </th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+              <th className="hidden md:table-cell px-2 py-3 md:px-4 md:py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                 Assigned
               </th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+              <th className="px-2 py-3 md:px-4 md:py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                 Actions
               </th>
             </tr>
@@ -102,7 +102,7 @@ const JobList = ({
           <tbody className="bg-card divide-y divide-border">
             {jobs.map((job) => (
               <tr key={job.id} className="hover:bg-muted/50">
-                <td className="px-4 py-4">
+                <td className="px-2 py-3 md:px-4 md:py-4">
                   <div className="max-w-xs">
                     <p className="font-medium text-foreground truncate">{job.title}</p>
                     {job.description && (
@@ -110,27 +110,27 @@ const JobList = ({
                     )}
                   </div>
                 </td>
-                <td className="px-4 py-4">
+                <td className="hidden md:table-cell px-2 py-3 md:px-4 md:py-4">
                   <span className={`px-2 py-1 text-xs font-medium rounded ${priorityColors[job.priority]}`}>
                     {job.priority}
                   </span>
                 </td>
-                <td className="px-4 py-4">
+                <td className="px-2 py-3 md:px-4 md:py-4">
                   <span className={`px-2 py-1 text-xs font-medium rounded ${statusColors[job.status]}`}>
                     {job.status.replace('_', ' ')}
                   </span>
                 </td>
-                <td className="px-4 py-4 text-sm text-muted-foreground">
+                <td className="hidden md:table-cell px-2 py-3 md:px-4 md:py-4 text-sm text-muted-foreground">
                   {formatDate(job.dueDate)}
                 </td>
-                <td className="px-4 py-4 text-sm text-muted-foreground">
+                <td className="hidden md:table-cell px-2 py-3 md:px-4 md:py-4 text-sm text-muted-foreground">
                   {job.assignedWorker ? (
                     job.assignedWorker.user.name ?? job.assignedWorker.user.email
                   ) : (
                     '-'
                   )}
                 </td>
-                <td className="px-4 py-4">
+                <td className="px-2 py-3 md:px-4 md:py-4">
                   <div className="flex flex-wrap gap-1">
                     {job.status === 'QUOTED' && job.quotes.length > 0 && (
                       <button

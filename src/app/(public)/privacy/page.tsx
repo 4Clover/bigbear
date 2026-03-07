@@ -1,5 +1,7 @@
 import type { Metadata } from 'next'
 
+export const revalidate = 86400 // 24 hours ISR
+
 export const metadata: Metadata = {
   title: 'Privacy Policy',
   description: 'Privacy policy for Grizzly Getaway cabin rental.',

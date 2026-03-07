@@ -301,7 +301,7 @@ describe('API Route Authorization Boundaries', () => {
 
   describe('bearer-protected: /api/cron/reminders', () => {
     it('should return 401 when no authorization header', async () => {
-      const response = await remindersGET(createGetRequest('/api/cron/reminders'))
+      const response = await remindersGET(createGetRequest('/api/cron/reminders') as never)
       const json = await response.json()
 
       expect(response.status).toBe(401)
@@ -313,7 +313,7 @@ describe('API Route Authorization Boundaries', () => {
         headers: { Authorization: 'Bearer wrong-secret' },
       })
 
-      const response = await remindersGET(request)
+      const response = await remindersGET(request as never)
       const json = await response.json()
 
       expect(response.status).toBe(401)
@@ -327,7 +327,7 @@ describe('API Route Authorization Boundaries', () => {
         headers: { Authorization: 'Bearer some-token' },
       })
 
-      const response = await remindersGET(request)
+      const response = await remindersGET(request as never)
 
       expect(response.status).toBe(401)
     })

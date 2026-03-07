@@ -73,6 +73,12 @@ vi.mock('node-ical', () => ({
   },
 }))
 
+vi.mock('@/lib/api/route-gates', () => ({
+  cronRoute: (handler: (req: Request) => Promise<Response>) => handler,
+  authenticatedRoute: vi.fn(),
+  publicRoute: vi.fn(),
+}))
+
 const { POST: webhookPOST } = await import('@/app/api/stripe/webhook/route')
 const { GET: remindersGET } = await import('@/app/api/cron/reminders/route')
 const { GET: calendarSyncGET } = await import('@/app/api/cron/calendar-sync/route')
@@ -89,7 +95,7 @@ const createCronRequest = (path: string) =>
   new Request(`http://localhost${path}`, {
     method: 'GET',
     headers: { authorization: 'Bearer test-cron-secret-1234567890' },
-  })
+  }) as never
 
 const createCheckoutEvent = (addonsJson: string) => ({
   id: 'evt_regression_test',
