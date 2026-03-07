@@ -5,6 +5,8 @@ import { prisma } from '@/lib/prisma'
 import { deleteBlob } from '@/lib/blob'
 import { revalidatePath } from 'next/cache'
 import { assertOwner } from '@/lib/auth/guards'
+import { secureAction } from '@/lib/auth/secure-action'
+import { invalidateGallery } from '@/lib/cache/invalidation'
 import { GALLERY_CATEGORIES, verifyGalleryUploadToken } from '@/lib/gallery-token'
 import { ImageUploader } from '@prisma/client'
 
@@ -91,32 +93,21 @@ export const getPublicGalleryImages = async () => {
   return { guestPhotos, propertyPhotos }
 }
 
-export const createGalleryImage = async (data: {
-  url: string
-  alt?: string
-  caption?: string
-  category: (typeof GALLERY_CATEGORIES)[number]
-  sortOrder?: number
-}) => {
-  await assertOwner()
+export const createGalleryImage = secureAction(
+  { roles: 'OWNER', schema: createGalleryImageSchema },
+  async ({ data }) => {
+    await prisma.galleryImage.create({
+      data: {
+        ...data,
+        uploadedBy: ImageUploader.OWNER,
+        isPublished: true,
+      },
+    })
 
-  const validated = createGalleryImageSchema.safeParse(data)
-  if (!validated.success) {
-    const fieldErrors = getFieldErrors(validated.error)
-    return { success: false, error: getValidationErrorMessage(fieldErrors) }
+    invalidateGallery()
+    return { success: true }
   }
-
-  await prisma.galleryImage.create({
-    data: {
-      ...validated.data,
-      uploadedBy: ImageUploader.OWNER,
-      isPublished: true,
-    },
-  })
-
-  revalidateGalleryPaths()
-  return { success: true }
-}
+)
 
 export const createGuestGalleryImage = async (data: {
   token: string
@@ -187,32 +178,27 @@ export const updateGalleryImage = async (data: {
   return { success: true }
 }
 
-export const deleteGalleryImage = async (id: string) => {
-  await assertOwner()
+export const deleteGalleryImage = secureAction(
+  { roles: 'OWNER', schema: idSchema },
+  async ({ data }) => {
+    const image = await prisma.galleryImage.findUnique({
+      where: { id: data.id },
+    })
 
-  const validated = idSchema.safeParse({ id })
-  if (!validated.success) {
-    const fieldErrors = getFieldErrors(validated.error)
-    return { success: false, error: getValidationErrorMessage(fieldErrors) }
+    if (!image) {
+      return { success: false, error: 'Image not found' }
+    }
+
+    await deleteBlob(image.url)
+
+    await prisma.galleryImage.delete({
+      where: { id: image.id },
+    })
+
+    invalidateGallery()
+    return { success: true }
   }
-
-  const image = await prisma.galleryImage.findUnique({
-    where: { id: validated.data.id },
-  })
-
-  if (!image) {
-    return { success: false, error: 'Image not found' }
-  }
-
-  await deleteBlob(image.url)
-
-  await prisma.galleryImage.delete({
-    where: { id: image.id },
-  })
-
-  revalidateGalleryPaths()
-  return { success: true }
-}
+)
 
 export const approveGalleryImage = async (id: string) => {
   await assertOwner()

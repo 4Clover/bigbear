@@ -1,15 +1,8 @@
-import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
-import { auth } from '@/lib/auth'
 import { exportReportToCsv } from '@/actions/reports'
-import { apiUnauthorized } from '@/lib/api-response'
+import { authenticatedRoute } from '@/lib/api/route-gates'
 
-export const GET = async (request: NextRequest): Promise<NextResponse> => {
-  const session = await auth()
-  if (!session?.user || !['OWNER', 'ACCOUNTANT'].includes(session.user.role)) {
-    return apiUnauthorized()
-  }
-
+export const GET = authenticatedRoute(['OWNER', 'ACCOUNTANT'], async (request) => {
   try {
     const { searchParams } = new URL(request.url)
     const year = parseInt(searchParams.get('year') ?? new Date().getFullYear().toString())
@@ -40,4 +33,4 @@ export const GET = async (request: NextRequest): Promise<NextResponse> => {
     console.error('CSV export error:', error)
     return NextResponse.json({ error: 'Failed to generate CSV' }, { status: 500 })
   }
-}
+})

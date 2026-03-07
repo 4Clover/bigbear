@@ -6,18 +6,11 @@ import {
   sendGalleryUploadInvite,
 } from '@/lib/notifications'
 import { addDays, subDays, startOfDay, endOfDay } from 'date-fns'
-import { env } from '@/lib/env'
+import { cronRoute } from '@/lib/api/route-gates'
 
 export const dynamic = 'force-dynamic'
 
-export const GET = async (request: Request): Promise<NextResponse> => {
-  // Verify cron secret for security
-  const authHeader = request.headers.get('authorization')
-  const cronSecret = env().CRON_SECRET
-  if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
-
+export const GET = cronRoute(async () => {
   const tomorrow = addDays(new Date(), 1)
   const tomorrowStart = startOfDay(tomorrow)
   const tomorrowEnd = endOfDay(tomorrow)
@@ -147,4 +140,4 @@ export const GET = async (request: Request): Promise<NextResponse> => {
     },
     errors: allErrors.length > 0 ? allErrors : undefined,
   })
-}
+})
