@@ -58,12 +58,21 @@ Primary data mutations. Each file corresponds to a domain: `bookings.ts`, `finan
 
 ### Key Libraries
 
-- `src/lib/prisma.ts` - Prisma client singleton (uses global to prevent hot-reload duplicates)
+- `src/lib/prisma.ts` - Prisma client singleton (Neon serverless adapter, uses global to prevent hot-reload duplicates)
 - `src/lib/stripe.ts` - Stripe client
 - `src/lib/env.ts` - Zod-validated environment variables (fails fast at startup)
 - `src/lib/errors.ts` - Custom error classes (`AppError`, `NotFoundError`, `ValidationError`, etc.)
-- `src/lib/notifications.ts` - Email (Resend) and SMS (Twilio) notifications
+- `src/lib/notifications.ts` - Email (Resend) and SMS (Twilio) notifications; Twilio client is lazy-loaded
 - `src/lib/rate-limit.ts` - Upstash Redis rate limiting
+- `src/lib/auth/secure-action.ts` - `secureAction()` and `secureFormAction()` wrappers (auth + validation in one)
+
+### Cache Invalidation (`src/lib/cache/invalidation.ts`)
+
+Centralized `CacheTags` object defines tag names per domain. Domain invalidation helpers combine `revalidateTag()` + `revalidatePath()`:
+
+- `invalidateGallery()`, `invalidateBookings()`, `invalidateMaintenance()`, `invalidateFinance()`, `invalidateCalendar()`, `invalidateNotifications()`
+
+Always use these helpers in server actions instead of manual `revalidatePath()` calls — they ensure all related paths and tags are invalidated together.
 
 ### User Roles (4 types)
 
@@ -73,24 +82,44 @@ Primary data mutations. Each file corresponds to a domain: `bookings.ts`, `finan
 
 ### Server Action Validation (Zod 4)
 
+Two approaches — use `secureAction` wrapper for new actions (preferred), or manual guards for complex cases:
+
 ```typescript
+// PREFERRED: secureAction wrapper (auth + validation combined)
+'use server'
+import { secureAction } from '@/lib/auth/secure-action'
+
+const schema = z.object({ id: z.string() })
+
+export const deleteImage = secureAction({ roles: 'OWNER', schema }, async ({ session, data }) => {
+  await prisma.galleryImage.delete({ where: { id: data.id } })
+  return { success: true }
+})
+```
+
+```typescript
+// For useActionState forms: secureFormAction wrapper
+import { secureFormAction } from '@/lib/auth/secure-action'
+
+export const updateProfile = secureFormAction(
+  { roles: 'OWNER', schema: profileSchema },
+  async ({ session, data }) => {
+    await prisma.user.update({ where: { id: session.user.id }, data })
+    return { success: true }
+  }
+)
+// Client: const [state, formAction, pending] = useActionState(updateProfile, { success: true })
+```
+
+```typescript
+// MANUAL: For complex multi-step actions with custom error handling
 'use server'
 import { z } from 'zod'
 import { assertOwner } from '@/lib/auth/guards'
 
-const schema = z.object({
-  email: z.email(),
-  amount: z.coerce.number().positive(),
-})
-
 export async function createInvoice(formData: FormData) {
   await assertOwner() // Auth first
-
-  const validated = schema.safeParse({
-    email: formData.get('email'),
-    amount: formData.get('amount'),
-  })
-
+  const validated = schema.safeParse(Object.fromEntries(formData.entries()))
   if (!validated.success) {
     return { errors: validated.error.flatten().fieldErrors }
   }
@@ -281,28 +310,34 @@ Include a comment block at its beginning:
 
 `@/*` maps to `src/*` (configured in tsconfig.json and vitest.config.ts)
 
-## MCP Servers
+## Documentation Lookup
 
-### Ref (Documentation Search)
+When working with libraries (Prisma, Stripe, Resend, Auth.js, Zod, date-fns, etc.), check the docs with Ref. Use `ref_search_documentation` to find relevant docs and `ref_read_url` to read full content from results. Include library/framework names in queries for best results.
 
-Use `ref_search_documentation` and `ref_read_url` when:
+When encountering lint errors or API mismatches from libraries, search Ref to verify correct patterns before guessing.
 
-- Implementing features with project dependencies (Prisma, Stripe, Resend, Auth.js, etc.)
-- Encountering library-specific errors or deprecation warnings
-- Unsure about API signatures, method parameters, or return types
-- Working with utility libraries (Zod, date-fns, etc.)
+Context7 MCP (`resolve-library-id` then `query-docs`) is also available for retrieving up-to-date library docs and code examples.
 
-**Do NOT use Ref for:**
+Fetch only the minimum info needed — do not over-search on every prompt.
 
-- Internal project code (use Serena symbolic tools)
-- Basic TypeScript/JavaScript syntax
-- Patterns already in this file or Serena memories
+## Serena (Symbolic Code Tools)
 
-**IMPORTANT:** Fetch only the MINIMUM info needed. Avoid loading entire documentation pages.
+Serena provides semantic code navigation and editing via MCP. Key tools:
 
-## Serena Memories
+- **`get_symbols_overview`** - Get all symbols in a file without reading bodies
+- **`find_symbol`** - Search by name path pattern (e.g. `Foo/bar`), with optional `include_body=True` and `depth` control
+- **`find_referencing_symbols`** - Find all references to a symbol (with code snippets)
+- **`replace_symbol_body`** / **`insert_after_symbol`** / **`insert_before_symbol`** - Symbolic editing
+- **`replace_content`** - Regex-based file editing for targeted line changes
+- **`search_for_pattern`** - Fast regex search across the codebase
 
-Project-specific patterns in `.serena/memories/` (loaded on-demand by task relevance):
+**Usage strategy**: Prefer symbolic tools over reading entire files. Get an overview first (`get_symbols_overview`), then read only the symbol bodies you need (`find_symbol` with `include_body=True`). Use `find_referencing_symbols` before editing to ensure changes are backward-compatible or all references are updated.
+
+**Project must be activated first**: Call `activate_project` with `/home/clovr/projects/grizzly` before using Serena tools.
+
+### Serena Memories (`.serena/memories/`)
+
+Project-specific patterns (read on-demand when relevant to the task):
 
 - `zod-validation-patterns` - Zod 4 syntax, lenient ID validation
 - `react-ref-forwarding` - forwardRef for form components
