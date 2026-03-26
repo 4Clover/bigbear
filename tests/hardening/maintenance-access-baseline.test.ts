@@ -54,6 +54,7 @@ describe('maintenance access baseline behavior', () => {
           email: 'worker@test.com',
           name: 'Worker',
           role: 'WORKER',
+          isFamilyMember: false,
         },
       })
     )
@@ -88,6 +89,7 @@ describe('maintenance access baseline behavior', () => {
           email: 'worker@test.com',
           name: 'Worker',
           role: 'WORKER',
+          isFamilyMember: false,
         },
       })
     )
@@ -115,6 +117,7 @@ describe('maintenance access baseline behavior', () => {
           email: 'owner@test.com',
           name: 'Owner',
           role: 'OWNER',
+          isFamilyMember: false,
         },
       })
     )
@@ -140,6 +143,7 @@ describe('maintenance access baseline behavior', () => {
           email: 'worker@test.com',
           name: 'Worker',
           role: 'WORKER',
+          isFamilyMember: false,
         },
       })
     )

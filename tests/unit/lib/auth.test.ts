@@ -162,6 +162,7 @@ describe('Auth Configuration (lib/auth.ts)', () => {
           email: 'custom@example.com',
           name: 'Custom User',
           role: 'OWNER',
+          isFamilyMember: false,
         },
       })
 

@@ -67,7 +67,7 @@ export const AddonSelector = ({ addons, selectedAddons, onChange }: AddonSelecto
                   onClick={() => {
                     updateQuantity(addon.id, quantity - 1)
                   }}
-                  className="w-8 h-8 rounded-full bg-stone-200 dark:bg-stone-700 hover:bg-stone-300 dark:hover:bg-stone-600 flex items-center justify-center transition-colors disabled:opacity-50 text-foreground"
+                  className="w-11 h-11 rounded-full bg-stone-200 dark:bg-stone-700 hover:bg-stone-300 dark:hover:bg-stone-600 flex items-center justify-center transition-colors disabled:opacity-50 text-foreground"
                   disabled={quantity === 0}
                   aria-label="Decrease quantity"
                 >
@@ -79,7 +79,7 @@ export const AddonSelector = ({ addons, selectedAddons, onChange }: AddonSelecto
                   onClick={() => {
                     updateQuantity(addon.id, quantity + 1)
                   }}
-                  className="w-8 h-8 rounded-full bg-forest-600 hover:bg-forest-700 text-white flex items-center justify-center transition-colors"
+                  className="w-11 h-11 rounded-full bg-forest-600 hover:bg-forest-700 text-white flex items-center justify-center transition-colors"
                   aria-label="Increase quantity"
                 >
                   <Plus className="w-4 h-4" />

@@ -39,6 +39,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     session({ session, user }) {
       session.user.id = user.id
       session.user.role = (user as { role: UserRole }).role
+      session.user.isFamilyMember = (user as { isFamilyMember: boolean }).isFamilyMember
       return session
     },
   },

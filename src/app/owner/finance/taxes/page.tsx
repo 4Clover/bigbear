@@ -4,14 +4,17 @@ import { useState } from 'react'
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
 import { SchedulESummarySheet } from '@/components/finance/SchedulESummarySheet'
+import { BankStatementUpload } from '@/components/finance/BankStatementUpload'
 
 const TaxesTransactionSheet = dynamic(
   () => import('@/components/finance/TaxesTransactionSheet').then((m) => m.TaxesTransactionSheet),
   { ssr: false, loading: () => <div className="animate-pulse bg-muted rounded-lg h-64" /> }
 )
 
+type TaxTab = 'transactions' | 'schedule-e' | 'bank-statements'
+
 const TaxesPage = () => {
-  const [activeTab, setActiveTab] = useState<'transactions' | 'schedule-e'>('transactions')
+  const [activeTab, setActiveTab] = useState<TaxTab>('transactions')
   const [year, setYear] = useState(new Date().getFullYear())
 
   const currentYear = new Date().getFullYear()
@@ -56,6 +59,18 @@ const TaxesPage = () => {
           >
             Schedule E Summary
           </button>
+          <button
+            onClick={() => {
+              setActiveTab('bank-statements')
+            }}
+            className={`px-4 py-2 font-medium border-b-2 transition-colors ${
+              activeTab === 'bank-statements'
+                ? 'border-forest-500 text-forest-600 dark:text-forest-400'
+                : 'border-transparent text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            Bank Statements
+          </button>
         </div>
         {activeTab === 'schedule-e' && (
           <div className="flex items-center gap-2">
@@ -84,6 +99,8 @@ const TaxesPage = () => {
         {activeTab === 'transactions' && <TaxesTransactionSheet />}
 
         {activeTab === 'schedule-e' && <SchedulESummarySheet year={year} />}
+
+        {activeTab === 'bank-statements' && <BankStatementUpload />}
       </div>
     </div>
   )

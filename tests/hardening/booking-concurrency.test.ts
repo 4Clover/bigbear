@@ -108,6 +108,7 @@ const setupCheckoutTransactionMocks = () => {
     name: 'Concurrency Guest',
     phone: '555-1000',
     role: 'GUEST',
+    isFamilyMember: false,
     emailVerified: null,
     image: null,
     createdAt: new Date(),

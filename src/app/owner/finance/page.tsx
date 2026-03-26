@@ -45,9 +45,15 @@ const FinancePage = async ({ searchParams }: { searchParams: Promise<SearchParam
         <div className="flex items-center gap-3">
           <Link
             href="/owner/finance/import"
-            className="px-4 py-2 border-2 border-forest-500 text-forest-600 dark:border-forest-400 dark:text-forest-400 text-sm font-medium rounded-lg hover:bg-forest-50 dark:hover:bg-forest-950 transition-colors"
+            className="px-4 py-2 border-2 border-border text-foreground text-sm font-medium rounded-lg hover:border-forest-500 hover:text-forest-600 hover:bg-forest-50 dark:hover:border-forest-400 dark:hover:text-forest-400 dark:hover:bg-forest-950 transition-colors"
           >
             Import CSV
+          </Link>
+          <Link
+            href="/owner/finance/import/excel"
+            className="px-4 py-2 border-2 border-border text-foreground text-sm font-medium rounded-lg hover:border-forest-500 hover:text-forest-600 hover:bg-forest-50 dark:hover:border-forest-400 dark:hover:text-forest-400 dark:hover:bg-forest-950 transition-colors"
+          >
+            Import Excel
           </Link>
           <Link
             href="/owner/finance/expenses"

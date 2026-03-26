@@ -62,15 +62,16 @@ enum ImageUploader {
 }
 
 model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String    @unique
-  emailVerified DateTime?
-  image         String?
-  phone         String?
-  role          UserRole  @default(GUEST)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id              String    @id @default(cuid())
+  name            String?
+  email           String    @unique
+  emailVerified   DateTime?
+  image           String?
+  phone           String?
+  role            UserRole  @default(GUEST)
+  isFamilyMember  Boolean   @default(false)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 
   accounts      Account[]
   sessions      Session[]
@@ -136,6 +137,7 @@ model Booking {
   transactions  Transaction[]
   messages      Message[]
   galleryImages GalleryImage[]
+  review        Review?
 
   @@index([checkIn, checkOut])
   @@index([status])
@@ -401,6 +403,8 @@ enum NotificationEvent {
   MAINTENANCE_COMPLETED
   NEW_MESSAGE
   GALLERY_INVITE
+  FAMILY_INVITE
+  REVIEW_INVITE
 }
 
 model NotificationPreference {
@@ -426,6 +430,24 @@ model NotificationLog {
 
   @@index([event])
   @@index([createdAt])
+}
+
+// ============================================================================
+// Review Models
+// ============================================================================
+
+model Review {
+  id          String   @id @default(cuid())
+  bookingId   String   @unique
+  guestName   String
+  rating      Int      // 1–5
+  body        String   @db.Text
+  photoUrls   String[] @default([])
+  isPublished Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  booking Booking @relation(fields: [bookingId], references: [id])
 }
 
 // ============================================================================

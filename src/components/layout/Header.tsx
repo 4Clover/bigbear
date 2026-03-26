@@ -95,7 +95,7 @@ export const Header = ({ session }: HeaderProps) => {
               onClick={() => {
                 setMobileMenuOpen(!mobileMenuOpen)
               }}
-              className="p-2 rounded-lg text-muted-foreground hover:bg-muted transition-colors"
+              className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg text-muted-foreground hover:bg-muted transition-colors"
               aria-label="Toggle menu"
             >
               {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
@@ -106,12 +106,12 @@ export const Header = ({ session }: HeaderProps) => {
         {/* Mobile menu */}
         {mobileMenuOpen && (
           <div className="md:hidden py-4 border-t border-border">
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-1">
               {navLinks.map((link) => (
                 <Link
                   key={link.href}
                   href={link.href}
-                  className="text-muted-foreground hover:text-forest-500 font-medium transition-colors"
+                  className="min-h-[44px] flex items-center px-3 rounded-lg text-muted-foreground hover:text-forest-500 hover:bg-muted font-medium transition-colors"
                   onClick={() => {
                     setMobileMenuOpen(false)
                   }}
@@ -139,7 +139,7 @@ export const Header = ({ session }: HeaderProps) => {
                       setMobileMenuOpen(false)
                       handleSignOut()
                     }}
-                    className="flex items-center gap-2 text-muted-foreground hover:text-foreground font-medium transition-colors"
+                    className="min-h-[44px] flex items-center gap-2 px-3 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted font-medium transition-colors"
                   >
                     <LogOut className="h-4 w-4" />
                     Sign Out

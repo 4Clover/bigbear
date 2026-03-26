@@ -49,7 +49,13 @@ import {
 
 const ownerSession = () =>
   createMockSession({
-    user: { id: 'owner-user', email: 'owner@test.com', name: 'Owner', role: 'OWNER' },
+    user: {
+      id: 'owner-user',
+      email: 'owner@test.com',
+      name: 'Owner',
+      role: 'OWNER',
+      isFamilyMember: false,
+    },
   })
 
 const workerASession = () =>
@@ -59,12 +65,19 @@ const workerASession = () =>
       email: 'worker-a@test.com',
       name: 'Worker A',
       role: 'WORKER',
+      isFamilyMember: false,
     },
   })
 
 const guestSession = () =>
   createMockSession({
-    user: { id: 'guest-user', email: 'guest@test.com', name: 'Guest', role: 'GUEST' },
+    user: {
+      id: 'guest-user',
+      email: 'guest@test.com',
+      name: 'Guest',
+      role: 'GUEST',
+      isFamilyMember: false,
+    },
   })
 
 const accountantSession = () =>
@@ -74,6 +87,7 @@ const accountantSession = () =>
       email: 'accountant@test.com',
       name: 'Accountant',
       role: 'ACCOUNTANT',
+      isFamilyMember: false,
     },
   })
 

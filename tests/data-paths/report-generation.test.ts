@@ -61,7 +61,13 @@ describe('Report Generation Data Paths', () => {
     vi.clearAllMocks()
     mockAuth.mockResolvedValue(
       createMockSession({
-        user: { id: 'owner-1', email: 'owner@bigbear.com', name: 'Property Owner', role: 'OWNER' },
+        user: {
+          id: 'owner-1',
+          email: 'owner@bigbear.com',
+          name: 'Property Owner',
+          role: 'OWNER',
+          isFamilyMember: false,
+        },
       })
     )
   })
@@ -439,7 +445,13 @@ describe('Report Generation Data Paths', () => {
     it('should allow OWNER to access all reports', async () => {
       mockAuth.mockResolvedValue(
         createMockSession({
-          user: { id: 'owner', email: 'owner@test.com', name: 'Owner', role: 'OWNER' },
+          user: {
+            id: 'owner',
+            email: 'owner@test.com',
+            name: 'Owner',
+            role: 'OWNER',
+            isFamilyMember: false,
+          },
         })
       )
 
@@ -457,7 +469,13 @@ describe('Report Generation Data Paths', () => {
     it('should allow ACCOUNTANT to access all reports', async () => {
       mockAuth.mockResolvedValue(
         createMockSession({
-          user: { id: 'acc', email: 'acc@test.com', name: 'Accountant', role: 'ACCOUNTANT' },
+          user: {
+            id: 'acc',
+            email: 'acc@test.com',
+            name: 'Accountant',
+            role: 'ACCOUNTANT',
+            isFamilyMember: false,
+          },
         })
       )
 
@@ -475,7 +493,13 @@ describe('Report Generation Data Paths', () => {
     it('should deny GUEST access to reports', async () => {
       mockAuth.mockResolvedValue(
         createMockSession({
-          user: { id: 'guest', email: 'guest@test.com', name: 'Guest', role: 'GUEST' },
+          user: {
+            id: 'guest',
+            email: 'guest@test.com',
+            name: 'Guest',
+            role: 'GUEST',
+            isFamilyMember: false,
+          },
         })
       )
 

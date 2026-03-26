@@ -1,10 +1,11 @@
 'use client'
 
 import { format } from 'date-fns'
-import { Calendar } from 'lucide-react'
+import { Calendar, Mail } from 'lucide-react'
 import type { Booking, BookingStatus } from '@prisma/client'
 import { useState, useTransition } from 'react'
 import { approveBookingRequest, rejectBookingRequest, cancelBooking } from '@/actions/bookings'
+import { sendReviewInvite } from '@/actions/reviews'
 
 interface BookingTableProps {
   bookings: Booking[]
@@ -65,6 +66,26 @@ const BookingTable = ({ bookings }: BookingTableProps) => {
     })
   }
 
+  const [sentInvites, setSentInvites] = useState<Set<string>>(new Set())
+
+  const handleSendReviewInvite = (id: string) => {
+    setActionId(id)
+    startTransition(async () => {
+      try {
+        const result = await sendReviewInvite({ bookingId: id })
+        if (result.success) {
+          setSentInvites((prev) => new Set(prev).add(id))
+        } else {
+          alert(result.error ?? 'Failed to send review invite')
+        }
+      } catch (error) {
+        console.error('Failed to send review invite:', error)
+        alert('Failed to send review invite')
+      }
+      setActionId(null)
+    })
+  }
+
   if (bookings.length === 0) {
     return (
       <div className="bg-card rounded-xl shadow-sm border border-border p-12 text-center">
@@ -116,7 +137,9 @@ const BookingTable = ({ bookings }: BookingTableProps) => {
                     <div className="text-sm text-foreground">
                       {format(booking.checkIn, 'MMM d')} - {format(booking.checkOut, 'MMM d')}
                     </div>
-                    <div className="text-sm text-muted-foreground">{format(booking.checkIn, 'yyyy')}</div>
+                    <div className="text-sm text-muted-foreground">
+                      {format(booking.checkIn, 'yyyy')}
+                    </div>
                   </td>
                   <td className="hidden md:table-cell px-2 py-3 md:px-6 md:py-4 whitespace-nowrap text-sm text-foreground">
                     {booking.numberOfGuests}
@@ -164,6 +187,22 @@ const BookingTable = ({ bookings }: BookingTableProps) => {
                           className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 font-medium disabled:opacity-50"
                         >
                           {isActionPending ? '...' : 'Cancel'}
+                        </button>
+                      )}
+                      {booking.status === 'COMPLETED' && (
+                        <button
+                          onClick={() => {
+                            handleSendReviewInvite(booking.id)
+                          }}
+                          disabled={isActionPending || sentInvites.has(booking.id)}
+                          className="inline-flex items-center gap-1 text-forest-600 hover:text-forest-700 dark:text-forest-400 dark:hover:text-forest-300 font-medium disabled:opacity-50"
+                        >
+                          <Mail className="h-3.5 w-3.5" />
+                          {sentInvites.has(booking.id)
+                            ? 'Sent'
+                            : isActionPending
+                              ? '...'
+                              : 'Review Invite'}
                         </button>
                       )}
                     </div>

@@ -167,10 +167,18 @@ body {
     sans-serif;
 }
 
-/* Focus styles */
-*:focus-visible {
-  outline: 2px solid var(--ring);
-  outline-offset: 2px;
+/* Focus styles — only show on keyboard navigation, not touch */
+@media (hover: hover) {
+  *:focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+}
+
+@media (hover: none) {
+  *:focus-visible {
+    outline: none;
+  }
 }
 
 /* Scrollbar styling */
@@ -227,6 +235,13 @@ html {
   background-repeat: no-repeat;
 }
 
+/* background-attachment: fixed causes performance issues on mobile Safari */
+@media (max-width: 768px) {
+  html {
+    background-attachment: scroll;
+  }
+}
+
 /* Semi-transparent overlay for public pages */
 .bg-overlay {
   background-color: color-mix(in srgb, var(--background) 70%, transparent);
@@ -236,4 +251,9 @@ html {
 
 .dark .bg-overlay {
   --muted-foreground: var(--stone-200);
+}
+
+/* Safe area padding for mobile sticky bars (iPhone notch/home indicator) */
+.safe-area-pb {
+  padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
 }

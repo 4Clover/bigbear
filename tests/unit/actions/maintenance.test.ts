@@ -60,7 +60,13 @@ describe('Maintenance Actions', () => {
     it('should allow WORKER to get available jobs', async () => {
       mockAuth.mockResolvedValueOnce(
         createMockSession({
-          user: { id: '1', email: 'worker@test.com', name: 'Worker', role: 'WORKER' },
+          user: {
+            id: '1',
+            email: 'worker@test.com',
+            name: 'Worker',
+            role: 'WORKER',
+            isFamilyMember: false,
+          },
         })
       )
 
@@ -73,7 +79,13 @@ describe('Maintenance Actions', () => {
     it('should reject GUEST from getting available jobs', async () => {
       mockAuth.mockResolvedValueOnce(
         createMockSession({
-          user: { id: '2', email: 'guest@test.com', name: 'Guest', role: 'GUEST' },
+          user: {
+            id: '2',
+            email: 'guest@test.com',
+            name: 'Guest',
+            role: 'GUEST',
+            isFamilyMember: false,
+          },
         })
       )
 
@@ -83,7 +95,13 @@ describe('Maintenance Actions', () => {
     it('should reject OWNER from worker-only actions', async () => {
       mockAuth.mockResolvedValueOnce(
         createMockSession({
-          user: { id: '3', email: 'owner@test.com', name: 'Owner', role: 'OWNER' },
+          user: {
+            id: '3',
+            email: 'owner@test.com',
+            name: 'Owner',
+            role: 'OWNER',
+            isFamilyMember: false,
+          },
         })
       )
 
@@ -93,7 +111,13 @@ describe('Maintenance Actions', () => {
     it('should allow OWNER to create maintenance jobs', async () => {
       mockAuth.mockResolvedValueOnce(
         createMockSession({
-          user: { id: '1', email: 'owner@test.com', name: 'Owner', role: 'OWNER' },
+          user: {
+            id: '1',
+            email: 'owner@test.com',
+            name: 'Owner',
+            role: 'OWNER',
+            isFamilyMember: false,
+          },
         })
       )
 
@@ -125,7 +149,13 @@ describe('Maintenance Actions', () => {
     it('should reject WORKER from creating maintenance jobs', async () => {
       mockAuth.mockResolvedValueOnce(
         createMockSession({
-          user: { id: '2', email: 'worker@test.com', name: 'Worker', role: 'WORKER' },
+          user: {
+            id: '2',
+            email: 'worker@test.com',
+            name: 'Worker',
+            role: 'WORKER',
+            isFamilyMember: false,
+          },
         })
       )
 
@@ -143,7 +173,13 @@ describe('Maintenance Actions', () => {
     it('should return only assigned jobs for WORKER in getMaintenanceJobs', async () => {
       mockAuth.mockResolvedValueOnce(
         createMockSession({
-          user: { id: 'worker-user-1', email: 'worker@test.com', name: 'Worker', role: 'WORKER' },
+          user: {
+            id: 'worker-user-1',
+            email: 'worker@test.com',
+            name: 'Worker',
+            role: 'WORKER',
+            isFamilyMember: false,
+          },
         })
       )
 
@@ -178,7 +214,13 @@ describe('Maintenance Actions', () => {
     it('should throw Unauthorized for WORKER fetching unassigned job', async () => {
       mockAuth.mockResolvedValueOnce(
         createMockSession({
-          user: { id: 'worker-user-1', email: 'worker@test.com', name: 'Worker', role: 'WORKER' },
+          user: {
+            id: 'worker-user-1',
+            email: 'worker@test.com',
+            name: 'Worker',
+            role: 'WORKER',
+            isFamilyMember: false,
+          },
         })
       )
 
@@ -223,7 +265,13 @@ describe('Maintenance Actions', () => {
     it('should keep OWNER access unchanged in getMaintenanceJobs', async () => {
       mockAuth.mockResolvedValueOnce(
         createMockSession({
-          user: { id: 'owner-user-1', email: 'owner@test.com', name: 'Owner', role: 'OWNER' },
+          user: {
+            id: 'owner-user-1',
+            email: 'owner@test.com',
+            name: 'Owner',
+            role: 'OWNER',
+            isFamilyMember: false,
+          },
         })
       )
 
@@ -247,7 +295,13 @@ describe('Maintenance Actions', () => {
     it('should not expose worker email phone or taxId in WORKER-scoped results', async () => {
       mockAuth.mockResolvedValueOnce(
         createMockSession({
-          user: { id: 'worker-user-1', email: 'worker@test.com', name: 'Worker', role: 'WORKER' },
+          user: {
+            id: 'worker-user-1',
+            email: 'worker@test.com',
+            name: 'Worker',
+            role: 'WORKER',
+            isFamilyMember: false,
+          },
         })
       )
 
@@ -369,7 +423,13 @@ describe('Maintenance Actions', () => {
     beforeEach(() => {
       mockAuth.mockResolvedValue(
         createMockSession({
-          user: { id: '1', email: 'worker@test.com', name: 'Worker', role: 'WORKER' },
+          user: {
+            id: '1',
+            email: 'worker@test.com',
+            name: 'Worker',
+            role: 'WORKER',
+            isFamilyMember: false,
+          },
         })
       )
     })
@@ -572,7 +632,13 @@ describe('Maintenance Actions', () => {
     beforeEach(() => {
       mockAuth.mockResolvedValue(
         createMockSession({
-          user: { id: '1', email: 'worker@test.com', name: 'Worker', role: 'WORKER' },
+          user: {
+            id: '1',
+            email: 'worker@test.com',
+            name: 'Worker',
+            role: 'WORKER',
+            isFamilyMember: false,
+          },
         })
       )
     })
@@ -665,7 +731,13 @@ describe('Maintenance Actions', () => {
     beforeEach(() => {
       mockAuth.mockResolvedValue(
         createMockSession({
-          user: { id: '1', email: 'worker@test.com', name: 'Worker', role: 'WORKER' },
+          user: {
+            id: '1',
+            email: 'worker@test.com',
+            name: 'Worker',
+            role: 'WORKER',
+            isFamilyMember: false,
+          },
         })
       )
     })
@@ -817,7 +889,13 @@ describe('Maintenance Actions', () => {
     beforeEach(() => {
       mockAuth.mockResolvedValue(
         createMockSession({
-          user: { id: '1', email: 'owner@test.com', name: 'Owner', role: 'OWNER' },
+          user: {
+            id: '1',
+            email: 'owner@test.com',
+            name: 'Owner',
+            role: 'OWNER',
+            isFamilyMember: false,
+          },
         })
       )
     })
@@ -909,7 +987,13 @@ describe('Maintenance Actions', () => {
     beforeEach(() => {
       mockAuth.mockResolvedValue(
         createMockSession({
-          user: { id: '1', email: 'owner@test.com', name: 'Owner', role: 'OWNER' },
+          user: {
+            id: '1',
+            email: 'owner@test.com',
+            name: 'Owner',
+            role: 'OWNER',
+            isFamilyMember: false,
+          },
         })
       )
     })
@@ -1044,7 +1128,13 @@ describe('Maintenance Actions', () => {
     beforeEach(() => {
       mockAuth.mockResolvedValue(
         createMockSession({
-          user: { id: '1', email: 'owner@test.com', name: 'Owner', role: 'OWNER' },
+          user: {
+            id: '1',
+            email: 'owner@test.com',
+            name: 'Owner',
+            role: 'OWNER',
+            isFamilyMember: false,
+          },
         })
       )
     })
@@ -1055,6 +1145,7 @@ describe('Maintenance Actions', () => {
         id: 'new-user',
         email: 'newworker@test.com',
         name: 'New Worker',
+        isFamilyMember: false,
         emailVerified: null,
         image: null,
         phone: null,
@@ -1094,6 +1185,7 @@ describe('Maintenance Actions', () => {
         id: 'existing-user',
         email: 'existing@test.com',
         name: 'Existing',
+        isFamilyMember: false,
         emailVerified: null,
         image: null,
         phone: null,
@@ -1113,7 +1205,13 @@ describe('Maintenance Actions', () => {
     it('should reject WORKER from inviting workers', async () => {
       mockAuth.mockResolvedValueOnce(
         createMockSession({
-          user: { id: '2', email: 'worker@test.com', name: 'Worker', role: 'WORKER' },
+          user: {
+            id: '2',
+            email: 'worker@test.com',
+            name: 'Worker',
+            role: 'WORKER',
+            isFamilyMember: false,
+          },
         })
       )
 
@@ -1133,7 +1231,13 @@ describe('Maintenance Actions', () => {
     beforeEach(() => {
       mockAuth.mockResolvedValue(
         createMockSession({
-          user: { id: '1', email: 'owner@test.com', name: 'Owner', role: 'OWNER' },
+          user: {
+            id: '1',
+            email: 'owner@test.com',
+            name: 'Owner',
+            role: 'OWNER',
+            isFamilyMember: false,
+          },
         })
       )
     })
@@ -1212,7 +1316,13 @@ describe('Maintenance Actions', () => {
     it('should return all worker profiles', async () => {
       mockAuth.mockResolvedValueOnce(
         createMockSession({
-          user: { id: '1', email: 'owner@test.com', name: 'Owner', role: 'OWNER' },
+          user: {
+            id: '1',
+            email: 'owner@test.com',
+            name: 'Owner',
+            role: 'OWNER',
+            isFamilyMember: false,
+          },
         })
       )
 
@@ -1252,7 +1362,13 @@ describe('Maintenance Actions', () => {
     it('should reject WORKER from getting workers list', async () => {
       mockAuth.mockResolvedValueOnce(
         createMockSession({
-          user: { id: '2', email: 'worker@test.com', name: 'Worker', role: 'WORKER' },
+          user: {
+            id: '2',
+            email: 'worker@test.com',
+            name: 'Worker',
+            role: 'WORKER',
+            isFamilyMember: false,
+          },
         })
       )
 
@@ -1267,7 +1383,13 @@ describe('Maintenance Actions', () => {
     beforeEach(() => {
       mockAuth.mockResolvedValue(
         createMockSession({
-          user: { id: '1', email: 'owner@test.com', name: 'Owner', role: 'OWNER' },
+          user: {
+            id: '1',
+            email: 'owner@test.com',
+            name: 'Owner',
+            role: 'OWNER',
+            isFamilyMember: false,
+          },
         })
       )
     })

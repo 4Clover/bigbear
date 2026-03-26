@@ -9,10 +9,12 @@ import {
   Home,
   Images,
   LogOut,
+  MessageSquare,
   Receipt,
   Settings,
   TreePine,
   Upload,
+  Users,
   Wrench,
 } from 'lucide-react'
 import Link from 'next/link'
@@ -43,6 +45,8 @@ const navItems: NavItem[] = [
   { href: '/owner/finance/taxes', label: 'Taxes', icon: Receipt },
   { href: '/owner/finance/reports', label: 'Reports', icon: BarChart3 },
   { href: '/owner/gallery', label: 'Gallery', icon: Images },
+  { href: '/owner/reviews', label: 'Reviews', icon: MessageSquare },
+  { href: '/owner/settings/family', label: 'Family', icon: Users },
   { href: '/owner/settings', label: 'Settings', icon: Settings },
 ]
 

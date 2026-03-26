@@ -53,7 +53,13 @@ describe('Finance Workflow Data Paths', () => {
     vi.clearAllMocks()
     mockAuth.mockResolvedValue(
       createMockSession({
-        user: { id: '1', email: 'owner@test.com', name: 'Owner', role: 'OWNER' },
+        user: {
+          id: '1',
+          email: 'owner@test.com',
+          name: 'Owner',
+          role: 'OWNER',
+          isFamilyMember: false,
+        },
       })
     )
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -740,7 +746,13 @@ describe('Finance Workflow Data Paths', () => {
       // Start as GUEST - should fail at create
       mockAuth.mockResolvedValueOnce(
         createMockSession({
-          user: { id: '99', email: 'guest@test.com', name: 'Guest', role: 'GUEST' },
+          user: {
+            id: '99',
+            email: 'guest@test.com',
+            name: 'Guest',
+            role: 'GUEST',
+            isFamilyMember: false,
+          },
         })
       )
 
@@ -755,7 +767,13 @@ describe('Finance Workflow Data Paths', () => {
       // Try as WORKER - should also fail
       mockAuth.mockResolvedValueOnce(
         createMockSession({
-          user: { id: '98', email: 'worker@test.com', name: 'Worker', role: 'WORKER' },
+          user: {
+            id: '98',
+            email: 'worker@test.com',
+            name: 'Worker',
+            role: 'WORKER',
+            isFamilyMember: false,
+          },
         })
       )
 
@@ -764,7 +782,13 @@ describe('Finance Workflow Data Paths', () => {
       // Try as GUEST for delete
       mockAuth.mockResolvedValueOnce(
         createMockSession({
-          user: { id: '99', email: 'guest@test.com', name: 'Guest', role: 'GUEST' },
+          user: {
+            id: '99',
+            email: 'guest@test.com',
+            name: 'Guest',
+            role: 'GUEST',
+            isFamilyMember: false,
+          },
         })
       )
 
@@ -774,7 +798,13 @@ describe('Finance Workflow Data Paths', () => {
     it('should allow ACCOUNTANT full access to finance operations', async () => {
       mockAuth.mockResolvedValue(
         createMockSession({
-          user: { id: '2', email: 'accountant@test.com', name: 'Accountant', role: 'ACCOUNTANT' },
+          user: {
+            id: '2',
+            email: 'accountant@test.com',
+            name: 'Accountant',
+            role: 'ACCOUNTANT',
+            isFamilyMember: false,
+          },
         })
       )
 

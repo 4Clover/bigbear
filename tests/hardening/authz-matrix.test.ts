@@ -88,6 +88,7 @@ const setRole = (role: Role) => {
         email: `${role.toLowerCase()}@test.com`,
         name: role,
         role,
+        isFamilyMember: false,
       },
     })
   )

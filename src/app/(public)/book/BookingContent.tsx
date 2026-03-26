@@ -2,7 +2,13 @@
 
 import { useState, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
-import { Calendar, GuestForm, AddonSelector, PriceSummary } from '@/components/booking'
+import {
+  Calendar,
+  GuestForm,
+  AddonSelector,
+  PriceSummary,
+  PaymentOptionsModal,
+} from '@/components/booking'
 import { Button, Card, CardContent } from '@/components/ui'
 
 interface Addon {
@@ -31,14 +37,16 @@ interface GuestInfo {
   phone: string
 }
 
-interface CheckoutResponse {
-  url?: string
-  error?: string
-}
+// Stripe checkout is currently disabled — payment handled via PaymentOptionsModal
+// interface CheckoutResponse {
+//   url?: string
+//   error?: string
+// }
 
 export const BookingContent = () => {
   const searchParams = useSearchParams()
   const cancelled = searchParams.get('cancelled')
+  const familyToken = searchParams.get('family')
 
   const [checkIn, setCheckIn] = useState<Date | null>(null)
   const [checkOut, setCheckOut] = useState<Date | null>(null)
@@ -47,9 +55,12 @@ export const BookingContent = () => {
   const [addons, setAddons] = useState<Addon[]>([])
   const [pricing, setPricing] = useState<PricingConfig | null>(null)
   const [blockedDates, setBlockedDates] = useState<Date[]>([])
-  const [isLoading, setIsLoading] = useState(false)
   const [errors, setErrors] = useState<Partial<Record<keyof GuestInfo, string>>>({})
+  const [showPaymentModal, setShowPaymentModal] = useState(false)
   const [availabilityError, setAvailabilityError] = useState(false)
+  const [isFamilyBooking, setIsFamilyBooking] = useState(false)
+  const [familyConfirmed, setFamilyConfirmed] = useState(false)
+  const [familySubmitting, setFamilySubmitting] = useState(false)
 
   useEffect(() => {
     const fetchData = async () => {
@@ -86,6 +97,36 @@ export const BookingContent = () => {
     void fetchData()
   }, [])
 
+  // Verify family token if present
+  useEffect(() => {
+    if (!familyToken) return
+
+    const verifyFamily = async () => {
+      try {
+        const res = await fetch('/api/family/verify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token: familyToken }),
+        })
+        if (res.ok) {
+          const data = (await res.json()) as { valid: boolean; name: string; email: string }
+          if (data.valid) {
+            setIsFamilyBooking(true)
+            setGuestInfo((prev) => ({
+              ...prev,
+              name: data.name,
+              email: data.email,
+            }))
+          }
+        }
+      } catch {
+        // Token invalid — continue as normal booking
+      }
+    }
+
+    void verifyFamily()
+  }, [familyToken])
+
   const handleDateSelect = (newCheckIn: Date | null, newCheckOut: Date | null) => {
     setCheckIn(newCheckIn)
     setCheckOut(newCheckOut)
@@ -108,7 +149,40 @@ export const BookingContent = () => {
     return Object.keys(newErrors).length === 0
   }
 
-  const handleSubmit = async () => {
+  const handleFamilyConfirm = async () => {
+    if (!checkIn || !checkOut || !validateForm()) return
+
+    setFamilySubmitting(true)
+    try {
+      const res = await fetch('/api/booking/family', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          token: familyToken,
+          checkIn: checkIn.toISOString(),
+          checkOut: checkOut.toISOString(),
+          guestName: guestInfo.name,
+          guestEmail: guestInfo.email,
+          guestPhone: guestInfo.phone,
+          numberOfGuests: 1,
+          addons: selectedAddons,
+        }),
+      })
+
+      if (res.ok) {
+        setFamilyConfirmed(true)
+      } else {
+        const data = (await res.json()) as { error?: string }
+        alert(data.error ?? 'Failed to create booking')
+      }
+    } catch {
+      alert('Something went wrong. Please try again.')
+    } finally {
+      setFamilySubmitting(false)
+    }
+  }
+
+  const handleReserve = () => {
     if (!checkIn || !checkOut) {
       alert('Please select your dates')
       return
@@ -116,35 +190,12 @@ export const BookingContent = () => {
 
     if (!validateForm()) return
 
-    setIsLoading(true)
-
-    try {
-      const response = await fetch('/api/stripe/checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          checkIn: checkIn.toISOString(),
-          checkOut: checkOut.toISOString(),
-          guestName: guestInfo.name,
-          guestEmail: guestInfo.email,
-          guestPhone: guestInfo.phone,
-          addons: selectedAddons,
-        }),
-      })
-
-      const data = (await response.json()) as CheckoutResponse
-
-      if (data.url) {
-        window.location.href = data.url
-      } else {
-        alert('Failed to create checkout session')
-      }
-    } catch (error) {
-      console.error('Checkout error:', error)
-      alert('Something went wrong. Please try again.')
-    } finally {
-      setIsLoading(false)
+    if (isFamilyBooking) {
+      void handleFamilyConfirm()
+      return
     }
+
+    setShowPaymentModal(true)
   }
 
   const defaultPricing: PricingConfig = {
@@ -157,15 +208,48 @@ export const BookingContent = () => {
 
   const config = pricing ?? defaultPricing
 
+  if (familyConfirmed) {
+    return (
+      <div className="max-w-2xl mx-auto px-4 py-16 text-center space-y-4">
+        <div className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-forest-100 text-forest-600 dark:bg-forest-900/40 dark:text-forest-400">
+          <svg
+            className="h-8 w-8"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={2}
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+          </svg>
+        </div>
+        <h2 className="text-2xl font-bold text-foreground">Booking Confirmed!</h2>
+        <p className="text-muted-foreground">
+          Thanks, {guestInfo.name}! Your family booking has been confirmed. You&apos;ll receive a
+          confirmation email at {guestInfo.email} shortly.
+        </p>
+      </div>
+    )
+  }
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <div className="text-center mb-12">
         <h1 className="text-4xl font-bold mb-4 text-foreground">Book Your Stay</h1>
         <p className="text-muted-foreground max-w-2xl mx-auto">
-          Select your dates, input your info, provide the deposit, and you&apos;ll receive a
-          text/email confirming your booking! We are excited to host you!
+          {isFamilyBooking
+            ? 'Welcome, family! Select your dates and confirm — no payment needed.'
+            : 'Select your dates, input your info, provide the deposit, and you\u0027ll receive a text/email confirming your booking! We are excited to host you!'}
         </p>
       </div>
+
+      {isFamilyBooking && (
+        <div className="mb-8 p-4 bg-forest-50 dark:bg-forest-900/20 border border-forest-200 dark:border-forest-800 rounded-lg text-forest-700 dark:text-forest-300">
+          <p className="font-semibold">Family Booking</p>
+          <p className="text-sm mt-1">
+            You&apos;re booking as family — no payment required. Just pick your dates and confirm!
+          </p>
+        </div>
+      )}
 
       {cancelled && (
         <div className="mb-8 p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg text-amber-800 dark:text-amber-200">
@@ -236,20 +320,93 @@ export const BookingContent = () => {
               selectedAddons={selectedAddons}
             />
             <Button
-              onClick={() => void handleSubmit()}
-              isLoading={isLoading}
-              disabled={!checkIn || !checkOut || availabilityError}
-              className="w-full"
+              onClick={() => {
+                handleReserve()
+              }}
+              disabled={!checkIn || !checkOut || availabilityError || familySubmitting}
+              isLoading={familySubmitting}
+              className="w-full hidden lg:flex"
               size="lg"
             >
-              Proceed to Payment
+              {isFamilyBooking ? 'Confirm Booking' : 'Reserve & Pay'}
             </Button>
-            <p className="text-xs text-muted-foreground text-center">
-              You will be redirected to Stripe for secure payment processing.
-            </p>
+            {!isFamilyBooking && (
+              <p className="text-xs text-muted-foreground text-center hidden lg:block">
+                Choose from Venmo, Cash App, PayPal, Zelle, or contact the owner.
+              </p>
+            )}
           </div>
         </div>
       </div>
+
+      {/* Mobile sticky bottom bar — visible only below lg breakpoint */}
+      <div className="fixed bottom-0 inset-x-0 z-40 lg:hidden bg-card border-t border-border px-4 py-3 safe-area-pb">
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
+          <div className="text-sm">
+            {checkIn && checkOut ? (
+              <span className="font-semibold text-foreground">
+                $
+                {(() => {
+                  const nights = Math.ceil(
+                    (checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24)
+                  )
+                  const accommodationTotal = config.baseNightlyRate * nights
+                  const addonsTotal = selectedAddons.reduce((total, selected) => {
+                    const addon = addons.find((a) => a.id === selected.id)
+                    return total + (addon ? addon.price * selected.quantity : 0)
+                  }, 0)
+                  const subtotal = accommodationTotal + config.cleaningFee + addonsTotal
+                  const deposit = subtotal * (config.depositPercentage / 100)
+                  return (subtotal + deposit).toFixed(2)
+                })()}{' '}
+                <span className="font-normal text-muted-foreground">total</span>
+              </span>
+            ) : (
+              <span className="text-muted-foreground">Select dates</span>
+            )}
+          </div>
+          <Button
+            onClick={() => {
+              handleReserve()
+            }}
+            disabled={!checkIn || !checkOut || availabilityError || familySubmitting}
+            isLoading={familySubmitting}
+            size="md"
+          >
+            {isFamilyBooking ? 'Confirm' : 'Reserve & Pay'}
+          </Button>
+        </div>
+      </div>
+
+      {/* Payment options modal */}
+      {checkIn && checkOut && (
+        <PaymentOptionsModal
+          isOpen={showPaymentModal}
+          onClose={() => {
+            setShowPaymentModal(false)
+          }}
+          booking={{
+            checkIn,
+            checkOut,
+            guestName: guestInfo.name,
+            guestEmail: guestInfo.email,
+            guestPhone: guestInfo.phone,
+            totalAmount: (() => {
+              const nights = Math.ceil(
+                (checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24)
+              )
+              const accommodationTotal = config.baseNightlyRate * nights
+              const addonsTotal = selectedAddons.reduce((total, selected) => {
+                const addon = addons.find((a) => a.id === selected.id)
+                return total + (addon ? addon.price * selected.quantity : 0)
+              }, 0)
+              const subtotal = accommodationTotal + config.cleaningFee + addonsTotal
+              const deposit = subtotal * (config.depositPercentage / 100)
+              return subtotal + deposit
+            })(),
+          }}
+        />
+      )}
     </div>
   )
 }

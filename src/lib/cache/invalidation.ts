@@ -1,4 +1,3 @@
-
 import { revalidatePath, revalidateTag } from 'next/cache'
 
 // ---------------------------------------------------------------------------
@@ -16,6 +15,7 @@ export const CacheTags = {
   finance: () => 'finance' as const,
   calendar: () => 'calendar' as const,
   notifications: () => 'notifications' as const,
+  reviews: () => 'reviews' as const,
 } as const
 
 // ---------------------------------------------------------------------------
@@ -61,4 +61,15 @@ export const invalidateCalendar = () => {
 export const invalidateNotifications = () => {
   revalidateTag(CacheTags.notifications(), { expire: 0 })
   revalidatePath('/owner/settings')
+}
+
+/** Invalidate review caches (owner reviews page) */
+export const invalidateReviews = () => {
+  revalidateTag(CacheTags.reviews(), { expire: 0 })
+  revalidatePath('/owner/reviews')
+}
+
+/** Invalidate family caches (owner family settings) */
+export const invalidateFamily = () => {
+  revalidatePath('/owner/settings/family')
 }

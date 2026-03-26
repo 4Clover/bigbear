@@ -53,7 +53,13 @@ describe('importExpensesFromCsv', () => {
     it('should reject GUEST role', async () => {
       mockAuth.mockResolvedValueOnce(
         createMockSession({
-          user: { id: '3', email: 'guest@test.com', name: 'Guest', role: 'GUEST' },
+          user: {
+            id: '3',
+            email: 'guest@test.com',
+            name: 'Guest',
+            role: 'GUEST',
+            isFamilyMember: false,
+          },
         })
       )
 
@@ -72,7 +78,13 @@ describe('importExpensesFromCsv', () => {
     it('should reject WORKER role', async () => {
       mockAuth.mockResolvedValueOnce(
         createMockSession({
-          user: { id: '4', email: 'worker@test.com', name: 'Worker', role: 'WORKER' },
+          user: {
+            id: '4',
+            email: 'worker@test.com',
+            name: 'Worker',
+            role: 'WORKER',
+            isFamilyMember: false,
+          },
         })
       )
 
@@ -96,7 +108,13 @@ describe('importExpensesFromCsv', () => {
     beforeEach(() => {
       mockAuth.mockResolvedValue(
         createMockSession({
-          user: { id: '1', email: 'owner@test.com', name: 'Owner', role: 'OWNER' },
+          user: {
+            id: '1',
+            email: 'owner@test.com',
+            name: 'Owner',
+            role: 'OWNER',
+            isFamilyMember: false,
+          },
         })
       )
     })
@@ -167,7 +185,13 @@ describe('importExpensesFromCsv', () => {
     beforeEach(() => {
       mockAuth.mockResolvedValue(
         createMockSession({
-          user: { id: '1', email: 'owner@test.com', name: 'Owner', role: 'OWNER' },
+          user: {
+            id: '1',
+            email: 'owner@test.com',
+            name: 'Owner',
+            role: 'OWNER',
+            isFamilyMember: false,
+          },
         })
       )
     })
@@ -279,7 +303,13 @@ describe('importExpensesFromCsv', () => {
     beforeEach(() => {
       mockAuth.mockResolvedValue(
         createMockSession({
-          user: { id: '1', email: 'owner@test.com', name: 'Owner', role: 'OWNER' },
+          user: {
+            id: '1',
+            email: 'owner@test.com',
+            name: 'Owner',
+            role: 'OWNER',
+            isFamilyMember: false,
+          },
         })
       )
     })
@@ -397,7 +427,13 @@ describe('importExpensesFromCsv', () => {
     beforeEach(() => {
       mockAuth.mockResolvedValue(
         createMockSession({
-          user: { id: '1', email: 'owner@test.com', name: 'Owner', role: 'OWNER' },
+          user: {
+            id: '1',
+            email: 'owner@test.com',
+            name: 'Owner',
+            role: 'OWNER',
+            isFamilyMember: false,
+          },
         })
       )
     })

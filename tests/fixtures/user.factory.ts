@@ -14,6 +14,7 @@ export const createUserFixture = (overrides: Partial<User> = {}): User => {
     image: null,
     phone: null,
     role: 'GUEST' as UserRole,
+    isFamilyMember: false,
     createdAt: now,
     updatedAt: now,
     ...overrides,

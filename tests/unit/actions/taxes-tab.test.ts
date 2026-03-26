@@ -95,7 +95,13 @@ describe('Taxes Tab Persistence', () => {
     it('should update transaction with valid data', async () => {
       mockAuth.mockResolvedValueOnce(
         createMockSession({
-          user: { id: '1', email: 'owner@test.com', name: 'Owner', role: 'OWNER' },
+          user: {
+            id: '1',
+            email: 'owner@test.com',
+            name: 'Owner',
+            role: 'OWNER',
+            isFamilyMember: false,
+          },
         })
       )
 
@@ -146,7 +152,13 @@ describe('Taxes Tab Persistence', () => {
     it('should create expense with valid data', async () => {
       mockAuth.mockResolvedValueOnce(
         createMockSession({
-          user: { id: '1', email: 'owner@test.com', name: 'Owner', role: 'OWNER' },
+          user: {
+            id: '1',
+            email: 'owner@test.com',
+            name: 'Owner',
+            role: 'OWNER',
+            isFamilyMember: false,
+          },
         })
       )
 
@@ -185,7 +197,13 @@ describe('Taxes Tab Persistence', () => {
     it('should return errors for invalid data (missing required field)', async () => {
       mockAuth.mockResolvedValueOnce(
         createMockSession({
-          user: { id: '1', email: 'owner@test.com', name: 'Owner', role: 'OWNER' },
+          user: {
+            id: '1',
+            email: 'owner@test.com',
+            name: 'Owner',
+            role: 'OWNER',
+            isFamilyMember: false,
+          },
         })
       )
 
@@ -213,7 +231,13 @@ describe('Taxes Tab Persistence', () => {
     it('should delete transaction with valid id', async () => {
       mockAuth.mockResolvedValueOnce(
         createMockSession({
-          user: { id: '1', email: 'owner@test.com', name: 'Owner', role: 'OWNER' },
+          user: {
+            id: '1',
+            email: 'owner@test.com',
+            name: 'Owner',
+            role: 'OWNER',
+            isFamilyMember: false,
+          },
         })
       )
 
@@ -247,7 +271,13 @@ describe('Taxes Tab Persistence', () => {
     beforeEach(() => {
       mockAuth.mockResolvedValue(
         createMockSession({
-          user: { id: '1', email: 'owner@test.com', name: 'Owner', role: 'OWNER' },
+          user: {
+            id: '1',
+            email: 'owner@test.com',
+            name: 'Owner',
+            role: 'OWNER',
+            isFamilyMember: false,
+          },
         })
       )
     })

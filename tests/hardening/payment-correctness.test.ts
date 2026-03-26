@@ -106,6 +106,7 @@ const setupCheckoutTransactionMocks = () => {
     name: 'Test Guest',
     phone: '555-1000',
     role: 'GUEST',
+    isFamilyMember: false,
     emailVerified: null,
     image: null,
     createdAt: new Date(),
@@ -303,7 +304,11 @@ describe('payment webhook correctness hardening', () => {
     setupCheckoutTransactionMocks()
     mockConstructEvent.mockReturnValue(createCheckoutEvent())
 
-    mockSendBookingConfirmation.mockReturnValue(new Promise(() => { /* non-blocking */ }))
+    mockSendBookingConfirmation.mockReturnValue(
+      new Promise(() => {
+        /* non-blocking */
+      })
+    )
 
     const timeoutResult = Symbol('timeout')
     const response = await Promise.race([

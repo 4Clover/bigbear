@@ -59,7 +59,13 @@ describe('Finance Actions', () => {
     it('should allow OWNER to create expenses', async () => {
       mockAuth.mockResolvedValueOnce(
         createMockSession({
-          user: { id: '1', email: 'owner@test.com', name: 'Owner', role: 'OWNER' },
+          user: {
+            id: '1',
+            email: 'owner@test.com',
+            name: 'Owner',
+            role: 'OWNER',
+            isFamilyMember: false,
+          },
         })
       )
 
@@ -94,7 +100,13 @@ describe('Finance Actions', () => {
     it('should allow ACCOUNTANT to create expenses', async () => {
       mockAuth.mockResolvedValueOnce(
         createMockSession({
-          user: { id: '2', email: 'accountant@test.com', name: 'Accountant', role: 'ACCOUNTANT' },
+          user: {
+            id: '2',
+            email: 'accountant@test.com',
+            name: 'Accountant',
+            role: 'ACCOUNTANT',
+            isFamilyMember: false,
+          },
         })
       )
 
@@ -126,7 +138,13 @@ describe('Finance Actions', () => {
     it('should reject GUEST from creating expenses', async () => {
       mockAuth.mockResolvedValueOnce(
         createMockSession({
-          user: { id: '3', email: 'guest@test.com', name: 'Guest', role: 'GUEST' },
+          user: {
+            id: '3',
+            email: 'guest@test.com',
+            name: 'Guest',
+            role: 'GUEST',
+            isFamilyMember: false,
+          },
         })
       )
 
@@ -142,7 +160,13 @@ describe('Finance Actions', () => {
     it('should reject WORKER from creating expenses', async () => {
       mockAuth.mockResolvedValueOnce(
         createMockSession({
-          user: { id: '4', email: 'worker@test.com', name: 'Worker', role: 'WORKER' },
+          user: {
+            id: '4',
+            email: 'worker@test.com',
+            name: 'Worker',
+            role: 'WORKER',
+            isFamilyMember: false,
+          },
         })
       )
 
@@ -170,7 +194,13 @@ describe('Finance Actions', () => {
     it('should allow OWNER to update transactions', async () => {
       mockAuth.mockResolvedValueOnce(
         createMockSession({
-          user: { id: '1', email: 'owner@test.com', name: 'Owner', role: 'OWNER' },
+          user: {
+            id: '1',
+            email: 'owner@test.com',
+            name: 'Owner',
+            role: 'OWNER',
+            isFamilyMember: false,
+          },
         })
       )
 
@@ -197,7 +227,13 @@ describe('Finance Actions', () => {
     it('should allow ACCOUNTANT to update transactions', async () => {
       mockAuth.mockResolvedValueOnce(
         createMockSession({
-          user: { id: '2', email: 'accountant@test.com', name: 'Accountant', role: 'ACCOUNTANT' },
+          user: {
+            id: '2',
+            email: 'accountant@test.com',
+            name: 'Accountant',
+            role: 'ACCOUNTANT',
+            isFamilyMember: false,
+          },
         })
       )
 
@@ -224,7 +260,13 @@ describe('Finance Actions', () => {
     it('should reject GUEST from updating transactions', async () => {
       mockAuth.mockResolvedValueOnce(
         createMockSession({
-          user: { id: '3', email: 'guest@test.com', name: 'Guest', role: 'GUEST' },
+          user: {
+            id: '3',
+            email: 'guest@test.com',
+            name: 'Guest',
+            role: 'GUEST',
+            isFamilyMember: false,
+          },
         })
       )
 
@@ -239,7 +281,13 @@ describe('Finance Actions', () => {
     beforeEach(() => {
       mockAuth.mockResolvedValue(
         createMockSession({
-          user: { id: '1', email: 'owner@test.com', name: 'Owner', role: 'OWNER' },
+          user: {
+            id: '1',
+            email: 'owner@test.com',
+            name: 'Owner',
+            role: 'OWNER',
+            isFamilyMember: false,
+          },
         })
       )
     })
@@ -270,7 +318,10 @@ describe('Finance Actions', () => {
       })
 
       expect(result.success).toBe(true)
-      expect(result.transaction).toEqual({ ...mockTransaction, amount: Number(mockTransaction.amount) })
+      expect(result.transaction).toEqual({
+        ...mockTransaction,
+        amount: Number(mockTransaction.amount),
+      })
       expect(prismaMock.receipt.create).not.toHaveBeenCalled()
     })
 
@@ -429,7 +480,13 @@ describe('Finance Actions', () => {
     beforeEach(() => {
       mockAuth.mockResolvedValue(
         createMockSession({
-          user: { id: '1', email: 'owner@test.com', name: 'Owner', role: 'OWNER' },
+          user: {
+            id: '1',
+            email: 'owner@test.com',
+            name: 'Owner',
+            role: 'OWNER',
+            isFamilyMember: false,
+          },
         })
       )
     })
@@ -454,7 +511,10 @@ describe('Finance Actions', () => {
       const result = await updateTransaction('tx-1', { amount: 200 })
 
       expect(result.success).toBe(true)
-      expect(result.transaction).toEqual({ ...mockTransaction, amount: Number(mockTransaction.amount) })
+      expect(result.transaction).toEqual({
+        ...mockTransaction,
+        amount: Number(mockTransaction.amount),
+      })
       expect(prismaMock.transaction.update).toHaveBeenCalledWith({
         where: { id: 'tx-1' },
         data: { amount: 200 },
@@ -529,9 +589,7 @@ describe('Finance Actions', () => {
     })
 
     it('should propagate Prisma error for non-existent transaction', async () => {
-      prismaMock.transaction.update.mockRejectedValueOnce(
-        new Error('Record to update not found.')
-      )
+      prismaMock.transaction.update.mockRejectedValueOnce(new Error('Record to update not found.'))
 
       await expect(updateTransaction('non-existent', { amount: 200 })).rejects.toThrow(
         'Record to update not found.'
@@ -547,7 +605,13 @@ describe('Finance Actions', () => {
     beforeEach(() => {
       mockAuth.mockResolvedValue(
         createMockSession({
-          user: { id: '1', email: 'owner@test.com', name: 'Owner', role: 'OWNER' },
+          user: {
+            id: '1',
+            email: 'owner@test.com',
+            name: 'Owner',
+            role: 'OWNER',
+            isFamilyMember: false,
+          },
         })
       )
       prismaMock.receipt.deleteMany.mockResolvedValue({ count: 0 })
@@ -696,7 +760,13 @@ describe('Finance Actions', () => {
     beforeEach(() => {
       mockAuth.mockResolvedValue(
         createMockSession({
-          user: { id: '1', email: 'owner@test.com', name: 'Owner', role: 'OWNER' },
+          user: {
+            id: '1',
+            email: 'owner@test.com',
+            name: 'Owner',
+            role: 'OWNER',
+            isFamilyMember: false,
+          },
         })
       )
     })
@@ -786,7 +856,13 @@ describe('Finance Actions', () => {
     it('should reject unauthorized users', async () => {
       mockAuth.mockResolvedValueOnce(
         createMockSession({
-          user: { id: '3', email: 'guest@test.com', name: 'Guest', role: 'GUEST' },
+          user: {
+            id: '3',
+            email: 'guest@test.com',
+            name: 'Guest',
+            role: 'GUEST',
+            isFamilyMember: false,
+          },
         })
       )
 
@@ -831,7 +907,13 @@ describe('Finance Actions', () => {
     beforeEach(() => {
       mockAuth.mockResolvedValue(
         createMockSession({
-          user: { id: '1', email: 'owner@test.com', name: 'Owner', role: 'OWNER' },
+          user: {
+            id: '1',
+            email: 'owner@test.com',
+            name: 'Owner',
+            role: 'OWNER',
+            isFamilyMember: false,
+          },
         })
       )
     })
@@ -910,7 +992,13 @@ describe('Finance Actions', () => {
     it('should reject unauthorized users', async () => {
       mockAuth.mockResolvedValueOnce(
         createMockSession({
-          user: { id: '3', email: 'guest@test.com', name: 'Guest', role: 'GUEST' },
+          user: {
+            id: '3',
+            email: 'guest@test.com',
+            name: 'Guest',
+            role: 'GUEST',
+            isFamilyMember: false,
+          },
         })
       )
 

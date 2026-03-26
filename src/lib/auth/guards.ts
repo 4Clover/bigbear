@@ -31,3 +31,11 @@ export const assertOwnerOrWorker = async () => {
   }
   return session
 }
+
+export const assertFamilyMember = async () => {
+  const session = await auth()
+  if (!session?.user || !session.user.isFamilyMember) {
+    throw new Error('Unauthorized')
+  }
+  return session
+}

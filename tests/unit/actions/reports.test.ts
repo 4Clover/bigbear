@@ -58,7 +58,13 @@ describe('Report Actions', () => {
     vi.clearAllMocks()
     mockAuth.mockResolvedValue(
       createMockSession({
-        user: { id: '1', email: 'owner@test.com', name: 'Owner', role: 'OWNER' },
+        user: {
+          id: '1',
+          email: 'owner@test.com',
+          name: 'Owner',
+          role: 'OWNER',
+          isFamilyMember: false,
+        },
       })
     )
   })
@@ -116,7 +122,13 @@ describe('Report Actions', () => {
     it('should reject unauthorized users', async () => {
       mockAuth.mockResolvedValueOnce(
         createMockSession({
-          user: { id: '1', email: 'guest@test.com', name: 'Guest', role: 'GUEST' },
+          user: {
+            id: '1',
+            email: 'guest@test.com',
+            name: 'Guest',
+            role: 'GUEST',
+            isFamilyMember: false,
+          },
         })
       )
 
@@ -126,7 +138,13 @@ describe('Report Actions', () => {
     it('should allow ACCOUNTANT role', async () => {
       mockAuth.mockResolvedValueOnce(
         createMockSession({
-          user: { id: '1', email: 'accountant@test.com', name: 'Accountant', role: 'ACCOUNTANT' },
+          user: {
+            id: '1',
+            email: 'accountant@test.com',
+            name: 'Accountant',
+            role: 'ACCOUNTANT',
+            isFamilyMember: false,
+          },
         })
       )
 

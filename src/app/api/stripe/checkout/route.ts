@@ -1,3 +1,11 @@
+//|-----------------------------------------------------|
+//| %%% STRIPE CHECKOUT — CURRENTLY DISABLED %%%%%%%%%%%%|
+//| The booking flow now uses PaymentOptionsModal with   |
+//| Venmo/CashApp/PayPal/Zelle/Contact Owner.            |
+//| This route is kept intact for future re-enablement.  |
+//| No frontend path calls this endpoint.                |
+//|-----------------------------------------------------|
+
 import { type NextRequest, NextResponse } from 'next/server'
 import { stripe } from '@/lib/stripe'
 import { prisma } from '@/lib/prisma'

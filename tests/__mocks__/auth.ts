@@ -7,6 +7,7 @@ interface MockUser {
   email: string
   name: string | null
   role: UserRole
+  isFamilyMember: boolean
 }
 
 interface MockSession extends Session {
@@ -19,6 +20,7 @@ export const createMockSession = (overrides: Partial<MockSession> = {}): MockSes
     email: 'test@example.com',
     name: 'Test User',
     role: 'GUEST',
+    isFamilyMember: false,
     ...overrides.user,
   },
   expires: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
@@ -30,6 +32,7 @@ export const createMockUser = (overrides: Partial<MockUser> = {}): MockUser => (
   email: 'test@example.com',
   name: 'Test User',
   role: 'GUEST',
+  isFamilyMember: false,
   ...overrides,
 })
 
