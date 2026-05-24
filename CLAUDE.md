@@ -1,3 +1,18 @@
+<!-- autobots:managed:start -->
+
+# CLAUDE.md
+
+Configuration and instructions for Claude Code.
+
+## Rules
+
+## MCP Servers
+
+Configured MCP servers provide access to external tools and data sources.
+See settings.json for server configuration.
+
+<!-- autobots:managed:end -->
+
 # CLAUDE.md
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
@@ -42,7 +57,7 @@ pnpm db:studio              # Open Prisma Studio
 
 ### Server Actions (`src/actions/`)
 
-Primary data mutations. Each file corresponds to a domain: `bookings.ts`, `finance.ts`, `maintenance.ts`, `reports.ts`, `calendar.ts`, `notifications.ts`.
+Primary data mutations. Each file corresponds to a domain: `bookings.ts`, `finance.ts`, `maintenance.ts`, `reports.ts`, `calendar.ts`, `notifications.ts`, `gallery.ts`, `reviews.ts`, `family.ts`.
 
 **Security**: Server Actions create public HTTP endpoints. Always:
 
@@ -65,6 +80,34 @@ Primary data mutations. Each file corresponds to a domain: `bookings.ts`, `finan
 - `src/lib/notifications.ts` - Email (Resend) and SMS (Twilio) notifications; Twilio client is lazy-loaded
 - `src/lib/rate-limit.ts` - Upstash Redis rate limiting
 - `src/lib/auth/secure-action.ts` - `secureAction()` and `secureFormAction()` wrappers (auth + validation in one)
+- `src/lib/blob.ts` - Vercel Blob client for image uploads (gallery, receipts, maintenance photos)
+
+### Token-Based Guest Access
+
+Three token libs (`src/lib/gallery-token.ts`, `src/lib/review-token.ts`, `src/lib/family-token.ts`) issue signed tokens that let guests access specific pages without a full auth session. These are sent via email links. Corresponding API routes validate the token and expose the restricted action.
+
+### API Route Wrappers (`src/lib/api/route-gates.ts`)
+
+Three wrappers cover all API route categories — use these instead of manual auth checks:
+
+```typescript
+// Protected routes requiring a role
+export const GET = authenticatedRoute(['OWNER', 'ACCOUNTANT'], async (req, session) => {
+  return NextResponse.json(await fetchData(session.user.id))
+})
+
+// Public routes with rate limiting
+export const POST = publicRoute('contact', { limit: 5, windowSeconds: 60 }, async (req) => {
+  return NextResponse.json({ success: true })
+})
+
+// Cron jobs verified with CRON_SECRET Bearer token
+export const dynamic = 'force-dynamic'
+export const GET = cronRoute(async (req) => {
+  await processReminders()
+  return NextResponse.json({ processed: true })
+})
+```
 
 ### Cache Invalidation (`src/lib/cache/invalidation.ts`)
 
@@ -301,10 +344,12 @@ function handler(_req: Request) { /* req not needed */ }
 
 Include a comment block at its beginning:
 
-"#|--------------------------------|"
-"#| %%% XYZ SCAFFOLDING %%%%%%%%%%%|"
-"#| TODO: Implement when relevant. |"
-"#|--------------------------------|"
+```typescript
+//|--------------------------------|
+//| %%% XYZ SCAFFOLDING %%%%%%%%%%%|
+//| TODO: Implement when relevant. |
+//|--------------------------------|
+```
 
 ## Path Alias
 
