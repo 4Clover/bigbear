@@ -1,40 +1,38 @@
 import { auth } from '@/lib/auth'
+import type { Session } from 'next-auth'
+import type { UserRole } from '@prisma/client'
 
-export const assertOwner = async () => {
+export const assertOwner = async (): Promise<Session> => {
   const session = await auth()
-  if (!session?.user || session.user.role !== 'OWNER') {
+  const role = session?.user.role
+  if (!role || role !== 'OWNER') {
     throw new Error('Unauthorized')
   }
   return session
 }
 
-export const assertOwnerOrAccountant = async () => {
+export const assertOwnerOrAccountant = async (): Promise<Session> => {
   const session = await auth()
-  if (!session?.user || !['OWNER', 'ACCOUNTANT'].includes(session.user.role)) {
+  const role = session?.user.role
+  if (!role || !(['OWNER', 'ACCOUNTANT'] as UserRole[]).includes(role)) {
     throw new Error('Unauthorized')
   }
   return session
 }
 
-export const assertWorker = async () => {
+export const assertWorker = async (): Promise<Session> => {
   const session = await auth()
-  if (!session?.user || session.user.role !== 'WORKER') {
+  const role = session?.user.role
+  if (!role || role !== 'WORKER') {
     throw new Error('Unauthorized')
   }
   return session
 }
 
-export const assertOwnerOrWorker = async () => {
+export const assertOwnerOrWorker = async (): Promise<Session> => {
   const session = await auth()
-  if (!session?.user || !['OWNER', 'WORKER'].includes(session.user.role)) {
-    throw new Error('Unauthorized')
-  }
-  return session
-}
-
-export const assertFamilyMember = async () => {
-  const session = await auth()
-  if (!session?.user || !session.user.isFamilyMember) {
+  const role = session?.user.role
+  if (!role || !(['OWNER', 'WORKER'] as UserRole[]).includes(role)) {
     throw new Error('Unauthorized')
   }
   return session

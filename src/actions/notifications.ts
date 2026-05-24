@@ -2,7 +2,7 @@
 
 import { prisma } from '@/lib/prisma'
 import type { NotificationEvent } from '@prisma/client'
-import { revalidatePath } from 'next/cache'
+import { invalidateNotifications } from '@/lib/cache/invalidation'
 import { assertOwner } from '@/lib/auth/guards'
 
 export const updateNotificationPreference = async (
@@ -18,16 +18,6 @@ export const updateNotificationPreference = async (
     create: { event, emailEnabled, smsEnabled },
   })
 
-  revalidatePath('/owner/settings')
+  invalidateNotifications()
   return { success: true }
-}
-
-export const getNotificationPreferences = async () => {
-  await assertOwner()
-
-  const preferences = await prisma.notificationPreference.findMany({
-    orderBy: { event: 'asc' },
-  })
-
-  return preferences
 }

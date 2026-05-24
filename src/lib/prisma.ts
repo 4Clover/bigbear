@@ -1,5 +1,6 @@
 import { PrismaClient, Prisma } from '@prisma/client'
 import { PrismaNeon } from '@prisma/adapter-neon'
+import { PrismaPg } from '@prisma/adapter-pg'
 import { env } from './env'
 
 const getConnectionString = (): string => {
@@ -27,7 +28,10 @@ const convertDecimals = <T>(obj: T): T => {
 }
 
 const createPrismaClient = () => {
-  const adapter = new PrismaNeon({ connectionString: getConnectionString() })
+  const connectionString = getConnectionString()
+  const isNeon =
+    connectionString.includes('neon.tech') || connectionString.includes('neon.database')
+  const adapter = isNeon ? new PrismaNeon({ connectionString }) : new PrismaPg({ connectionString })
   const client = new PrismaClient({ adapter })
 
   // Extend client to auto-convert Decimal to number in all query results
@@ -52,5 +56,3 @@ export const prisma = globalForPrisma.prisma ?? createPrismaClient()
 if (process.env.NODE_ENV !== 'production') {
   globalForPrisma.prisma = prisma
 }
-
-export default prisma

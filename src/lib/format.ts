@@ -20,9 +20,3 @@ export const formatDate = (date: Date | string): string =>
     month: 'short',
     day: 'numeric',
   }).format(new Date(date))
-
-/**
- * Formats a percentage value.
- */
-export const formatPercentage = (value: number, decimals = 1): string =>
-  `${value.toFixed(decimals)}%`

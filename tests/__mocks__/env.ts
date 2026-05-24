@@ -14,6 +14,7 @@ export const mockEnvValues = {
   TWILIO_AUTH_TOKEN: 'test-twilio-auth-token-32-chars-long',
   TWILIO_PHONE_NUMBER: '+15555555555',
   OWNER_EMAIL: 'owner@test.com',
+  NEXT_PUBLIC_APP_URL: 'http://localhost:3000',
 }
 
 export const env = vi.fn(() => ({ ...mockEnvValues }))

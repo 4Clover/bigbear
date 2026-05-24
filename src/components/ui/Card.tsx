@@ -37,18 +37,3 @@ export const CardHeader = ({ children, className = '' }: CardProps) => {
 export const CardContent = ({ children, className = '' }: CardProps) => {
   return <div className={`px-6 py-4 ${className}`}>{children}</div>
 }
-
-export const CardFooter = ({ children, className = '' }: CardProps) => {
-  return (
-    <div
-      className={`
-        px-6 py-4
-        border-t border-border
-        bg-muted
-        ${className}
-      `}
-    >
-      {children}
-    </div>
-  )
-}

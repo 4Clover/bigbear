@@ -7,7 +7,7 @@ import { prisma } from './prisma'
 import { env } from './env'
 import type { UserRole } from '@prisma/client'
 
-export const { handlers, auth, signIn, signOut } = NextAuth({
+export const { handlers, auth } = NextAuth({
   adapter: PrismaAdapter(prisma) as Adapter,
   providers: [
     Google({

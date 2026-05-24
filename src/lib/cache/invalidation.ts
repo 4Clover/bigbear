@@ -8,7 +8,7 @@ import { revalidatePath, revalidateTag } from 'next/cache'
  * Centralized cache tag generators. Convention: `domain` or `domain:id`.
  * Used with `cacheTag()` in data-fetching and `revalidateTag()` in mutations.
  */
-export const CacheTags = {
+const CacheTags = {
   gallery: () => 'gallery' as const,
   bookings: () => 'bookings' as const,
   maintenance: () => 'maintenance' as const,
@@ -16,6 +16,7 @@ export const CacheTags = {
   calendar: () => 'calendar' as const,
   notifications: () => 'notifications' as const,
   reviews: () => 'reviews' as const,
+  family: () => 'family' as const,
 } as const
 
 // ---------------------------------------------------------------------------
@@ -36,31 +37,10 @@ export const invalidateBookings = () => {
   revalidatePath('/owner/dashboard')
 }
 
-/** Invalidate maintenance caches (owner + worker views) */
-export const invalidateMaintenance = () => {
-  revalidateTag(CacheTags.maintenance(), { expire: 0 })
-  revalidatePath('/owner/maintenance')
-  revalidatePath('/worker/jobs')
-  revalidatePath('/worker/schedule')
-  revalidatePath('/worker/quotes')
-}
-
-/** Invalidate finance caches */
-export const invalidateFinance = () => {
-  revalidateTag(CacheTags.finance(), { expire: 0 })
-  revalidatePath('/owner/finance')
-}
-
 /** Invalidate calendar caches */
 export const invalidateCalendar = () => {
   revalidateTag(CacheTags.calendar(), { expire: 0 })
   revalidatePath('/owner/calendar')
-}
-
-/** Invalidate notification caches */
-export const invalidateNotifications = () => {
-  revalidateTag(CacheTags.notifications(), { expire: 0 })
-  revalidatePath('/owner/settings')
 }
 
 /** Invalidate review caches (owner reviews page) */
@@ -71,5 +51,12 @@ export const invalidateReviews = () => {
 
 /** Invalidate family caches (owner family settings) */
 export const invalidateFamily = () => {
+  revalidateTag(CacheTags.family(), { expire: 0 })
   revalidatePath('/owner/settings/family')
+}
+
+/** Invalidate notification preference caches */
+export const invalidateNotifications = () => {
+  revalidateTag(CacheTags.notifications(), { expire: 0 })
+  revalidatePath('/owner/settings')
 }

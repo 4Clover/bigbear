@@ -1,4 +1,3 @@
-
 import { z } from 'zod'
 import { auth } from '@/lib/auth'
 import type { UserRole } from '@prisma/client'
@@ -24,12 +23,6 @@ interface ActionResult<T = void> {
   success: boolean
   error?: string
   data?: T
-}
-
-/** State shape compatible with React 19 useActionState */
-export interface FormActionState {
-  success: boolean
-  error?: string
 }
 
 // ---------------------------------------------------------------------------
@@ -103,53 +96,5 @@ export function secureAction<TSchema extends z.ZodType, TResult>(
     }
 
     return handler({ session, data: undefined as z.infer<TSchema> })
-  }
-}
-
-// ---------------------------------------------------------------------------
-// secureFormAction — for React 19 useActionState form binding
-// ---------------------------------------------------------------------------
-
-/**
- * Wraps a server action for use with `useActionState(action, initialState)`.
- *
- * The returned function has the signature `(state, formData) => Promise<FormActionState>`
- * that React 19's `useActionState` expects.
- *
- * @example
- * ```ts
- * export const updateProfile = secureFormAction(
- *   { roles: 'OWNER', schema: profileSchema },
- *   async ({ session, data }) => {
- *     await prisma.user.update({ where: { id: session.user.id }, data })
- *     return { success: true }
- *   }
- * )
- * ```
- */
-export function secureFormAction<TSchema extends z.ZodType>(
-  config: SecureActionConfig<TSchema> & { schema: TSchema },
-  handler: (ctx: ActionContext<z.infer<TSchema>>) => Promise<FormActionState>
-): (_prev: FormActionState, formData: FormData) => Promise<FormActionState> {
-  return async (_prev: FormActionState, formData: FormData) => {
-    try {
-      const session = await checkAuth(config.roles)
-
-      const raw = Object.fromEntries(formData.entries())
-      const validated = config.schema.safeParse(raw)
-      if (!validated.success) {
-        return { success: false, error: extractValidationError(validated.error) }
-      }
-
-      return await handler({
-        session,
-        data: validated.data as z.infer<TSchema>,
-      })
-    } catch (error) {
-      if (error instanceof Error && error.message === 'Unauthorized') {
-        return { success: false, error: 'Unauthorized' }
-      }
-      throw error
-    }
   }
 }

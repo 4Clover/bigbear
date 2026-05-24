@@ -8,32 +8,18 @@ import { invalidateFamily } from '@/lib/cache/invalidation'
 import { Resend } from 'resend'
 import { env } from '@/lib/env'
 
-const resend = new Resend(env().AUTH_RESEND_KEY)
+// Lazy-loaded to avoid module-scope crash on bad AUTH_RESEND_KEY and to enable test isolation
+const getResend = () => new Resend(env().AUTH_RESEND_KEY)
 
-// ---------------------------------------------------------------------------
-// Owner: list family members
-// ---------------------------------------------------------------------------
-
-export const listFamilyMembers = secureAction(
-  { roles: 'OWNER', schema: z.object({}) },
-  async () => {
-    const members = await prisma.user.findMany({
-      where: { isFamilyMember: true },
-      select: { id: true, name: true, email: true, createdAt: true },
-      orderBy: { name: 'asc' },
-    })
-
-    return {
-      success: true,
-      members: members.map((m) => ({
-        id: m.id,
-        name: m.name,
-        email: m.email,
-        createdAt: m.createdAt.toISOString(),
-      })),
-    }
-  }
-)
+// HTML-encode untrusted strings before interpolating into email HTML bodies
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#x27;')
+}
 
 // ---------------------------------------------------------------------------
 // Owner: add a family member (by email) and send booking invite
@@ -65,22 +51,27 @@ export const addFamilyMember = secureAction(
     // If user doesn't exist yet, they'll be marked as family when they first sign in
     // (handled by the signIn event in auth.ts if needed, or they book via token)
 
+    const appUrl = env().NEXT_PUBLIC_APP_URL
+    if (!appUrl) {
+      return { success: false, error: 'Application URL not configured' }
+    }
+
     // Send family booking invite email
     const token = await signFamilyToken({
       email: data.email,
       name: data.name,
     })
 
-    const appUrl = env().NEXT_PUBLIC_APP_URL ?? ''
     const bookingUrl = `${appUrl}/book?family=${token}`
+    const safeName = escapeHtml(data.name)
 
-    await resend.emails.send({
+    await getResend().emails.send({
       from: env().RESEND_FROM_EMAIL,
       to: data.email,
       subject: "You're invited to book at Grizzly Getaway!",
       html: `
         <h2>Family Booking Invitation</h2>
-        <p>Hello ${data.name},</p>
+        <p>Hello ${safeName},</p>
         <p>You've been invited to book a stay at Grizzly Getaway as a family member.
         As family, no payment is required — just pick your dates and confirm!</p>
         <p><a href="${bookingUrl}" style="display:inline-block; padding:12px 24px; background-color:#447a52; color:white; text-decoration:none; border-radius:8px; font-weight:bold;">
@@ -106,6 +97,18 @@ export const removeFamilyMember = secureAction(
     schema: z.object({ userId: z.string().min(1) }),
   },
   async ({ data }) => {
+    const user = await prisma.user.findUnique({
+      where: { id: data.userId },
+      select: { isFamilyMember: true },
+    })
+
+    if (!user) {
+      return { success: false, error: 'User not found' }
+    }
+    if (!user.isFamilyMember) {
+      return { success: false, error: 'User is not a family member' }
+    }
+
     await prisma.user.update({
       where: { id: data.userId },
       data: { isFamilyMember: false },
@@ -135,21 +138,26 @@ export const resendFamilyInvite = secureAction(
       return { success: false, error: 'User is not a family member' }
     }
 
+    const appUrl = env().NEXT_PUBLIC_APP_URL
+    if (!appUrl) {
+      return { success: false, error: 'Application URL not configured' }
+    }
+
     const token = await signFamilyToken({
       email: user.email,
       name: user.name ?? 'Family',
     })
 
-    const appUrl = env().NEXT_PUBLIC_APP_URL ?? ''
     const bookingUrl = `${appUrl}/book?family=${token}`
+    const safeName = escapeHtml(user.name ?? 'there')
 
-    await resend.emails.send({
+    await getResend().emails.send({
       from: env().RESEND_FROM_EMAIL,
       to: user.email,
       subject: 'Your Grizzly Getaway booking link',
       html: `
         <h2>Here's your booking link!</h2>
-        <p>Hello ${user.name ?? 'there'},</p>
+        <p>Hello ${safeName},</p>
         <p>Use the link below to book your stay at Grizzly Getaway. As family, no payment is required!</p>
         <p><a href="${bookingUrl}" style="display:inline-block; padding:12px 24px; background-color:#447a52; color:white; text-decoration:none; border-radius:8px; font-weight:bold;">
           Book Your Stay
