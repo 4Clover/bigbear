@@ -13,7 +13,7 @@ export default defineConfig({
   schema: 'prisma/schema.prisma',
   migrations: {
     path: 'prisma/migrations',
-    seed: 'tsx prisma/seed.ts',
+    seed: 'bun prisma/seed.ts',
   },
   datasource: {
     // Use DIRECT_URL for migrations (non-pooled connection)
