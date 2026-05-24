@@ -65,6 +65,7 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   reactCompiler: true,
+  ...(isDev && { allowedDevOrigins: ['192.168.4.103'] }),
   images: {
     remotePatterns: [
       {
