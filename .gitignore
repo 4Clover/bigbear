@@ -2,11 +2,18 @@
 phases/
 plans/
 rental-cabin-development-plan.md
+plan-feature-batch.md
 img/
 .codesight/
 .claude/
 .sisyphus/
 .vscode/
+
+# Local AI/agent tooling — not project state
+.ollama.json
+.opencode.json
+GEMINI.md
+Modelfile
 # dependencies
 /node_modules
 /.pnp
