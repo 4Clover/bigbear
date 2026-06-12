@@ -1,5 +1,6 @@
 'use client'
 
+import { toast } from 'sonner'
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { createExpense } from '@/actions/finance'
@@ -32,7 +33,7 @@ export const ExpenseForm = ({ categories }: ExpenseFormProps) => {
     e.preventDefault()
 
     if (!categoryId || !amount || !date) {
-      alert('Please fill in all required fields')
+      toast.error('Please fill in all required fields')
       return
     }
 
@@ -50,7 +51,7 @@ export const ExpenseForm = ({ categories }: ExpenseFormProps) => {
         router.push('/owner/finance')
       } catch (error) {
         console.error('Failed to create expense:', error)
-        alert('Failed to create expense')
+        toast.error('Failed to create expense')
       }
     })
   }
@@ -76,13 +77,17 @@ export const ExpenseForm = ({ categories }: ExpenseFormProps) => {
               Amount <span className="text-destructive">*</span>
             </label>
             <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                $
+              </span>
               <input
                 type="number"
                 step="0.01"
                 min="0"
                 value={amount}
-                onChange={(e) => { setAmount(e.target.value); }}
+                onChange={(e) => {
+                  setAmount(e.target.value)
+                }}
                 placeholder="0.00"
                 className="w-full pl-7 pr-3 py-2 border border-border rounded-lg text-sm bg-background text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary focus:border-primary"
               />
@@ -96,7 +101,9 @@ export const ExpenseForm = ({ categories }: ExpenseFormProps) => {
             <input
               type="date"
               value={date}
-              onChange={(e) => { setDate(e.target.value); }}
+              onChange={(e) => {
+                setDate(e.target.value)
+              }}
               className="w-full px-3 py-2 border border-border rounded-lg text-sm bg-background text-foreground focus:ring-2 focus:ring-primary focus:border-primary"
             />
           </div>
@@ -106,7 +113,9 @@ export const ExpenseForm = ({ categories }: ExpenseFormProps) => {
             <input
               type="text"
               value={vendor}
-              onChange={(e) => { setVendor(e.target.value); }}
+              onChange={(e) => {
+                setVendor(e.target.value)
+              }}
               placeholder="e.g., Home Depot"
               className="w-full px-3 py-2 border border-border rounded-lg text-sm bg-background text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary focus:border-primary"
             />
@@ -117,7 +126,9 @@ export const ExpenseForm = ({ categories }: ExpenseFormProps) => {
           <label className="block text-sm font-medium text-foreground mb-1">Description</label>
           <textarea
             value={description}
-            onChange={(e) => { setDescription(e.target.value); }}
+            onChange={(e) => {
+              setDescription(e.target.value)
+            }}
             placeholder="What was this expense for?"
             rows={3}
             className="w-full px-3 py-2 border border-border rounded-lg text-sm bg-background text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary focus:border-primary"
@@ -131,7 +142,15 @@ export const ExpenseForm = ({ categories }: ExpenseFormProps) => {
       </div>
 
       <div className="flex flex-col-reverse sm:flex-row justify-end gap-3">
-        <Button type="button" variant="ghost" onClick={() => { router.back(); }} disabled={isPending} className="w-full sm:w-auto">
+        <Button
+          type="button"
+          variant="ghost"
+          onClick={() => {
+            router.back()
+          }}
+          disabled={isPending}
+          className="w-full sm:w-auto"
+        >
           Cancel
         </Button>
         <Button type="submit" isLoading={isPending} className="w-full sm:w-auto">

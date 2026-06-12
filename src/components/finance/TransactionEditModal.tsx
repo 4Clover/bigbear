@@ -1,5 +1,6 @@
 'use client'
 
+import { toast } from 'sonner'
 import { useState, useTransition, useEffect, useRef } from 'react'
 import { upload } from '@vercel/blob/client'
 import { updateTransaction, addReceiptToTransaction } from '@/actions/finance'
@@ -57,7 +58,7 @@ export const TransactionEditModal = ({
     e.preventDefault()
 
     if (!categoryId || !amount || !date) {
-      alert('Please fill in all required fields')
+      toast.error('Please fill in all required fields')
       return
     }
 
@@ -99,7 +100,7 @@ export const TransactionEditModal = ({
       onClose()
     } catch (error) {
       console.error('Upload failed:', error)
-      alert('Failed to upload file')
+      toast.error('Failed to upload file')
     } finally {
       setIsUploading(false)
       e.target.value = ''

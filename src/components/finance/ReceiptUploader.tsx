@@ -1,5 +1,6 @@
 'use client'
 
+import { toast } from 'sonner'
 import { useState, useRef, useCallback } from 'react'
 import { upload } from '@vercel/blob/client'
 import type { PutBlobResult } from '@vercel/blob'
@@ -44,7 +45,7 @@ export const ReceiptUploader = ({ onUpload, existingReceipts = [] }: ReceiptUplo
         onUpload(updated)
       } catch (error) {
         console.error('Upload failed:', error)
-        alert('Failed to upload files')
+        toast.error('Failed to upload files')
       } finally {
         setIsUploading(false)
       }

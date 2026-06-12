@@ -2,7 +2,9 @@
 
 import { useState, useTransition } from 'react'
 import { format } from 'date-fns'
+import { toast } from 'sonner'
 import { addCalendarSync, removeCalendarSync, toggleCalendarSync } from '@/actions/calendar'
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import type { CalendarSync } from '@prisma/client'
 
 interface CalendarSyncListProps {
@@ -14,6 +16,7 @@ const CalendarSyncList = ({ syncs }: CalendarSyncListProps) => {
   const [showAddForm, setShowAddForm] = useState(false)
   const [name, setName] = useState('')
   const [icalUrl, setIcalUrl] = useState('')
+  const [removeTargetId, setRemoveTargetId] = useState<string | null>(null)
 
   const handleAdd = (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -25,19 +28,18 @@ const CalendarSyncList = ({ syncs }: CalendarSyncListProps) => {
         setShowAddForm(false)
       } catch (error) {
         console.error('Failed to add calendar sync:', error)
-        alert('Failed to add calendar sync')
+        toast.error('Failed to add calendar sync')
       }
     })
   }
 
   const handleRemove = (id: string) => {
-    if (!confirm('Are you sure you want to remove this calendar sync?')) return
     startTransition(async () => {
       try {
         await removeCalendarSync(id)
       } catch (error) {
         console.error('Failed to remove calendar sync:', error)
-        alert('Failed to remove calendar sync')
+        toast.error('Failed to remove calendar sync')
       }
     })
   }
@@ -48,7 +50,7 @@ const CalendarSyncList = ({ syncs }: CalendarSyncListProps) => {
         await toggleCalendarSync(id, !isActive)
       } catch (error) {
         console.error('Failed to toggle calendar sync:', error)
-        alert('Failed to toggle calendar sync')
+        toast.error('Failed to toggle calendar sync')
       }
     })
   }
@@ -154,7 +156,7 @@ const CalendarSyncList = ({ syncs }: CalendarSyncListProps) => {
                 </button>
                 <button
                   onClick={() => {
-                    handleRemove(sync.id)
+                    setRemoveTargetId(sync.id)
                   }}
                   disabled={isPending}
                   className="text-sm text-red-600 hover:text-red-900 disabled:opacity-50"
@@ -166,6 +168,20 @@ const CalendarSyncList = ({ syncs }: CalendarSyncListProps) => {
           ))}
         </div>
       )}
+
+      <ConfirmDialog
+        open={removeTargetId !== null}
+        onOpenChange={(open) => {
+          if (!open) setRemoveTargetId(null)
+        }}
+        title="Remove this calendar sync?"
+        description="Externally synced blocked dates from this calendar will no longer update. This cannot be undone."
+        confirmLabel="Remove"
+        variant="destructive"
+        onConfirm={() => {
+          if (removeTargetId) handleRemove(removeTargetId)
+        }}
+      />
     </div>
   )
 }

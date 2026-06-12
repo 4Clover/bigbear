@@ -1,5 +1,6 @@
 'use client'
 
+import { toast } from 'sonner'
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { AlertTriangle, Calendar } from 'lucide-react'
@@ -60,7 +61,7 @@ const WorkerSchedulePage = () => {
       await loadJobs()
     } catch (error) {
       console.error('Failed to start work:', error)
-      alert('Failed to start work')
+      toast.error('Failed to start work')
     }
   }
 

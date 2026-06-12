@@ -1,5 +1,6 @@
 'use client'
 
+import { toast } from 'sonner'
 import { useState, useRef, useCallback } from 'react'
 import Image from 'next/image'
 import { upload } from '@vercel/blob/client'
@@ -36,7 +37,7 @@ const ProofPhotoUploader = ({ onUpload, existingPhotos = [] }: ProofPhotoUploade
         onUpload(updated)
       } catch (error) {
         console.error('Upload failed:', error)
-        alert('Failed to upload photos')
+        toast.error('Failed to upload photos')
       } finally {
         setIsUploading(false)
       }

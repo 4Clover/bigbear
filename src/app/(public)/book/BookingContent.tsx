@@ -1,5 +1,6 @@
 'use client'
 
+import { toast } from 'sonner'
 import { useState, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
 import {
@@ -173,10 +174,10 @@ export const BookingContent = () => {
         setFamilyConfirmed(true)
       } else {
         const data = (await res.json()) as { error?: string }
-        alert(data.error ?? 'Failed to create booking')
+        toast.error(data.error ?? 'Failed to create booking')
       }
     } catch {
-      alert('Something went wrong. Please try again.')
+      toast.error('Something went wrong. Please try again.')
     } finally {
       setFamilySubmitting(false)
     }
@@ -184,7 +185,7 @@ export const BookingContent = () => {
 
   const handleReserve = () => {
     if (!checkIn || !checkOut) {
-      alert('Please select your dates')
+      toast.error('Please select your dates')
       return
     }
 

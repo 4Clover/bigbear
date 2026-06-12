@@ -2,7 +2,9 @@
 
 import { useState, useTransition } from 'react'
 import { format } from 'date-fns'
+import { toast } from 'sonner'
 import { blockDates, unblockDates } from '@/actions/calendar'
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import type { BlockedDate } from '@prisma/client'
 
 interface BlockDateModalProps {
@@ -14,6 +16,7 @@ interface BlockDateModalProps {
 
 const BlockDateModal = ({ isOpen, onClose, selectedRange, existingBlock }: BlockDateModalProps) => {
   const [isPending, startTransition] = useTransition()
+  const [showUnblockConfirm, setShowUnblockConfirm] = useState(false)
   const [reason, setReason] = useState(existingBlock?.reason ?? '')
   const [startDate, setStartDate] = useState(
     selectedRange?.start ? format(selectedRange.start, 'yyyy-MM-dd') : ''
@@ -30,14 +33,13 @@ const BlockDateModal = ({ isOpen, onClose, selectedRange, existingBlock }: Block
         onClose()
       } catch (error) {
         console.error('Failed to block dates:', error)
-        alert('Failed to block dates')
+        toast.error('Failed to block dates')
       }
     })
   }
 
   const handleUnblock = () => {
     if (!existingBlock) return
-    if (!confirm('Are you sure you want to unblock these dates?')) return
 
     startTransition(async () => {
       try {
@@ -45,7 +47,7 @@ const BlockDateModal = ({ isOpen, onClose, selectedRange, existingBlock }: Block
         onClose()
       } catch (error) {
         console.error('Failed to unblock dates:', error)
-        alert('Failed to unblock dates')
+        toast.error('Failed to unblock dates')
       }
     })
   }
@@ -86,12 +88,23 @@ const BlockDateModal = ({ isOpen, onClose, selectedRange, existingBlock }: Block
                 )}
               </div>
               <button
-                onClick={handleUnblock}
+                onClick={() => {
+                  setShowUnblockConfirm(true)
+                }}
                 disabled={isPending}
                 className="w-full px-4 py-2 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700 disabled:opacity-50"
               >
                 {isPending ? 'Unblocking...' : 'Unblock Dates'}
               </button>
+              <ConfirmDialog
+                open={showUnblockConfirm}
+                onOpenChange={setShowUnblockConfirm}
+                title="Unblock these dates?"
+                description="The dates will reopen for guest bookings immediately."
+                confirmLabel="Unblock"
+                variant="destructive"
+                onConfirm={handleUnblock}
+              />
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4">

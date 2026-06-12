@@ -2,10 +2,12 @@
 
 import { useTransition, useState, useEffect } from 'react'
 import { Paperclip, Camera } from 'lucide-react'
+import { toast } from 'sonner'
 import { deleteTransaction, getExpenseCategories } from '@/actions/finance'
 
 import { formatCurrency, formatDate } from '@/lib/format'
 import { Pagination } from '@/components/ui/Pagination'
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { TransactionEditModal } from './TransactionEditModal'
 import type { Transaction, ExpenseCategory, Receipt } from '@prisma/client'
 
@@ -33,22 +35,23 @@ export const TransactionTable = ({
   onViewReceipts,
 }: TransactionTableProps) => {
   const [isPending, startTransition] = useTransition()
-  const [editingTransaction, setEditingTransaction] = useState<TransactionWithRelations | null>(null)
+  const [editingTransaction, setEditingTransaction] = useState<TransactionWithRelations | null>(
+    null
+  )
   const [categories, setCategories] = useState<ExpenseCategory[]>([])
+  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null)
 
   useEffect(() => {
     void getExpenseCategories().then(setCategories)
   }, [])
 
   const handleDelete = (id: string) => {
-    if (!confirm('Are you sure you want to delete this transaction?')) return
-
     startTransition(async () => {
       try {
         await deleteTransaction(id)
       } catch (error) {
         console.error('Failed to delete transaction:', error)
-        alert('Failed to delete transaction')
+        toast.error('Failed to delete transaction')
       }
     })
   }
@@ -126,7 +129,9 @@ export const TransactionTable = ({
               </td>
               <td
                 className={`px-2 py-3 md:px-6 md:py-4 whitespace-nowrap text-sm font-medium text-right ${
-                  transaction.type === 'INCOME' ? 'text-forest-600 dark:text-forest-400' : 'text-red-600 dark:text-red-400'
+                  transaction.type === 'INCOME'
+                    ? 'text-forest-600 dark:text-forest-400'
+                    : 'text-red-600 dark:text-red-400'
                 }`}
               >
                 {transaction.type === 'EXPENSE' ? '-' : '+'}
@@ -162,7 +167,7 @@ export const TransactionTable = ({
                 <button
                   onClick={(e) => {
                     e.stopPropagation()
-                    handleDelete(transaction.id)
+                    setDeleteTargetId(transaction.id)
                   }}
                   disabled={isPending}
                   className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 disabled:opacity-50"
@@ -175,7 +180,7 @@ export const TransactionTable = ({
         </tbody>
       </table>
       <Pagination page={page} totalPages={totalPages} total={total} pageSize={pageSize} />
-      
+
       {editingTransaction && (
         <TransactionEditModal
           transaction={editingTransaction}
@@ -188,6 +193,20 @@ export const TransactionTable = ({
           }}
         />
       )}
+
+      <ConfirmDialog
+        open={deleteTargetId !== null}
+        onOpenChange={(open) => {
+          if (!open) setDeleteTargetId(null)
+        }}
+        title="Delete this transaction?"
+        description="The transaction and its receipt links will be removed from the ledger. This cannot be undone."
+        confirmLabel="Delete"
+        variant="destructive"
+        onConfirm={() => {
+          if (deleteTargetId) handleDelete(deleteTargetId)
+        }}
+      />
     </div>
   )
 }
