@@ -49,6 +49,14 @@ const createPrismaClient = () => {
 
 type ExtendedPrismaClient = ReturnType<typeof createPrismaClient>
 
+// The callback param of prisma.$transaction — the extended client narrows it,
+// so Prisma.TransactionClient from @prisma/client does not match. Use this
+// type for helpers that must run inside a transaction.
+export type TransactionClient = Omit<
+  ExtendedPrismaClient,
+  '$on' | '$connect' | '$disconnect' | '$extends' | '$use'
+>
+
 const globalForPrisma = globalThis as unknown as { prisma: ExtendedPrismaClient | undefined }
 
 export const prisma = globalForPrisma.prisma ?? createPrismaClient()

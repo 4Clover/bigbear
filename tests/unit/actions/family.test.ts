@@ -63,7 +63,7 @@ describe('Family Actions', () => {
   // ---------------------------------------------------------------------------
 
   describe('addFamilyMember', () => {
-    it('should send invite email when user does not exist yet', async () => {
+    it('should create the user with isFamilyMember=true when they do not exist yet', async () => {
       prismaMock.user.findUnique.mockResolvedValue(null)
 
       const result = await addFamilyMember({
@@ -72,12 +72,30 @@ describe('Family Actions', () => {
       })
 
       expect(result.success).toBe(true)
+      expect(prismaMock.user.create).toHaveBeenCalledWith({
+        data: {
+          email: 'family@example.com',
+          name: 'John Smith',
+          role: 'GUEST',
+          isFamilyMember: true,
+        },
+      })
       expect(mockSend).toHaveBeenCalledWith(
         expect.objectContaining({
           to: 'family@example.com',
           subject: expect.stringContaining('invited'),
         })
       )
+    })
+
+    it('should describe the link as non-expiring in the invite email', async () => {
+      prismaMock.user.findUnique.mockResolvedValue(null)
+
+      await addFamilyMember({ email: 'family@example.com', name: 'John' })
+
+      const callArgs = mockSend.mock.calls[0]?.[0] as { html?: string } | undefined
+      expect(callArgs?.html).toContain('stays valid as long as your family access is active')
+      expect(callArgs?.html).not.toMatch(/expires? in \d+ days/i)
     })
 
     it('should set isFamilyMember=true when user already exists', async () => {

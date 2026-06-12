@@ -681,7 +681,7 @@ export const sendGalleryUploadInvite = async (booking: {
   }
 }
 
-const logNotification = async (
+export const logNotification = async (
   event: NotificationEvent,
   recipient: string,
   channel: string,

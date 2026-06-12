@@ -47,9 +47,13 @@ export const addFamilyMember = secureAction(
         where: { id: existingUser.id },
         data: { isFamilyMember: true },
       })
+    } else {
+      // The booking route requires a live isFamilyMember flag (it never grants it),
+      // so the User row must exist before the invite link can be used
+      await prisma.user.create({
+        data: { email: data.email, name: data.name, role: 'GUEST', isFamilyMember: true },
+      })
     }
-    // If user doesn't exist yet, they'll be marked as family when they first sign in
-    // (handled by the signIn event in auth.ts if needed, or they book via token)
 
     const appUrl = env().NEXT_PUBLIC_APP_URL
     if (!appUrl) {
@@ -77,7 +81,7 @@ export const addFamilyMember = secureAction(
         <p><a href="${bookingUrl}" style="display:inline-block; padding:12px 24px; background-color:#447a52; color:white; text-decoration:none; border-radius:8px; font-weight:bold;">
           Book Your Stay
         </a></p>
-        <p style="color:#666; font-size:12px;">This link expires in 30 days. Contact the owner if you need a new one.</p>
+        <p style="color:#666; font-size:12px;">This link stays valid as long as your family access is active. Contact the owner if you need a new one.</p>
         <p>Looking forward to hosting you!<br>Grizzly Getaway</p>
       `,
     })
@@ -162,7 +166,7 @@ export const resendFamilyInvite = secureAction(
         <p><a href="${bookingUrl}" style="display:inline-block; padding:12px 24px; background-color:#447a52; color:white; text-decoration:none; border-radius:8px; font-weight:bold;">
           Book Your Stay
         </a></p>
-        <p style="color:#666; font-size:12px;">This link expires in 30 days.</p>
+        <p style="color:#666; font-size:12px;">This link stays valid as long as your family access is active.</p>
         <p>See you soon!<br>Grizzly Getaway</p>
       `,
     })

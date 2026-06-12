@@ -34,11 +34,26 @@ export const createBookingFixture = (overrides: Partial<Booking> = {}): Booking 
     totalAmount,
     paymentIntentId: null,
     status: 'PENDING',
+    paymentMethod: 'STRIPE',
+    holdExpiresAt: null,
+    paymentClaimedAt: null,
+    checkoutEmailSentAt: null,
+    reviewInviteAttempts: 0,
+    reviewInviteLastAttemptAt: null,
     notes: null,
     createdAt: now,
     updatedAt: now,
     ...overrides,
   }
+}
+
+export const createHoldBookingFixture = (overrides: Partial<Booking> = {}): Booking => {
+  return createBookingFixture({
+    status: 'PENDING',
+    paymentMethod: 'VENMO',
+    holdExpiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+    ...overrides,
+  })
 }
 
 export const createConfirmedBookingFixture = (overrides: Partial<Booking> = {}): Booking => {

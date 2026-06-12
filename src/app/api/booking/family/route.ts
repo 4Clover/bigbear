@@ -2,12 +2,14 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
 import { verifyFamilyToken } from '@/lib/family-token'
+import { cancelExpiredOverlappingHolds, isRangeAvailable } from '@/lib/booking/availability'
+import { sendFamilyBookingCreated } from '@/lib/notifications-booking'
 import { invalidateBookings, invalidateCalendar } from '@/lib/cache/invalidation'
 
 const schema = z.object({
   token: z.string().min(1),
-  checkIn: z.string(),
-  checkOut: z.string(),
+  checkIn: z.string().refine((d) => !isNaN(Date.parse(d)), 'Invalid check-in date'),
+  checkOut: z.string().refine((d) => !isNaN(Date.parse(d)), 'Invalid check-out date'),
   guestName: z.string().min(1),
   guestEmail: z.email(),
   guestPhone: z.string().optional(),
@@ -39,45 +41,72 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Email does not match invitation' }, { status: 403 })
     }
 
-    const checkInDate = new Date(checkIn)
-    const checkOutDate = new Date(checkOut)
-
-    // Find or create guest user
-    let user = await prisma.user.findUnique({ where: { email: guestEmail } })
-
-    if (!user) {
-      user = await prisma.user.create({
-        data: {
-          email: guestEmail,
-          name: guestName,
-          role: 'GUEST',
-          isFamilyMember: true,
-        },
-      })
-    } else if (!user.isFamilyMember) {
-      await prisma.user.update({
-        where: { id: user.id },
-        data: { isFamilyMember: true },
-      })
+    // The live DB flag is the trust signal — tokens are long-lived and the owner
+    // revokes access by clearing isFamilyMember, which must invalidate old links.
+    const user = await prisma.user.findUnique({ where: { email: guestEmail } })
+    if (!user?.isFamilyMember) {
+      return NextResponse.json(
+        { error: 'Family access has been removed. Contact the owner for a new invitation.' },
+        { status: 403 }
+      )
     }
 
-    // Create booking — family bookings are auto-confirmed with $0 amounts
-    await prisma.booking.create({
-      data: {
-        guestId: user.id,
-        checkIn: checkInDate,
-        checkOut: checkOutDate,
-        guestName,
-        guestEmail,
-        guestPhone: guestPhone ?? null,
-        numberOfGuests,
-        basePrice: 0,
-        addonsTotal: 0,
-        depositAmount: 0,
-        totalAmount: 0,
-        status: 'CONFIRMED',
-        notes: 'Family booking — no payment required',
-      },
+    const checkInDate = new Date(checkIn)
+    const checkOutDate = new Date(checkOut)
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+
+    if (checkInDate < today) {
+      return NextResponse.json({ error: 'Check-in date cannot be in the past' }, { status: 400 })
+    }
+    if (checkOutDate <= checkInDate) {
+      return NextResponse.json(
+        { error: 'Check-out date must be after check-in date' },
+        { status: 400 }
+      )
+    }
+
+    // Create booking — family bookings are auto-confirmed with $0 amounts.
+    // Sweep + availability + insert run atomically; the exclusion constraint
+    // is the backstop for races.
+    let booking
+    try {
+      booking = await prisma.$transaction(async (tx) => {
+        await cancelExpiredOverlappingHolds(tx, checkInDate, checkOutDate)
+
+        const available = await isRangeAvailable(tx, checkInDate, checkOutDate)
+        if (!available) throw new Error('DATES_UNAVAILABLE')
+
+        return tx.booking.create({
+          data: {
+            guestId: user.id,
+            checkIn: checkInDate,
+            checkOut: checkOutDate,
+            guestName,
+            guestEmail,
+            guestPhone: guestPhone ?? null,
+            numberOfGuests,
+            basePrice: 0,
+            addonsTotal: 0,
+            depositAmount: 0,
+            totalAmount: 0,
+            status: 'CONFIRMED',
+            notes: 'Family booking — no payment required',
+          },
+        })
+      })
+    } catch (err) {
+      if (err instanceof Error && err.message === 'DATES_UNAVAILABLE') {
+        return NextResponse.json(
+          { error: 'Selected dates are no longer available' },
+          { status: 409 }
+        )
+      }
+      throw err
+    }
+
+    sendFamilyBookingCreated(booking).catch(() => {
+      // Notification failure should not affect booking creation
     })
 
     invalidateBookings()

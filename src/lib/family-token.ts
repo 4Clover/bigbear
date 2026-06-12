@@ -9,8 +9,10 @@ export interface FamilyTokenPayload extends JWTPayload {
 }
 
 /**
- * Sign a JWT token for family booking access with 30-day expiration.
- * Sent via email to family members for payment-free booking.
+ * Sign a JWT token for family booking access. Sent via email to family
+ * members for payment-free booking. Effectively non-expiring (365d) —
+ * revocation is DB-gated: the booking route checks the live isFamilyMember
+ * flag, so clearing it invalidates every outstanding link immediately.
  */
 export async function signFamilyToken(
   payload: Omit<FamilyTokenPayload, keyof JWTPayload>
@@ -21,7 +23,7 @@ export async function signFamilyToken(
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
     .setIssuer('family-booking')
-    .setExpirationTime('30d')
+    .setExpirationTime('365d')
     .sign(key)
 }
 
