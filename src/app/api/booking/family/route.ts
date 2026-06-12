@@ -2,7 +2,11 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
 import { verifyFamilyToken } from '@/lib/family-token'
-import { cancelExpiredOverlappingHolds, isRangeAvailable } from '@/lib/booking/availability'
+import {
+  cancelExpiredOverlappingHolds,
+  isDateOverlapError,
+  isRangeAvailable,
+} from '@/lib/booking/availability'
 import { sendFamilyBookingCreated } from '@/lib/notifications-booking'
 import { invalidateBookings, invalidateCalendar } from '@/lib/cache/invalidation'
 
@@ -96,7 +100,10 @@ export async function POST(req: NextRequest) {
         })
       })
     } catch (err) {
-      if (err instanceof Error && err.message === 'DATES_UNAVAILABLE') {
+      if (
+        (err instanceof Error && err.message === 'DATES_UNAVAILABLE') ||
+        isDateOverlapError(err)
+      ) {
         return NextResponse.json(
           { error: 'Selected dates are no longer available' },
           { status: 409 }

@@ -26,6 +26,17 @@ export async function cancelExpiredOverlappingHolds(
 }
 
 /**
+ * True when an insert was rejected by the booking_no_date_overlap exclusion
+ * constraint (the TOCTOU backstop). Prisma surfaces this as
+ * PrismaClientKnownRequestError P2010 or, inside interactive transactions on
+ * Prisma 7, as a generic Error — both carry the constraint name in the
+ * message, so a message check covers every shape.
+ */
+export function isDateOverlapError(error: unknown): boolean {
+  return error instanceof Error && error.message.includes('booking_no_date_overlap')
+}
+
+/**
  * Returns true when the requested range has no conflicts with live
  * confirmed/pending bookings or manually blocked dates.
  *
