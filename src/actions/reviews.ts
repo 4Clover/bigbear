@@ -6,6 +6,7 @@ import { secureAction } from '@/lib/auth/secure-action'
 import { verifyReviewToken } from '@/lib/review-token'
 import { signReviewToken } from '@/lib/review-token'
 import { invalidateReviews } from '@/lib/cache/invalidation'
+import { deleteBlob } from '@/lib/blob'
 import { Resend } from 'resend'
 import { env } from '@/lib/env'
 
@@ -105,11 +106,30 @@ export const sendReviewInvite = secureAction(
   async ({ data }) => {
     const booking = await prisma.booking.findUnique({
       where: { id: data.bookingId },
-      select: { id: true, guestName: true, guestEmail: true, checkIn: true, checkOut: true },
+      select: {
+        id: true,
+        guestName: true,
+        guestEmail: true,
+        checkIn: true,
+        checkOut: true,
+        status: true,
+      },
     })
 
     if (!booking) {
       return { success: false, error: 'Booking not found' }
+    }
+
+    // Only real, finished stays may be invited — a PENDING hold or cancelled
+    // booking never produced a stay to review.
+    if (booking.status !== 'CONFIRMED' && booking.status !== 'COMPLETED') {
+      return {
+        success: false,
+        error: 'Review invites are only available for confirmed or completed stays',
+      }
+    }
+    if (booking.checkOut > new Date()) {
+      return { success: false, error: 'Review invites can only be sent after checkout' }
     }
 
     const token = await signReviewToken({
@@ -150,6 +170,46 @@ export const sendReviewInvite = secureAction(
       `,
     })
 
+    return { success: true }
+  }
+)
+
+// ---------------------------------------------------------------------------
+// Owner: remove a single photo from a review
+// ---------------------------------------------------------------------------
+
+export const removeReviewPhoto = secureAction(
+  {
+    roles: 'OWNER',
+    schema: z.object({
+      reviewId: z.string().min(1),
+      photoUrl: z.url(),
+    }),
+  },
+  async ({ data }) => {
+    const review = await prisma.review.findUnique({
+      where: { id: data.reviewId },
+    })
+
+    if (!review) {
+      return { success: false, error: 'Review not found' }
+    }
+    if (!review.photoUrls.includes(data.photoUrl)) {
+      return { success: false, error: 'Photo not found on this review' }
+    }
+
+    // Owner moderation is limited to photos and publish state — the review's
+    // body and rating belong to the guest and are never mutated here.
+    await prisma.review.update({
+      where: { id: data.reviewId },
+      data: { photoUrls: review.photoUrls.filter((url) => url !== data.photoUrl) },
+    })
+
+    deleteBlob(data.photoUrl).catch(() => {
+      // Blob cleanup failure should not block the photo removal
+    })
+
+    invalidateReviews()
     return { success: true }
   }
 )

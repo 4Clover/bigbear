@@ -1,10 +1,12 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { Star, Eye, EyeOff } from 'lucide-react'
+import { Star, Eye, EyeOff, Trash2 } from 'lucide-react'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
-import { toggleReviewPublished } from '@/actions/reviews'
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
+import { toggleReviewPublished, removeReviewPhoto } from '@/actions/reviews'
 
 interface ReviewItem {
   id: string
@@ -23,10 +25,16 @@ interface ReviewListProps {
   reviews: ReviewItem[]
 }
 
+interface PhotoDeleteTarget {
+  reviewId: string
+  photoUrl: string
+}
+
 export const ReviewList = ({ reviews: initialReviews }: ReviewListProps) => {
   const [reviews, setReviews] = useState(initialReviews)
   const [isPending, startTransition] = useTransition()
   const [togglingId, setTogglingId] = useState<string | null>(null)
+  const [photoDeleteTarget, setPhotoDeleteTarget] = useState<PhotoDeleteTarget | null>(null)
 
   const handleToggle = (reviewId: string) => {
     setTogglingId(reviewId)
@@ -38,6 +46,24 @@ export const ReviewList = ({ reviews: initialReviews }: ReviewListProps) => {
         )
       }
       setTogglingId(null)
+    })
+  }
+
+  const handleRemovePhoto = ({ reviewId, photoUrl }: PhotoDeleteTarget) => {
+    startTransition(async () => {
+      const result = await removeReviewPhoto({ reviewId, photoUrl })
+      if (result.success) {
+        setReviews((prev) =>
+          prev.map((r) =>
+            r.id === reviewId
+              ? { ...r, photoUrls: r.photoUrls.filter((url) => url !== photoUrl) }
+              : r
+          )
+        )
+        toast.success('Photo removed')
+      } else {
+        toast.error(result.error ?? 'Failed to remove photo')
+      }
     })
   }
 
@@ -113,26 +139,52 @@ export const ReviewList = ({ reviews: initialReviews }: ReviewListProps) => {
             {review.photoUrls.length > 0 && (
               <div className="flex gap-3 flex-wrap">
                 {review.photoUrls.map((url) => (
-                  <a
-                    key={url}
-                    href={url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="block w-24 h-24 rounded-lg overflow-hidden border border-border hover:opacity-80 transition-opacity"
-                  >
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={url}
-                      alt="Guest review photo"
-                      className="w-full h-full object-cover"
-                    />
-                  </a>
+                  <div key={url} className="relative group">
+                    <a
+                      href={url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="block w-24 h-24 rounded-lg overflow-hidden border border-border hover:opacity-80 transition-opacity"
+                    >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={url}
+                        alt="Guest review photo"
+                        className="w-full h-full object-cover"
+                      />
+                    </a>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setPhotoDeleteTarget({ reviewId: review.id, photoUrl: url })
+                      }}
+                      disabled={isPending}
+                      className="absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full bg-red-600 text-white shadow hover:bg-red-700 transition-colors disabled:opacity-50"
+                      aria-label="Remove photo"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
                 ))}
               </div>
             )}
           </div>
         </div>
       ))}
+
+      <ConfirmDialog
+        open={photoDeleteTarget !== null}
+        onOpenChange={(open) => {
+          if (!open) setPhotoDeleteTarget(null)
+        }}
+        title="Remove this photo?"
+        description="The photo will be removed from the review and deleted from storage. The review text and rating are not affected. This cannot be undone."
+        confirmLabel="Remove photo"
+        variant="destructive"
+        onConfirm={() => {
+          if (photoDeleteTarget) handleRemovePhoto(photoDeleteTarget)
+        }}
+      />
     </div>
   )
 }
