@@ -391,6 +391,7 @@ export const BookingContent = () => {
             guestName: guestInfo.name,
             guestEmail: guestInfo.email,
             guestPhone: guestInfo.phone,
+            addons: selectedAddons,
             totalAmount: (() => {
               const nights = Math.ceil(
                 (checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24)

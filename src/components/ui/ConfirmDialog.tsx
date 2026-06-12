@@ -23,6 +23,8 @@ interface ConfirmDialogProps {
   variant?: 'default' | 'destructive'
   onConfirm: () => void | Promise<void>
   isLoading?: boolean
+  /** Extra content (e.g. a controlled textarea) rendered between the description and the footer */
+  children?: React.ReactNode
 }
 
 export function ConfirmDialog({
@@ -35,6 +37,7 @@ export function ConfirmDialog({
   variant = 'default',
   onConfirm,
   isLoading = false,
+  children,
 }: ConfirmDialogProps) {
   const [isPending, startTransition] = useTransition()
 
@@ -56,6 +59,7 @@ export function ConfirmDialog({
           <AlertDialogTitle>{title}</AlertDialogTitle>
           <AlertDialogDescription>{description}</AlertDialogDescription>
         </AlertDialogHeader>
+        {children}
         <AlertDialogFooter>
           <AlertDialogCancel disabled={isWorking}>{cancelLabel}</AlertDialogCancel>
           <AlertDialogAction
