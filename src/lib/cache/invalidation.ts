@@ -43,10 +43,12 @@ export const invalidateCalendar = () => {
   revalidatePath('/owner/calendar')
 }
 
-/** Invalidate review caches (owner reviews page) */
+/** Invalidate review caches (owner reviews page + public reviews surfaces) */
 export const invalidateReviews = () => {
   revalidateTag(CacheTags.reviews(), { expire: 0 })
   revalidatePath('/owner/reviews')
+  revalidatePath('/reviews')
+  revalidatePath('/') // homepage carousel shows the latest published reviews
 }
 
 /** Invalidate family caches (owner family settings) */

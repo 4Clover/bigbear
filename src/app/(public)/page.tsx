@@ -2,8 +2,29 @@ import { DollarSign, Home, Mountain, Snowflake } from 'lucide-react'
 import Link from 'next/link'
 import type { LucideIcon } from 'lucide-react'
 import { Button } from '@/components/ui'
+import { prisma } from '@/lib/prisma'
+import { ReviewsCarousel } from './ReviewsCarousel'
+import type { PublicReview } from './reviews/PublicReviewList'
 
-export default function HomePage() {
+// ISR — review mutations bust this path via invalidateReviews()
+export const revalidate = 3600
+
+export default async function HomePage() {
+  const latestReviews = await prisma.review.findMany({
+    where: { isPublished: true },
+    orderBy: { createdAt: 'desc' },
+    take: 5,
+  })
+
+  const reviewDtos: PublicReview[] = latestReviews.map((review) => ({
+    id: review.id,
+    guestName: review.guestName,
+    rating: review.rating,
+    body: review.body,
+    photoUrls: review.photoUrls,
+    createdAt: review.createdAt.toISOString(),
+  }))
+
   return (
     <div>
       {/* Hero Section */}
@@ -73,6 +94,25 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* Guest Reviews Section */}
+      {reviewDtos.length > 0 && (
+        <section className="py-16 md:py-24">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 className="text-3xl font-bold text-center mb-12 text-foreground">
+              What Our Guests Say
+            </h2>
+            <ReviewsCarousel reviews={reviewDtos} />
+            <div className="mt-10 text-center">
+              <Link href="/reviews">
+                <Button variant="outline" size="lg">
+                  Read all reviews
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* CTA Section */}
       <section className="py-16 bg-black/5">
