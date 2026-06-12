@@ -25,7 +25,7 @@ _Avoid_: Off-platform booking, manual booking.
 The "I have questions before I pay" path on the payment modal. Also a **Payment method** (`CONTACT_OWNER`) — selecting it creates a 24h **Hold**, persists the guest's message as a **Message** attached to the **Booking**, and emails the owner. If the conversation results in payment, the owner confirms; otherwise the **Hold** expires like any other.
 
 **Payment claim**:
-The guest's assertion that they sent funds, recorded as `Booking.paymentClaimedAt`. Triggered by the guest clicking the magic link in their confirmation email. Surfaces a badge in the owner's BookingTable. Does _not_ transition status; only **Owner verification** does.
+The guest's assertion that they sent funds, recorded as `Booking.paymentClaimedAt`. Triggered by the guest clicking the magic link in their confirmation email. Surfaces a badge in the owner's BookingTable. Does _not_ transition status; only **Owner verification** does. A claimed **Hold** is exempt from the expire-holds cron — the owner resolves it manually.
 
 **Owner verification**:
 The owner's confirmation that funds arrived in the off-platform account, performed via the existing `approveBookingRequest` action. Always means full `totalAmount` received — partial payments are not modelled.
