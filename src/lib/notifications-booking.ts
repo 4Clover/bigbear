@@ -214,7 +214,12 @@ export const sendFamilyBookingCreated = async (booking: Booking) => {
 // Checkout-day thanks — wrap-up info + first review invite
 // ---------------------------------------------------------------------------
 
-export const sendCheckoutThanks = async (booking: Booking) => {
+/**
+ * Returns whether the email was actually sent — the reminders cron only
+ * stamps checkoutEmailSentAt/reviewInviteAttempts on success so a failed
+ * send retries on the next run.
+ */
+export const sendCheckoutThanks = async (booking: Booking): Promise<boolean> => {
   const token = await signReviewToken({
     bookingId: booking.id,
     guestName: booking.guestName,
@@ -253,6 +258,7 @@ export const sendCheckoutThanks = async (booking: Booking) => {
       'Checkout Thanks',
       'sent'
     )
+    return true
   } catch (error) {
     await logNotification(
       'GUEST_CHECKOUT_THANKS',
@@ -262,5 +268,6 @@ export const sendCheckoutThanks = async (booking: Booking) => {
       'failed',
       error instanceof Error ? error.message : 'Unknown error'
     )
+    return false
   }
 }

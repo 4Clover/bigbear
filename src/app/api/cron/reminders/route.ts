@@ -5,8 +5,12 @@ import {
   sendCheckoutReminder,
   sendGalleryUploadInvite,
 } from '@/lib/notifications'
+import { sendCheckoutThanks } from '@/lib/notifications-booking'
 import { addDays, subDays, startOfDay, endOfDay } from 'date-fns'
 import { cronRoute } from '@/lib/api/route-gates'
+
+/** Days to wait after the Nth review-invite attempt before retrying */
+const REVIEW_RETRY_DELAY_DAYS: Record<number, number> = { 1: 1, 2: 2, 3: 4 }
 
 export const dynamic = 'force-dynamic'
 
@@ -123,7 +127,95 @@ export const GET = cronRoute(async () => {
     )
   }
 
-  const allErrors = [...errors, ...galleryErrors]
+  // -------------------------------------------------------------------------
+  // Checkout-day thanks email (first review invite)
+  // Dedup is column-based (checkoutEmailSentAt), NOT NotificationLog-based —
+  // the log pattern dedups by recipient forever, which would suppress the
+  // email for repeat guests on their second stay.
+  // -------------------------------------------------------------------------
+  const now = new Date()
+  const todayStart = startOfDay(now)
+  const todayEnd = endOfDay(now)
+
+  let checkoutThanksSent = 0
+  const checkoutThanksErrors: string[] = []
+
+  const checkoutTodayBookings = await prisma.booking.findMany({
+    where: {
+      status: { in: ['CONFIRMED', 'COMPLETED'] },
+      checkoutEmailSentAt: null,
+      checkOut: { gte: todayStart, lte: todayEnd },
+    },
+  })
+
+  for (const booking of checkoutTodayBookings) {
+    try {
+      const sent = await sendCheckoutThanks(booking)
+      if (!sent) {
+        // Fields stay null so the next run retries the send
+        checkoutThanksErrors.push(`Checkout thanks failed for ${booking.id}`)
+        continue
+      }
+      await prisma.booking.update({
+        where: { id: booking.id },
+        data: {
+          checkoutEmailSentAt: now,
+          reviewInviteAttempts: 1,
+          reviewInviteLastAttemptAt: now,
+        },
+      })
+      checkoutThanksSent++
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Unknown error'
+      checkoutThanksErrors.push(`Checkout thanks failed for ${booking.id}: ${message}`)
+      console.error(`Checkout thanks failed for ${booking.id}:`, error)
+    }
+  }
+
+  // -------------------------------------------------------------------------
+  // Review-invite retry sweep — guests who haven't reviewed yet get up to 3
+  // follow-ups with a widening cadence (1d, 2d, 4d after attempts 1/2/3).
+  // attempts=4 falls out of the filter, so the stop is structural.
+  // -------------------------------------------------------------------------
+  let reviewRetriesSent = 0
+  const reviewRetryErrors: string[] = []
+
+  const retryCandidates = await prisma.booking.findMany({
+    where: {
+      reviewInviteAttempts: { in: [1, 2, 3] },
+      status: { in: ['CONFIRMED', 'COMPLETED'] },
+      review: { is: null },
+      reviewInviteLastAttemptAt: { not: null },
+    },
+  })
+
+  for (const booking of retryCandidates) {
+    const delayDays = REVIEW_RETRY_DELAY_DAYS[booking.reviewInviteAttempts]
+    if (delayDays === undefined || booking.reviewInviteLastAttemptAt === null) continue
+    if (booking.reviewInviteLastAttemptAt > subDays(now, delayDays)) continue
+
+    try {
+      const sent = await sendCheckoutThanks(booking)
+      if (!sent) {
+        reviewRetryErrors.push(`Review retry failed for ${booking.id}`)
+        continue
+      }
+      await prisma.booking.update({
+        where: { id: booking.id },
+        data: {
+          reviewInviteAttempts: booking.reviewInviteAttempts + 1,
+          reviewInviteLastAttemptAt: now,
+        },
+      })
+      reviewRetriesSent++
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Unknown error'
+      reviewRetryErrors.push(`Review retry failed for ${booking.id}: ${message}`)
+      console.error(`Review retry failed for ${booking.id}:`, error)
+    }
+  }
+
+  const allErrors = [...errors, ...galleryErrors, ...checkoutThanksErrors, ...reviewRetryErrors]
 
   return NextResponse.json({
     checkinReminders: {
@@ -137,6 +229,14 @@ export const GET = cronRoute(async () => {
     galleryInvites: {
       found: galleryInvitesFound,
       sent: galleryInvitesSent,
+    },
+    checkoutThanks: {
+      found: checkoutTodayBookings.length,
+      sent: checkoutThanksSent,
+    },
+    reviewRetries: {
+      found: retryCandidates.length,
+      sent: reviewRetriesSent,
     },
     errors: allErrors.length > 0 ? allErrors : undefined,
   })

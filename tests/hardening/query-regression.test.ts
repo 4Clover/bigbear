@@ -298,6 +298,8 @@ describe('N+1 query regression tests', () => {
         ]) // checkin
         .mockResolvedValueOnce([]) // checkout
         .mockResolvedValueOnce([]) // completed
+        .mockResolvedValueOnce([]) // checkout-today thanks
+        .mockResolvedValueOnce([]) // review retry candidates
 
       // Batch dedup queries
       prismaMock.notificationLog.findMany

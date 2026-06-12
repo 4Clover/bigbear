@@ -21,6 +21,12 @@ vi.mock('@/lib/notifications', () => ({
   sendGalleryUploadInvite: mockSendGalleryUploadInvite,
 }))
 
+const mockSendCheckoutThanks = vi.hoisted(() => vi.fn())
+
+vi.mock('@/lib/notifications-booking', () => ({
+  sendCheckoutThanks: mockSendCheckoutThanks,
+}))
+
 vi.mock('@/lib/api/route-gates', () => ({
   cronRoute: (handler: (req: Request) => Promise<Response>) => handler,
   authenticatedRoute: vi.fn(),
@@ -70,6 +76,7 @@ describe('cron reminders dedup behavior', () => {
     mockSendCheckinReminder.mockResolvedValue(undefined)
     mockSendCheckoutReminder.mockResolvedValue(undefined)
     mockSendGalleryUploadInvite.mockResolvedValue(undefined)
+    mockSendCheckoutThanks.mockResolvedValue(true)
   })
 
   describe('gallery invite dedup', () => {
@@ -91,6 +98,8 @@ describe('cron reminders dedup behavior', () => {
           ),
           makeBooking('b2', 'new-guest@test.com', new Date('2026-07-02'), new Date('2026-07-06')),
         ] as never)
+        .mockResolvedValueOnce([]) // checkout-today thanks
+        .mockResolvedValueOnce([]) // review retry candidates
 
       // Batch dedup: gallery invite already sent to first guest
       prismaMock.notificationLog.findMany
@@ -117,6 +126,8 @@ describe('cron reminders dedup behavior', () => {
           makeBooking('b1', 'guest-a@test.com', new Date('2026-07-01'), new Date('2026-07-05')),
           makeBooking('b2', 'guest-b@test.com', new Date('2026-07-02'), new Date('2026-07-06')),
         ] as never)
+        .mockResolvedValueOnce([]) // checkout-today thanks
+        .mockResolvedValueOnce([]) // review retry candidates
 
       prismaMock.notificationLog.findMany
         .mockResolvedValueOnce([]) // GUEST_CHECKIN_REMINDER
@@ -143,6 +154,8 @@ describe('cron reminders dedup behavior', () => {
         ] as never) // checkin bookings
         .mockResolvedValueOnce([]) // checkout bookings
         .mockResolvedValueOnce([]) // completed bookings
+        .mockResolvedValueOnce([]) // checkout-today thanks
+        .mockResolvedValueOnce([]) // review retry candidates
 
       prismaMock.notificationLog.findMany
         .mockResolvedValueOnce([{ recipient: 'sent@test.com' }] as never) // GUEST_CHECKIN_REMINDER
@@ -173,6 +186,8 @@ describe('cron reminders dedup behavior', () => {
           makeBooking('b3', 'also-sent@test.com', new Date('2026-07-03'), tomorrow),
         ] as never) // checkout bookings
         .mockResolvedValueOnce([]) // completed bookings
+        .mockResolvedValueOnce([]) // checkout-today thanks
+        .mockResolvedValueOnce([]) // review retry candidates
 
       prismaMock.notificationLog.findMany
         .mockResolvedValueOnce([]) // GUEST_CHECKIN_REMINDER
@@ -202,6 +217,8 @@ describe('cron reminders dedup behavior', () => {
         ] as never) // checkin
         .mockResolvedValueOnce([makeBooking('b3', 'c@test.com', new Date(), new Date())] as never) // checkout
         .mockResolvedValueOnce([]) // completed
+        .mockResolvedValueOnce([]) // checkout-today thanks
+        .mockResolvedValueOnce([]) // review retry candidates
 
       prismaMock.notificationLog.findMany
         .mockResolvedValueOnce([]) // GUEST_CHECKIN_REMINDER
