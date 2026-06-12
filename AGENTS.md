@@ -1,100 +1,119 @@
-# PROJECT KNOWLEDGE BASE
+# Big Bear Cabin — Rental Management
 
-**Generated:** 2026-02-18
-**Commit:** 1f6f38e
-**Branch:** dev
+Short-term rental management for a single Big Bear cabin: guest booking flow, Stripe
+payments, owner finance/tax reporting, maintenance jobs assigned to contractor workers,
+and a photo gallery. Next.js 16 (App Router) + React 19 + TypeScript (strict),
+Prisma 7 / PostgreSQL (Neon serverless), Auth.js v5 (passwordless email via Resend),
+deployed on Vercel. Four roles: `OWNER`, `GUEST`, `WORKER`, `ACCOUNTANT`.
 
-## OVERVIEW
+## Commands
 
-Short-term rental property management (Big Bear cabin). Next.js 16 + TypeScript + Prisma/PostgreSQL + Stripe + Auth.js. Deployed on Vercel. 4 user roles: OWNER, GUEST, WORKER, ACCOUNTANT.
+- Dev server: `pnpm dev`
+- Build: `pnpm build`
+- Lint: `pnpm lint` (ESLint, `strictTypeChecked` + `stylisticTypeChecked`)
+- Lint fix: `pnpm lint:fix`
+- Format (write / check): `pnpm format` / `pnpm format:check` (Prettier)
+- Typecheck: `pnpm typecheck` (`tsc --noEmit`)
+- Test (watch): `pnpm test`
+- Test (single run): `pnpm test:run`
+- Test (one file): `pnpm test:run tests/unit/lib/calendar.test.ts`
+- Coverage: `pnpm test:coverage`
+- Local Postgres (Docker): `pnpm db:up` / `pnpm db:down`
+- Migrate dev / prod: `pnpm db:migrate` / `pnpm db:migrate:prod`
+- Seed / Studio / regen client: `pnpm db:seed` / `pnpm db:studio` / `pnpm db:generate`
 
-## STRUCTURE
+Husky pre-commit runs `bun run lint-staged && bun run typecheck && bun run test:run` —
+all must pass. Scripts run with `bun`; dependencies are managed with `pnpm`.
 
-```
-grizzly/
-├── src/
-│   ├── actions/          # Server actions by domain (7 files) → see actions/AGENTS.md
-│   ├── app/              # App Router routes (4 route groups) → see app/AGENTS.md
-│   ├── components/       # Domain-organized components (62 files) → see components/AGENTS.md
-│   ├── lib/              # Infrastructure layer (15 modules) → see lib/AGENTS.md
-│   └── types/            # Shared types (pagination, next-auth extensions)
-├── tests/                # Vitest test suite (35 files) → see tests/AGENTS.md
-├── prisma/               # Schema (437 lines) + migrations + seed → see prisma/AGENTS.md
-└── src/proxy.ts          # Global route protection (Next.js 16 proxy pattern)
-```
+## Architecture
 
-## WHERE TO LOOK
+- `src/actions/` — server actions, one file per domain (`bookings`, `finance`,
+  `maintenance`, `calendar`, `reports`, `gallery`, `reviews`, `family`,
+  `notifications`). Primary mutation layer. See `src/actions/AGENTS.md`.
+- `src/app/` — App Router. Route groups: `(public)/` (booking, gallery, contact),
+  `(auth)/` (login/verify), `owner/` (OWNER), `worker/` (WORKER), `api/` (cron,
+  webhooks, REST).
+- `src/lib/` — infrastructure (auth, prisma, stripe, env, notifications, blob,
+  rate-limit, cache, signed-token libs). See `src/lib/AGENTS.md`.
+- `src/proxy.ts` — global route protection (Next.js 16 proxy pattern). Replaces
+  `middleware.ts`; do not add a `middleware.ts`.
+- `prisma/schema.prisma` — 23 models, the DB source of truth. Run `pnpm db:migrate`
+  after edits.
+- `tests/` — Vitest suite. `.codesight/CODESIGHT.md` is an AST-derived map; read it
+  to orient, but it can lag the live code — verify counts and symbol names at source.
 
-| Task                | Location                              | Notes                                          |
-| ------------------- | ------------------------------------- | ---------------------------------------------- |
-| Add protected route | `src/app/owner/` or `src/app/worker/` | proxy.ts auto-protects; add layout guard too   |
-| Add server action   | `src/actions/{domain}.ts`             | Auth guard first, Zod validate, revalidatePath |
-| Add UI component    | `src/components/{domain}/`            | Custom design system, not shadcn               |
-| Add API endpoint    | `src/app/api/{feature}/route.ts`      | Rate limit public endpoints, Bearer for cron   |
-| Add Prisma model    | `prisma/schema.prisma`                | Run `pnpm db:migrate` after                    |
-| Change env vars     | `src/lib/env.ts`                      | Zod-validated; fails fast at startup           |
-| Add gallery feature | `src/actions/gallery.ts`              | Token-gated guest uploads; owner CRUD          |
-| Mock for tests      | `tests/__mocks__/`                    | Prisma, auth, resend, twilio, upstash          |
-| Add test fixtures   | `tests/fixtures/`                     | Factory pattern with counter-based IDs         |
+Auth is enforced in three layers: `src/proxy.ts` (global) → route-group layout guards
+→ `assert*()` guards inside each server action.
 
-## CONVENTIONS
+## Conventions
 
-- **No semicolons**, single quotes, 100-char line width (Prettier)
-- **`import type`** for type-only imports (eslint enforced)
-- **Underscore prefix** for intentionally unused vars (`_error`, `_req`)
-- **Decimal→number**: Prisma client extension auto-converts; never serialize raw Decimals
-- **Lazy-load expensive clients**: Stripe (Proxy pattern), Twilio (conditional init)
-- **Non-blocking notifications**: Always `.catch(() => {})` on notification sends
-- **Auth guard order**: `assertOwner()` → Zod validate → Prisma query → revalidatePath
+- Validate authorization first in every server action — they are public HTTP endpoints.
+  Use guards from `src/lib/auth/guards.ts` (`assertOwner()`, `assertWorker()`), or the
+  `secureAction` wrapper from `src/lib/auth/secure-action.ts` for new actions.
+- Server action order: auth guard → Zod validate → Prisma query → cache invalidate.
+- Read Zod parse errors via `z.treeifyError(error).properties` (Zod 4) — never `.flatten()`.
+- Invalidate caches with the domain helpers in `src/lib/cache/invalidation.ts`:
+  `invalidateGallery`, `invalidateBookings`, `invalidateCalendar`, `invalidateReviews`,
+  `invalidateFamily`, `invalidateNotifications` — not bare `revalidatePath`.
+- Read app config via `env()` from `src/lib/env.ts` (Zod-validated, fails fast at
+  startup); add new vars there. Only low-level infra (`prisma.ts`, `rate-limit.ts`,
+  `instrumentation.ts`) reads `process.env` directly.
+- Terminate notification sends with `.catch(() => {})` — they are non-blocking.
+- Filter sensitive fields into DTOs before returning data to clients.
+- UI uses the custom forest/wood/stone token palette in `src/app/globals.css`
+  (Tailwind v4, CSS `@theme`) — not shadcn, not default Tailwind colors.
 
-## ANTI-PATTERNS (THIS PROJECT)
+## Constraints
 
-- **NEVER** use `as any`, `@ts-ignore`, `@ts-expect-error` in production code (tests OK with `as any`)
-- **NEVER** use `error.flatten()` — use `z.treeifyError(error).properties` (Zod 4)
-- **NEVER** pass raw Prisma Decimal to client components
-- **NEVER** skip auth guards in server actions (they create public HTTP endpoints)
-- **NEVER** use `<img>` — use Next.js `<Image>` (1 exception: ReceiptGallery)
-- **NEVER** suppress floating promises — await, void, or .catch()
-- **NEVER** use non-null assertions (`!`) — proper null checks required
+- Manage dependencies with `pnpm` (`pnpm-lock.yaml`); the toolchain (node, pnpm, bun,
+  biome) is provisioned by `mise`.
+- All DB access goes through the Prisma singleton in `src/lib/prisma.ts`.
+- Never pass a raw Prisma `Decimal` to a client component — a client extension
+  auto-converts Decimals to numbers; rely on it.
+- Never use `as any`, `@ts-ignore`, `@ts-expect-error`, or non-null assertions (`!`)
+  in `src/` (tests may use `as any`). Null-check, then access.
+- Never leave a floating promise — `await`, `void`, or `.catch()` it.
+- Gate API routes with `src/lib/api/route-gates.ts`: `authenticatedRoute(roles, handler)`
+  for role-gated routes, `cronRoute(handler)` for Vercel cron (verifies the
+  `CRON_SECRET` Bearer token). Public routes rate-limit manually with `checkRateLimit`
+  from `src/lib/rate-limit.ts`.
 
-## LINTER PITFALLS
+## TypeScript strictness gotchas
 
-`strictTypeChecked` + `stylisticTypeChecked` active. Common traps:
+`tsconfig` adds `noUncheckedIndexedAccess`, `noImplicitReturns`, and
+`noFallthroughCasesInSwitch`. The traps ESLint alone won't catch:
 
-- **Floating promises**: `saveData()` → `await saveData()` or `void saveData()` or `.catch()`
-- **Async onClick**: `onClick={async () => ...}` → `onClick={() => { void save() }}`
-- **Template literals**: Only strings/numbers in templates (no objects/arrays)
-- **Type imports**: `import { User }` → `import type { User }` for type-only
-- **Non-null assertions**: `user!.name` → null check first, then access
-- **Indexed access**: `items[0]` returns `T | undefined` (`noUncheckedIndexedAccess`) — must guard
-- **Switch exhaustiveness**: Handle all enum values, no default fallback
-- **Unused vars**: Prefix with `_` (`_error`, `_req`)
-- **Scaffolding**: Mark planned/unused features with `%%% XYZ SCAFFOLDING %%%` comment block
+- Indexed access (`items[0]`, `obj[key]`) returns `T | undefined` — guard before use.
+- A `switch` over an enum must cover every case with no `default` (exhaustiveness check).
+- Template literals accept only strings/numbers — never interpolate objects/arrays.
 
-## COMMANDS
+## Testing
 
-```bash
-pnpm dev                  # Dev server
-pnpm build                # Production build
-pnpm lint                 # ESLint (strict + stylistic TypeScript)
-pnpm typecheck            # tsc --noEmit
-pnpm test:run             # Vitest single run
-pnpm test:coverage        # Coverage report
-pnpm db:migrate           # Prisma migrations (dev)
-pnpm db:seed              # Seed database
-pnpm db:up                # Docker PostgreSQL
-```
+- Vitest. Tests live in `tests/`: `unit/`, `data-paths/` (workflows),
+  `patterns/` (state machines/cascades), `hardening/` (authz/rate-limit regression).
+- Prisma is mocked via `vitest-mock-extended`. Import `prismaMock` from
+  `tests/__mocks__/prisma.ts` and `vi.mock('@/lib/prisma', ...)`. Mocks for auth,
+  resend, twilio, and upstash also live in `tests/__mocks__/`.
+- Build test data with the factories in `tests/fixtures/` (counter-based IDs).
+- Run one file: `pnpm test:run <path>`.
 
-## NOTES
+## Gotchas
 
-- **3-layer auth**: proxy.ts (global) → layout guards (route group) → assertOwner/assertWorker (action)
-- **No middleware.ts**: proxy.ts replaces it (Next.js 16 pattern)
-- **No CI/CD pipeline**: Vercel auto-deploys from git; no GitHub Actions
-- **No error/loading/not-found files**: Error handling is inline; loading via client state
-- **React Compiler enabled**: `reactCompiler: true` in next.config.ts
-- **Tailwind CSS v4**: Uses `@tailwindcss/postcss` plugin
-- **Custom color palette**: forest/wood/stone tokens (not default Tailwind colors)
-- **errors.ts defined but unused**: Custom error classes exist but actions throw generic Error
-- **Vercel Cron**: calendar-sync (6h), reminders (daily 10am UTC) — need CRON_SECRET
-- **PDF reports**: `@react-pdf/renderer` for AnnualReport, MonthlyReport, ScheduleE
-- **Gallery tokens**: `gallery-token.ts` generates HMAC tokens for guest photo uploads (time-limited)
+- React Compiler is on (`reactCompiler: true` in `next.config.ts`) — skip manual
+  `useMemo`/`useCallback`/`memo` unless profiling proves a need.
+- `src/lib/errors.ts` defines `AppError`/`NotFoundError`/etc., but actions currently
+  throw generic `Error` — do not assume typed errors are caught downstream.
+- Three components use a raw `<img>` deliberately (`ReceiptGallery`, `ReviewForm`,
+  `ReviewList`); prefer Next.js `<Image>` elsewhere.
+- PDF reports (`AnnualReport`, `MonthlyReport`, `ScheduleE`) use `@react-pdf/renderer`.
+
+## Deployment
+
+- Vercel auto-deploys on merge to `prod` (the default branch). No GitHub Actions CI —
+  the Husky pre-commit hook is the only gate.
+- Vercel Cron (`vercel.json`): `/api/cron/calendar-sync` every 6h (`0 */6 * * *`) and
+  `/api/cron/reminders` daily at 10:00 UTC (`0 10 * * *`). Both require `CRON_SECRET`.
+
+## Path alias
+
+`@/*` maps to `src/*` (tsconfig + vitest.config). No other path aliases.
