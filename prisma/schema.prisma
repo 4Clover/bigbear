@@ -112,6 +112,15 @@ enum BookingStatus {
   NO_SHOW
 }
 
+enum PaymentMethod {
+  STRIPE
+  VENMO
+  CASHAPP
+  PAYPAL
+  ZELLE
+  CONTACT_OWNER
+}
+
 model Booking {
   id              String        @id @default(cuid())
   guestId         String
@@ -128,9 +137,19 @@ model Booking {
   totalAmount     Decimal       @db.Decimal(10, 2)
   paymentIntentId String?       @unique
   status          BookingStatus @default(PENDING)
+  paymentMethod   PaymentMethod @default(STRIPE)
   notes           String?
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
+
+  // Alt-payment Hold lifecycle (see docs/adr/0001-alt-payments-and-holds.md)
+  holdExpiresAt    DateTime?
+  paymentClaimedAt DateTime?
+
+  // Checkout-day email + review invite retry cadence
+  checkoutEmailSentAt       DateTime?
+  reviewInviteAttempts      Int       @default(0)
+  reviewInviteLastAttemptAt DateTime?
 
   guest         User           @relation(fields: [guestId], references: [id])
   addons        BookingAddon[]
@@ -142,6 +161,7 @@ model Booking {
   @@index([checkIn, checkOut])
   @@index([status])
   @@index([guestId])
+  @@index([status, holdExpiresAt])
 }
 
 model StripeEvent {
@@ -405,6 +425,9 @@ enum NotificationEvent {
   GALLERY_INVITE
   FAMILY_INVITE
   REVIEW_INVITE
+  HOLD_CREATED
+  FAMILY_BOOKING_CREATED
+  GUEST_CHECKOUT_THANKS
 }
 
 model NotificationPreference {
@@ -448,6 +471,8 @@ model Review {
   updatedAt   DateTime @updatedAt
 
   booking Booking @relation(fields: [bookingId], references: [id])
+
+  @@index([isPublished, createdAt])
 }
 
 // ============================================================================
