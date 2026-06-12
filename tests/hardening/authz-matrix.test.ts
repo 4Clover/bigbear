@@ -198,7 +198,7 @@ describe('authorization matrix for critical server actions', () => {
       allowed: ['WORKER'],
       denied: ['OWNER', 'GUEST', 'ACCOUNTANT'],
       invoke: async () => {
-        prismaMock.workerProfile.findUnique.mockResolvedValueOnce(workerProfile as never)
+        prismaMock.workerProfile.findUnique.mockResolvedValueOnce(workerProfile)
         prismaMock.maintenanceJob.findMany.mockResolvedValueOnce([])
         return getAssignedJobs()
       },
@@ -208,7 +208,7 @@ describe('authorization matrix for critical server actions', () => {
       allowed: ['WORKER'],
       denied: ['OWNER', 'GUEST', 'ACCOUNTANT'],
       invoke: async () => {
-        prismaMock.workerProfile.findUnique.mockResolvedValueOnce(workerProfile as never)
+        prismaMock.workerProfile.findUnique.mockResolvedValueOnce(workerProfile)
         prismaMock.quote.findMany.mockResolvedValueOnce([])
         return getWorkerQuotes()
       },
@@ -218,8 +218,8 @@ describe('authorization matrix for critical server actions', () => {
       allowed: ['WORKER'],
       denied: ['OWNER', 'GUEST', 'ACCOUNTANT'],
       invoke: async () => {
-        prismaMock.workerProfile.findUnique.mockResolvedValueOnce(workerProfile as never)
-        prismaMock.maintenanceJob.findUnique.mockResolvedValueOnce(maintenanceJobBase as never)
+        prismaMock.workerProfile.findUnique.mockResolvedValueOnce(workerProfile)
+        prismaMock.maintenanceJob.findUnique.mockResolvedValueOnce(maintenanceJobBase)
         prismaMock.quote.findFirst.mockResolvedValueOnce(null)
         ;(prismaMock.$transaction as any).mockResolvedValueOnce([
           quoteBase,
@@ -233,7 +233,7 @@ describe('authorization matrix for critical server actions', () => {
       allowed: ['WORKER'],
       denied: ['OWNER', 'GUEST', 'ACCOUNTANT'],
       invoke: async () => {
-        prismaMock.workerProfile.findUnique.mockResolvedValueOnce(workerProfile as never)
+        prismaMock.workerProfile.findUnique.mockResolvedValueOnce(workerProfile)
         prismaMock.maintenanceJob.findUnique.mockResolvedValueOnce({
           ...maintenanceJobBase,
           status: 'ASSIGNED',
@@ -258,7 +258,7 @@ describe('authorization matrix for critical server actions', () => {
       allowed: ['WORKER'],
       denied: ['OWNER', 'GUEST', 'ACCOUNTANT'],
       invoke: async () => {
-        prismaMock.workerProfile.findUnique.mockResolvedValueOnce(workerProfile as never)
+        prismaMock.workerProfile.findUnique.mockResolvedValueOnce(workerProfile)
         prismaMock.maintenanceJob.findUnique.mockResolvedValueOnce({
           ...maintenanceJobBase,
           status: 'IN_PROGRESS',
@@ -276,7 +276,7 @@ describe('authorization matrix for critical server actions', () => {
       allowed: ['WORKER'],
       denied: ['OWNER', 'GUEST', 'ACCOUNTANT'],
       invoke: async () => {
-        prismaMock.workerProfile.findUnique.mockResolvedValueOnce(workerProfile as never)
+        prismaMock.workerProfile.findUnique.mockResolvedValueOnce(workerProfile)
         prismaMock.maintenanceJob.findUnique.mockResolvedValueOnce({
           ...maintenanceJobBase,
           status: 'SCHEDULED',
@@ -295,7 +295,7 @@ describe('authorization matrix for critical server actions', () => {
       allowed: ['OWNER'],
       denied: ['WORKER', 'GUEST', 'ACCOUNTANT'],
       invoke: async () => {
-        prismaMock.maintenanceJob.create.mockResolvedValueOnce(maintenanceJobBase as never)
+        prismaMock.maintenanceJob.create.mockResolvedValueOnce(maintenanceJobBase)
         return createMaintenanceJob({ title: 'Fix faucet' })
       },
     },
@@ -306,7 +306,7 @@ describe('authorization matrix for critical server actions', () => {
       invoke: async () => {
         const session = await mockAuth()
         if (session?.user.role === 'WORKER') {
-          prismaMock.workerProfile.findUnique.mockResolvedValueOnce(workerProfile as never)
+          prismaMock.workerProfile.findUnique.mockResolvedValueOnce(workerProfile)
         }
         prismaMock.maintenanceJob.findMany.mockResolvedValueOnce([])
         prismaMock.maintenanceJob.count.mockResolvedValueOnce(0)
@@ -320,13 +320,13 @@ describe('authorization matrix for critical server actions', () => {
       invoke: async () => {
         const session = await mockAuth()
         if (session?.user.role === 'WORKER') {
-          prismaMock.workerProfile.findUnique.mockResolvedValueOnce(workerProfile as never)
+          prismaMock.workerProfile.findUnique.mockResolvedValueOnce(workerProfile)
           prismaMock.maintenanceJob.findUnique.mockResolvedValueOnce({
             ...maintenanceJobBase,
             assignedWorkerId: workerProfile.id,
-          } as never)
+          })
         } else {
-          prismaMock.maintenanceJob.findUnique.mockResolvedValueOnce(maintenanceJobBase as never)
+          prismaMock.maintenanceJob.findUnique.mockResolvedValueOnce(maintenanceJobBase)
         }
         return getMaintenanceJob('job-1')
       },
@@ -393,7 +393,7 @@ describe('authorization matrix for critical server actions', () => {
       allowed: ['OWNER'],
       denied: ['WORKER', 'GUEST', 'ACCOUNTANT'],
       invoke: async () => {
-        prismaMock.maintenanceJob.findUnique.mockResolvedValueOnce(maintenanceJobBase as never)
+        prismaMock.maintenanceJob.findUnique.mockResolvedValueOnce(maintenanceJobBase)
         prismaMock.maintenanceJob.update.mockResolvedValueOnce({
           ...maintenanceJobBase,
           status: 'CANCELLED',
@@ -415,7 +415,7 @@ describe('authorization matrix for critical server actions', () => {
       allowed: ['OWNER'],
       denied: ['WORKER', 'GUEST', 'ACCOUNTANT'],
       invoke: async () => {
-        prismaMock.workerProfile.update.mockResolvedValueOnce(workerProfile as never)
+        prismaMock.workerProfile.update.mockResolvedValueOnce(workerProfile)
         return updateWorkerProfile('worker-profile-1', { isActive: true })
       },
     },
@@ -444,7 +444,7 @@ describe('authorization matrix for critical server actions', () => {
       allowed: ['WORKER'],
       denied: ['OWNER', 'GUEST', 'ACCOUNTANT'],
       invoke: async () => {
-        prismaMock.workerProfile.findUnique.mockResolvedValueOnce(workerProfile as never)
+        prismaMock.workerProfile.findUnique.mockResolvedValueOnce(workerProfile)
         return getWorkerProfile()
       },
     },

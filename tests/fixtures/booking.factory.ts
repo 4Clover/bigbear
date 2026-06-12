@@ -33,7 +33,7 @@ export const createBookingFixture = (overrides: Partial<Booking> = {}): Booking 
     depositAmount,
     totalAmount,
     paymentIntentId: null,
-    status: 'PENDING' as BookingStatus,
+    status: 'PENDING',
     notes: null,
     createdAt: now,
     updatedAt: now,

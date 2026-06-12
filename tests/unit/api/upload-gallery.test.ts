@@ -229,10 +229,7 @@ describe('Gallery Upload API Route', () => {
       let capturedResult: Record<string, unknown> | undefined
       vi.mocked(handleUpload).mockImplementation(
         async ({ onBeforeGenerateToken }: HandleUploadOptions) => {
-          capturedResult = (await onBeforeGenerateToken('test.jpg', null, false)) as Record<
-            string,
-            unknown
-          >
+          capturedResult = await onBeforeGenerateToken('test.jpg', null, false)
           return { type: 'blob.generate-client-token' as const, clientToken: 'mock-token' }
         }
       )

@@ -66,6 +66,7 @@ const PhotoCarousel = ({ images }: PhotoCarouselProps) => {
 
     emblaApi.on('select', updateIndex)
     emblaApi.on('reInit', updateIndex)
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- embla's documented init pattern: snap list only exists once the API instance is ready
     setScrollSnaps(emblaApi.scrollSnapList())
     updateIndex()
 

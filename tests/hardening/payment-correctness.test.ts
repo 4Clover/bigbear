@@ -173,14 +173,14 @@ describe('payment webhook correctness hardening', () => {
       status: 'processing',
       createdAt: new Date(),
       processedAt: null,
-    } as never)
+    })
     stripeEventMock.update.mockResolvedValue({
       id: 'evt_default',
       type: 'checkout.session.completed',
       status: 'processed',
       createdAt: new Date(),
       processedAt: new Date(),
-    } as never)
+    })
   })
 
   it('should skip duplicate webhook event', async () => {
@@ -190,7 +190,7 @@ describe('payment webhook correctness hardening', () => {
       status: 'processed',
       createdAt: new Date(),
       processedAt: new Date(),
-    } as never)
+    })
     mockConstructEvent.mockReturnValue(createCheckoutEvent({ eventId: 'evt_duplicate' }))
 
     const response = await POST(createWebhookRequest())
@@ -281,7 +281,7 @@ describe('payment webhook correctness hardening', () => {
       addonId: 'addon-1',
       quantity: 1,
       price: 15 as never,
-    } as never)
+    })
     mockConstructEvent.mockReturnValue(
       createCheckoutEvent({
         addonsJson: JSON.stringify([

@@ -47,6 +47,7 @@ export function TaxesTransactionSheet() {
   }, [])
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- reset fetch state when `year` changes before the async reload
     setLoading(true)
     setError(null)
 
@@ -140,9 +141,8 @@ export function TaxesTransactionSheet() {
           } = {}
 
           for (const [col, value] of colChanges) {
-            const strVal = typeof value === 'string' || typeof value === 'number'
-              ? String(value)
-              : ''
+            const strVal =
+              typeof value === 'string' || typeof value === 'number' ? String(value) : ''
             if (col === 0 && value != null) {
               payload.date = new Date(strVal)
             }
@@ -297,6 +297,7 @@ export function TaxesTransactionSheet() {
       <div className="rounded-lg border border-border overflow-hidden">
         <HotTable
           key={dataVersion}
+          // eslint-disable-next-line react-hooks/refs -- Handsontable mutates this array in place; a ref (remounted via key) is its documented React binding
           data={dataRef.current}
           colHeaders={['Date', 'Category', 'Vendor', 'Description', 'Amount', 'Notes']}
           columns={columns}

@@ -580,7 +580,7 @@ describe('Finance Workflow Data Paths', () => {
         { categoryId: 'cat-utilities', type: 'EXPENSE', _sum: { amount: mockDecimal(200) } },
         { categoryId: 'cat-repairs', type: 'EXPENSE', _sum: { amount: mockDecimal(300) } },
       ] as never)
-      prismaMock.transaction.count.mockResolvedValueOnce(6 as never)
+      prismaMock.transaction.count.mockResolvedValueOnce(6)
       prismaMock.expenseCategory.findMany.mockResolvedValueOnce([
         rentalCategory,
         utilitiesCategory,
@@ -674,7 +674,7 @@ describe('Finance Workflow Data Paths', () => {
         { categoryId: 'cat-rental', type: 'INCOME', _sum: { amount: mockDecimal(500) } },
         { categoryId: 'cat-repairs', type: 'EXPENSE', _sum: { amount: mockDecimal(2500) } },
       ] as never)
-      prismaMock.transaction.count.mockResolvedValueOnce(2 as never)
+      prismaMock.transaction.count.mockResolvedValueOnce(2)
       prismaMock.expenseCategory.findMany.mockResolvedValueOnce([
         rentalCategory,
         repairsCategory,

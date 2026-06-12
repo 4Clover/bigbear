@@ -65,6 +65,9 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   reactCompiler: true,
+  // node-ical >=0.23 pulls in temporal-polyfill/jsbi, whose CJS interop breaks under
+  // Turbopack bundling — resolve it natively at runtime instead (server-only package)
+  serverExternalPackages: ['node-ical'],
   ...(isDev && { allowedDevOrigins: ['192.168.4.103'] }),
   images: {
     remotePatterns: [

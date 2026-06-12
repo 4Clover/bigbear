@@ -209,14 +209,14 @@ describe('N+1 query regression tests', () => {
       status: 'processing',
       createdAt: new Date(),
       processedAt: null,
-    } as never)
+    })
     stripeEventMock.update.mockResolvedValue({
       id: 'evt_regression_test',
       type: 'checkout.session.completed',
       status: 'processed',
       createdAt: new Date(),
       processedAt: new Date(),
-    } as never)
+    })
   })
 
   describe('webhook addon lookup batching', () => {
@@ -269,7 +269,7 @@ describe('N+1 query regression tests', () => {
         addonId: 'addon-a',
         quantity: 1,
         price: 10 as never,
-      } as never)
+      })
 
       mockConstructEvent.mockReturnValue(createCheckoutEvent(addonsJson))
 

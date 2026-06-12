@@ -149,6 +149,12 @@ const eslintConfig = defineConfig([
     ...tseslint.configs.disableTypeChecked,
   },
 
+  // prisma/ is excluded from tsconfig, so type-aware linting can't see it
+  {
+    files: ['prisma/**/*.ts'],
+    ...tseslint.configs.disableTypeChecked,
+  },
+
   // Prettier must be last to override formatting rules
   prettier,
 

@@ -6,7 +6,7 @@ import { MobileSidebar } from '@/components/layout/MobileSidebar'
 const WorkerLayout = async ({ children }: { children: React.ReactNode }) => {
   const session = await auth()
 
-  if (!session?.user || session.user.role !== 'WORKER') {
+  if (session?.user.role !== 'WORKER') {
     redirect('/login')
   }
 

@@ -1,3 +1,5 @@
+/* eslint-disable react-hooks/error-boundaries -- server route: renderToStream renders
+   synchronously and rejects into the surrounding catch; no React error boundary exists here */
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'

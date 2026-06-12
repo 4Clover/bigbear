@@ -177,14 +177,14 @@ describe('booking overlap and webhook concurrency hardening', () => {
       status: 'processing',
       createdAt: new Date(),
       processedAt: null,
-    } as never)
+    })
     stripeEventMock.update.mockResolvedValue({
       id: 'evt_concurrency_default',
       type: 'checkout.session.completed',
       status: 'processed',
       createdAt: new Date(),
       processedAt: new Date(),
-    } as never)
+    })
   })
 
   it('returns 200 when overlap exclusion constraint rejects create', async () => {
@@ -270,7 +270,7 @@ describe('booking overlap and webhook concurrency hardening', () => {
       status: 'processed',
       createdAt: new Date(),
       processedAt: new Date(),
-    } as never)
+    })
     mockConstructEvent.mockReturnValue(
       createCheckoutEvent({ eventId: 'evt_duplicate_concurrency' })
     )

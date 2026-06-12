@@ -86,7 +86,7 @@ describe('Auth Configuration (lib/auth.ts)', () => {
       const mockUser = { id: 'user-123', role: 'OWNER' }
 
       const result = sessionCallback({
-        session: mockSession as any,
+        session: mockSession,
         user: mockUser,
       })
 
@@ -369,7 +369,7 @@ describe('Auth Configuration (lib/auth.ts)', () => {
     })
 
     it('should handle undefined AUTHORIZED_ADMIN_EMAILS gracefully', async () => {
-      vi.stubEnv('AUTHORIZED_ADMIN_EMAILS', undefined as any)
+      vi.stubEnv('AUTHORIZED_ADMIN_EMAILS', undefined)
       const mockPrismaUserUpdate = vi.fn()
       const mockUser = createMockUser({ email: 'admin@example.com' })
 

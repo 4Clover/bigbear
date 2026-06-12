@@ -182,7 +182,7 @@ describe('State Machine Pattern', () => {
       const transitions = new Map<string, string[]>([['A', ['B']]])
       const validator = createStateMachineValidator(transitions)
 
-      expect(validator.getAllowedTransitions('UNKNOWN' as string)).toEqual([])
+      expect(validator.getAllowedTransitions('UNKNOWN')).toEqual([])
     })
 
     it('should handle self-transitions if explicitly allowed', () => {

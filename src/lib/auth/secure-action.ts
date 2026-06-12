@@ -92,7 +92,7 @@ export function secureAction<TSchema extends z.ZodType, TResult>(
       if (!validated.success) {
         return { success: false, error: extractValidationError(validated.error) }
       }
-      return handler({ session, data: validated.data as z.infer<TSchema> })
+      return handler({ session, data: validated.data })
     }
 
     return handler({ session, data: undefined as z.infer<TSchema> })

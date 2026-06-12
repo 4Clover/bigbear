@@ -50,6 +50,7 @@ const WorkerSchedulePage = () => {
   }, [])
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- setState only fires after the awaited fetch resolves
     void loadJobs()
   }, [loadJobs])
 
@@ -68,21 +69,20 @@ const WorkerSchedulePage = () => {
   }
 
   // Group jobs by date
-  const scheduledJobs = jobs.filter((j) => j.scheduledDate && ['SCHEDULED', 'IN_PROGRESS'].includes(j.status))
+  const scheduledJobs = jobs.filter(
+    (j) => j.scheduledDate && ['SCHEDULED', 'IN_PROGRESS'].includes(j.status)
+  )
   const unscheduledJobs = jobs.filter((j) => !j.scheduledDate && j.status === 'ASSIGNED')
 
-  const jobsByDate = scheduledJobs.reduce<Record<string, Job[]>>(
-    (acc, job) => {
-      // scheduledDate is guaranteed non-null due to filter above
-      // eslint-disable-next-line @typescript-eslint/non-nullable-type-assertion-style
-      const scheduledDate = job.scheduledDate as Date
-      const dateKey = new Date(scheduledDate).toISOString().split('T')[0] ?? ''
-      acc[dateKey] ??= []
-      acc[dateKey].push(job)
-      return acc
-    },
-    {}
-  )
+  const jobsByDate = scheduledJobs.reduce<Record<string, Job[]>>((acc, job) => {
+    // scheduledDate is guaranteed non-null due to filter above
+    // eslint-disable-next-line @typescript-eslint/non-nullable-type-assertion-style
+    const scheduledDate = job.scheduledDate as Date
+    const dateKey = new Date(scheduledDate).toISOString().split('T')[0] ?? ''
+    acc[dateKey] ??= []
+    acc[dateKey].push(job)
+    return acc
+  }, {})
 
   const sortedDates = Object.keys(jobsByDate).sort()
 
@@ -115,11 +115,15 @@ const WorkerSchedulePage = () => {
                   <div>
                     <h3 className="font-medium text-foreground">{job.title}</h3>
                     {job.dueDate && (
-                      <p className="text-sm text-muted-foreground">Due: {formatDate(job.dueDate)}</p>
+                      <p className="text-sm text-muted-foreground">
+                        Due: {formatDate(job.dueDate)}
+                      </p>
                     )}
                   </div>
                   <button
-                    onClick={() => { router.push('/worker/jobs'); }}
+                    onClick={() => {
+                      router.push('/worker/jobs')
+                    }}
                     className="px-3 py-1.5 bg-wood-600 text-white text-sm font-medium rounded hover:bg-wood-700 transition-colors"
                   >
                     Schedule
@@ -164,14 +168,18 @@ const WorkerSchedulePage = () => {
                       <div className="flex gap-2">
                         {job.status === 'SCHEDULED' && (
                           <button
-                            onClick={() => { void handleStart(job.id); }}
+                            onClick={() => {
+                              void handleStart(job.id)
+                            }}
                             className="px-3 py-1.5 bg-amber-600 text-white text-sm font-medium rounded hover:bg-amber-700 transition-colors"
                           >
                             Start
                           </button>
                         )}
                         <button
-                          onClick={() => { handleComplete(job.id); }}
+                          onClick={() => {
+                            handleComplete(job.id)
+                          }}
                           className="px-3 py-1.5 bg-forest-600 text-white text-sm font-medium rounded hover:bg-forest-700 transition-colors"
                         >
                           Complete

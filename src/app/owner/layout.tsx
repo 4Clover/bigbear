@@ -6,7 +6,7 @@ import OwnerNav from '@/components/owner/OwnerNav'
 const OwnerLayout = async ({ children }: { children: React.ReactNode }) => {
   const session = await auth()
 
-  if (!session?.user || session.user.role !== 'OWNER') {
+  if (session?.user.role !== 'OWNER') {
     redirect('/login')
   }
 

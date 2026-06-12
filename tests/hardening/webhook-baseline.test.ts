@@ -242,7 +242,7 @@ describe('webhook baseline behavior', () => {
       addonId: 'addon-1',
       quantity: 1,
       price: 15 as never,
-    } as never)
+    })
 
     mockConstructEvent.mockReturnValue(
       createCheckoutEvent({
